@@ -1,6 +1,6 @@
 1. Clone Repository
-   git clone https://github.com/USERNAME/NAMA-REPO.git
-   cd NAMA-REPO
+   - git clone https://github.com/USERNAME/NAMA-REPO.git
+   - cd NAMA-REPO
 
 2. Install Dependensi Backend (Laravel)
    composer install
