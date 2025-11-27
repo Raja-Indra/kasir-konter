@@ -65,6 +65,15 @@ class ProdukController extends Controller
         $produk->update($validated);
         return redirect()->back();
     }
+    
+    public function togglePin(Produk $produk)
+    {
+        $produk->update([
+            'is_pinned' => !$produk->is_pinned
+        ]);
+
+        return redirect()->back()->with('success', 'Status pin produk diperbarui.');
+    }
 
     public function destroy(Produk $produk)
     {

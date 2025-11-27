@@ -17,7 +17,10 @@ class TransaksiController extends Controller
     {
         // Kita kirim data produk untuk ditampilkan di katalog kasir
         return Inertia::render('Transaksi/Index', [
-            'products' => Produk::latest()->get()
+            'products' => Produk::query()
+                ->orderBy('is_pinned', 'desc') 
+                ->latest()
+                ->get()
         ]);
     }
 

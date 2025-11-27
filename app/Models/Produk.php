@@ -28,12 +28,14 @@ class Produk extends Model
         'stok',
         'jenis',
         'is_digital',
-        'is_flexible_price'
+        'is_flexible_price',
+        'is_pinned'
     ];
 
     protected $casts = [
         'is_digital' => 'boolean',
         'is_flexible_price' => 'boolean',
+        'is_pinned' => 'boolean',
         'harga_modal' => 'decimal:2',
         'harga_jual' => 'decimal:2',
     ];

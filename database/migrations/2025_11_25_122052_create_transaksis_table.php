@@ -14,20 +14,19 @@ return new class extends Migration
         Schema::create('transaksis', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            // Kasir yang melayani (Opsional: bisa nullable jika mau support guest checkout)
-            $table->foreignId('user_id')->constrained('users');
+            $table->uuid('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
-            $table->string('no_nota')->unique(); // TRX-2023...
-
-            $table->decimal('total_harga', 15, 2); // Total belanjaan
-            $table->decimal('total_laba', 15, 2);  // Total keuntungan nota ini
-            $table->decimal('bayar', 15, 2);       // Uang dari pelanggan
-            $table->decimal('kembalian', 15, 2);   // Uang kembali
-
-            $table->integer('umur_pelanggan')->nullable(); // Sesuai request (Nullable biar tidak wajib)
+            $table->string('no_nota')->unique();
+            $table->decimal('total_harga', 15, 2);
+            $table->decimal('total_laba', 15, 2);
+            $table->decimal('bayar', 15, 2);
+            $table->decimal('kembalian', 15, 2);
+            $table->integer('umur_pelanggan')->nullable();
 
             $table->timestamps();
         });
+
     }
 
     /**
