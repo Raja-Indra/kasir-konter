@@ -36,8 +36,8 @@ export default function Print({ transaksi }) {
                 {/* --- HEADER --- */}
                 <div className="mb-2 text-center">
                     <h1 className="mb-1 text-sm font-bold uppercase">Indra Cell</h1>
-                    <p>Jl. Pelaihari - Batakan</p>
-                    <p>0812-3456-7890</p>
+                    <p>Jl. A Yani - Tambang Ulang</p>
+                    <p>0838-9533-8857</p>
                 </div>
 
                 {/* --- INFO NOTA --- */}
