@@ -23,6 +23,7 @@ export default function UserIndex({ auth, users }) {
         email: '',
         no_hp: '',
         password: '',
+        role: 'kasir',
         is_active: true,
         foto: null, // File object
         _method: 'POST' // Trick untuk Laravel agar bisa PUT file upload
@@ -252,6 +253,20 @@ export default function UserIndex({ auth, users }) {
                                 required={!isEditMode} // Wajib hanya saat create
                             />
                             <InputError message={errors.password} className="mt-2" />
+                        </div>
+                        
+                        {/* Pilihan Role */}
+                        <div className="col-span-2">
+                            <InputLabel htmlFor="role" value="Role / Jabatan" />
+                            <select
+                                id="role"
+                                className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                value={data.role}
+                                onChange={(e) => setData('role', e.target.value)}
+                            >
+                                <option value="kasir">Kasir (Transaksi Saja)</option>
+                                <option value="admin">Admin (Akses Penuh)</option>
+                            </select>
                         </div>
 
                         {/* Status Aktif */}

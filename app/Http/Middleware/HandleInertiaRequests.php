@@ -33,6 +33,14 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
+
+                // --- PASTIKAN 2 BARIS INI ADA DAN BENAR ---
+                // Mengambil nama role user (contoh: ['admin'])
+                'roles' => $request->user() ? $request->user()->getRoleNames() : [],
+
+                // Mengambil nama permission user (contoh: ['manage users', 'view dashboard'])
+                'permissions' => $request->user() ? $request->user()->getAllPermissions()->pluck('name') : [],
+                // ------------------------------------------
             ],
         ];
     }

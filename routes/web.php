@@ -5,11 +5,13 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\HutangController;
+use App\Http\Controllers\LaporanController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -25,9 +27,13 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Route::get('/dashboard', function () {
+//     return Inertia::render('Dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -45,6 +51,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/hutang/{hutang}/cicil', [HutangController::class, 'cicil'])->name('hutang.cicil'); // Route khusus bayar
     Route::delete('/hutang/{hutang}', [HutangController::class, 'destroy'])->name('hutang.destroy');
     Route::put('/produk/{produk}/pin', [ProdukController::class, 'togglePin'])->name('produk.pin');
+    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/export', [LaporanController::class, 'exportPdf'])->name('laporan.export');
 });
 
 require __DIR__.'/auth.php';

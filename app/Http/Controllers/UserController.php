@@ -38,8 +38,8 @@ class UserController extends Controller
         // Hash Password
         $validated['password'] = Hash::make($validated['password']);
 
-        User::create($validated);
-
+        $user = User::create($validated);
+        $user->assignRole($request->input('role', 'kasir'));
         return redirect()->back();
     }
 
@@ -72,7 +72,7 @@ class UserController extends Controller
         }
 
         $user->update($validated);
-
+        $user->syncRoles([$request->input('role')]);
         return redirect()->back();
     }
 
