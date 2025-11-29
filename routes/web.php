@@ -12,6 +12,7 @@ use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\HutangController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\SettingController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -53,6 +54,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/produk/{produk}/pin', [ProdukController::class, 'togglePin'])->name('produk.pin');
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/export', [LaporanController::class, 'exportPdf'])->name('laporan.export');
+    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
 });
 
 require __DIR__.'/auth.php';

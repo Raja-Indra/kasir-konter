@@ -1,10 +1,12 @@
 import { Link } from '@inertiajs/react';
-import logoIndra from '@/Assets/logo-1.png';
-import usePermission from '@/Hooks/usePermission'; // Pastikan import ini ada
+import logoIndra from '@/Assets/logo-1.png'; // Pastikan path ini benar
+import usePermission from '@/Hooks/usePermission';
+import { usePage } from '@inertiajs/react';
 
 // Terima props isOpen dan setIsOpen dari Layout
 export default function Sidebar({ isOpen, setIsOpen }) {
-    const { can } = usePermission(); // Ambil helper 'can'
+    const { can } = usePermission();
+    const { shop_settings } = usePage().props;
 
     // Class dinamis untuk Link
     const baseLinkClass = `flex items-center py-3 rounded transition-all duration-200 hover:bg-indigo-50 text-gray-700 ${isOpen ? 'px-4' : 'justify-center px-2'}`;
@@ -18,7 +20,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 min-h-screen
             `}
         >
-            {/* --- TOMBOL TOGGLE (GANTUNGAN KUNCI) --- */}
+            {/* --- TOMBOL TOGGLE --- */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="absolute z-50 p-1 text-gray-500 bg-white border border-gray-200 rounded-full shadow-md -right-3 top-20 hover:bg-gray-100"
@@ -32,14 +34,16 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             </button>
 
             <div className="flex-1 p-4">
-                {/* --- LOGO AREA --- */}
+                {/* --- LOGO AREA DINAMIS --- */}
                 <div className={`flex items-center justify-center mb-6 transition-all duration-300 ${isOpen ? '-mt-4' : 'mt-2'}`}>
                     <Link href={route('dashboard')}>
                         {isOpen ? (
                             <img
-                                src={logoIndra}
+                                // Prioritas: Logo DB > Logo Statis File > Placeholder Text
+                                src={shop_settings?.logo_toko ? `/storage/${shop_settings.logo_toko}` : logoIndra}
                                 alt="Logo"
                                 className="object-contain w-auto h-32 transition-all"
+                                onError={(e) => { e.target.style.display = 'none'; }} 
                             />
                         ) : (
                             <div className="flex items-center justify-center w-10 h-10 text-xl font-bold text-white bg-indigo-600 rounded-lg shadow">I</div>
@@ -53,7 +57,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
                 <ul className="space-y-2">
 
-                    {/* Dashboard - SEMUA BISA AKSES */}
+                    {/* Dashboard */}
                     <li>
                         <Link href={route('dashboard')} className={`${baseLinkClass} ${route().current('dashboard') ? activeLinkClass : ''}`} title={!isOpen ? "Dashboard" : ""}>
                             <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -63,7 +67,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                         </Link>
                     </li>
 
-                    {/* Kasir - KHUSUS YANG PUNYA PERMISSION 'manage transaction' */}
+                    {/* Kasir */}
                     {can('manage transaction') && (
                         <li>
                             <Link href={route('transaksi.index')} className={`${baseLinkClass} ${route().current('transaksi.*') ? activeLinkClass : ''}`} title={!isOpen ? "Kasir" : ""}>
@@ -75,7 +79,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                         </li>
                     )}
 
-                    {/* Riwayat Transaksi - SEMUA BISA AKSES (Opsional: kalau mau dibatasi pakai can('view reports')) */}
+                    {/* Riwayat */}
                     <li>
                         <Link href={route('riwayat.index')} className={`${baseLinkClass} ${route().current('riwayat.*') ? activeLinkClass : ''}`} title={!isOpen ? "Riwayat" : ""}>
                             <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -85,10 +89,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                         </Link>
                     </li>
 
-                    {/* Kasbon - KHUSUS 'manage debt' */}
+                    {/* Kasbon */}
                     {can('manage debt') && (
                         <li>
-                            <Link href={route('hutang.index')} className={`${baseLinkClass} ${route().current('hutang.*') ? activeLinkClass : ''}`} title={!isOpen ? "Kasbon" : ""}>
+                            <Link href={route('hutang.index')} className={`${baseLinkClass} ${route().current('hutang.*') ? activeLinkClass : ''}`} title={!isOpen ? "Buku Kasbon" : ""}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
                                 </svg>
@@ -97,7 +101,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                         </li>
                     )}
 
-                    {/* Laporan Penjualan - KHUSUS ADMIN / 'view reports' */}
+                    {/* Laporan Penjualan */}
                     {can('view reports') && (
                         <li>
                             <Link href={route('laporan.index')} className={`${baseLinkClass} ${route().current('laporan.*') ? activeLinkClass : ''}`} title={!isOpen ? "Laporan Penjualan" : ""}>
@@ -109,10 +113,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                         </li>
                     )}
 
-                    {/* Manajemen User - KHUSUS ADMIN / 'manage users' */}
+                    {/* Manajemen User */}
                     {can('manage users') && (
                         <li>
-                            <Link href={route('users.index')} className={`${baseLinkClass} ${route().current('users.*') ? activeLinkClass : ''}`} title={!isOpen ? "User" : ""}>
+                            <Link href={route('users.index')} className={`${baseLinkClass} ${route().current('users.*') ? activeLinkClass : ''}`} title={!isOpen ? "Manajemen User" : ""}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                 </svg>
@@ -121,7 +125,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                         </li>
                     )}
 
-                    {/* Provider & Produk - KHUSUS ADMIN / 'manage products' */}
+                    {/* Provider & Produk */}
                     {can('manage products') && (
                         <>
                             <li>
@@ -142,6 +146,19 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                 </Link>
                             </li>
                         </>
+                    )}
+
+                    {/* --- MENU BARU: Pengaturan Toko --- */}
+                    {can('manage users') && (
+                        <li>
+                            <Link href={route('settings.index')} className={`${baseLinkClass} ${route().current('settings.*') ? activeLinkClass : ''}`} title={!isOpen ? "Pengaturan Toko" : ""}>
+                                <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Pengaturan Toko</span>
+                            </Link>
+                        </li>
                     )}
 
                 </ul>

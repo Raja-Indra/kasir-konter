@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { Head } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 
 export default function Print({ transaksi }) {
+    const { shop_settings } = usePage().props;
 
     useEffect(() => {
         // Delay sedikit agar style ter-load sempurna sebelum print dialog muncul
@@ -34,10 +36,10 @@ export default function Print({ transaksi }) {
             <div className="w-[58mm] p-1 mx-auto bg-white">
 
                 {/* --- HEADER --- */}
-                <div className="mb-2 text-center">
-                    <h1 className="mb-1 text-sm font-bold uppercase">Indra Cell</h1>
-                    <p>Jl. A Yani - Tambang Ulang</p>
-                    <p>0838-9533-8857</p>
+                <div className="text-center mb-2">
+                    <h1 className="text-sm font-bold uppercase mb-1">{shop_settings.nama_toko}</h1>
+                    <p>{shop_settings.alamat_toko}</p>
+                    <p>{shop_settings.no_hp_toko}</p>
                 </div>
 
                 {/* --- INFO NOTA --- */}
@@ -87,9 +89,8 @@ export default function Print({ transaksi }) {
                 </div>
 
                 {/* --- FOOTER --- */}
-                <div className="pt-2 text-center border-t border-black border-dashed">
-                    <p>Terima Kasih</p>
-                    <p className="mt-1">*** LUNAS ***</p>
+                <div className="text-center border-t border-black border-dashed pt-2">
+                    <p>{shop_settings.footer_struk}</p>
                 </div>
             </div>
 

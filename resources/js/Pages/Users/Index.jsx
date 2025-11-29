@@ -16,25 +16,24 @@ export default function UserIndex({ auth, users }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [userToEdit, setUserToEdit] = useState(null);
-    const [previewImage, setPreviewImage] = useState(null); // State untuk preview foto
+    const [previewImage, setPreviewImage] = useState(null); 
 
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         name: '',
         email: '',
         no_hp: '',
         password: '',
-        role: 'kasir',
+        role: 'kasir', // Default role
         is_active: true,
-        foto: null, // File object
-        _method: 'POST' // Trick untuk Laravel agar bisa PUT file upload
+        foto: null, 
+        _method: 'POST' 
     });
 
-    // Handle Perubahan File Input
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             setData('foto', file);
-            setPreviewImage(URL.createObjectURL(file)); // Buat URL sementara untuk preview
+            setPreviewImage(URL.createObjectURL(file)); 
         }
     };
 
@@ -45,7 +44,7 @@ export default function UserIndex({ auth, users }) {
         reset();
         clearErrors();
         setData({
-            name: '', email: '', no_hp: '', password: '', is_active: true, foto: null, _method: 'POST'
+            name: '', email: '', no_hp: '', password: '', role: 'kasir', is_active: true, foto: null, _method: 'POST'
         });
         setIsModalOpen(true);
     };
@@ -53,19 +52,18 @@ export default function UserIndex({ auth, users }) {
     const openEditModal = (user) => {
         setIsEditMode(true);
         setUserToEdit(user);
-
-        // Tampilkan foto lama jika ada
         setPreviewImage(user.foto ? `/storage/${user.foto}` : null);
-
         clearErrors();
         setData({
             name: user.name,
             email: user.email,
             no_hp: user.no_hp || '',
-            password: '', // Password dikosongkan saat edit
+            password: '', 
+            // Ambil role pertama user (jika ada), kalau tidak default kasir
+            role: user.roles && user.roles.length > 0 ? user.roles[0].name : 'kasir',
             is_active: user.is_active ? true : false,
-            foto: null, // Reset input file
-            _method: 'PUT' // Penting! Ubah method jadi PUT untuk update
+            foto: null, 
+            _method: 'PUT' 
         });
         setIsModalOpen(true);
     };
@@ -77,7 +75,7 @@ export default function UserIndex({ auth, users }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
+        
         const actionText = isEditMode ? 'mengubah data user' : 'menambahkan user baru';
 
         MySwal.fire({
@@ -89,9 +87,8 @@ export default function UserIndex({ auth, users }) {
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Gunakan POST untuk kirim file, tapi dengan _method: PUT/POST di dalam body
                 const routeName = isEditMode ? route('users.update', userToEdit.id) : route('users.store');
-
+                
                 post(routeName, {
                     onSuccess: () => {
                         closeModal();
@@ -124,22 +121,23 @@ export default function UserIndex({ auth, users }) {
             <Head title="Manajemen User" />
 
             <div className="py-6">
-                <div className="max-w-full px-4 mx-auto sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8">
                     <div className="p-6 bg-white shadow-sm sm:rounded-lg">
-
+                        
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-lg font-medium text-gray-900">Daftar Pengguna / Kasir</h3>
                             <PrimaryButton onClick={openCreateModal}>+ Tambah User</PrimaryButton>
                         </div>
 
                         <div className="overflow-x-auto">
-                            <table className="w-full min-w-full divide-y divide-gray-200">
+                            <table className="min-w-full divide-y divide-gray-200 w-full">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">User</th>
-                                        <th className="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">Kontak</th>
-                                        <th className="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase">Status</th>
-                                        <th className="px-6 py-3 text-xs font-medium text-right text-gray-500 uppercase">Aksi</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kontak</th>
+                                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Role</th>
+                                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
@@ -147,18 +145,24 @@ export default function UserIndex({ auth, users }) {
                                         <tr key={user.id} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
-                                                    <div className="flex-shrink-0 w-10 h-10">
+                                                    <div className="flex-shrink-0 h-10 w-10">
                                                         {user.foto ? (
-                                                            <img className="object-cover w-10 h-10 rounded-full" src={`/storage/${user.foto}`} alt="" />
+                                                            <img className="h-10 w-10 rounded-full object-cover" src={`/storage/${user.foto}`} alt="" />
                                                         ) : (
-                                                            <div className="flex items-center justify-center w-10 h-10 font-bold text-gray-500 bg-gray-200 rounded-full">
+                                                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
                                                                 {user.name.charAt(0)}
                                                             </div>
                                                         )}
                                                     </div>
                                                     <div className="ml-4">
                                                         <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                                                        <div className="text-xs text-gray-500">ID: ...{user.id.substr(-8)}</div>
+                                                        
+                                                        {/* --- PERBAIKAN DI SINI (ID String) --- */}
+                                                        <div className="text-xs text-gray-500">
+                                                            ID: ...{String(user.id).slice(-8)}
+                                                        </div>
+                                                        {/* ----------------------------------- */}
+                                                        
                                                     </div>
                                                 </div>
                                             </td>
@@ -166,20 +170,31 @@ export default function UserIndex({ auth, users }) {
                                                 <div className="text-sm text-gray-900">{user.email}</div>
                                                 <div className="text-sm text-gray-500">{user.no_hp || '-'}</div>
                                             </td>
-                                            <td className="px-6 py-4 text-center whitespace-nowrap">
+                                            
+                                            {/* Kolom Role */}
+                                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                                                {user.roles && user.roles.length > 0 ? (
+                                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.roles[0].name === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
+                                                        {user.roles[0].name.toUpperCase()}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-xs text-gray-400">-</span>
+                                                )}
+                                            </td>
+
+                                            <td className="px-6 py-4 whitespace-nowrap text-center">
                                                 {user.is_active ? (
-                                                    <span className="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full">
+                                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                                         Aktif
                                                     </span>
                                                 ) : (
-                                                    <span className="inline-flex px-2 text-xs font-semibold leading-5 text-red-800 bg-red-100 rounded-full">
+                                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
                                                         Nonaktif
                                                     </span>
                                                 )}
                                             </td>
-                                            <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                                <button onClick={() => openEditModal(user)} className="mr-4 text-indigo-600 hover:text-indigo-900">Edit</button>
-                                                {/* Jangan biarkan user menghapus dirinya sendiri */}
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <button onClick={() => openEditModal(user)} className="text-indigo-600 hover:text-indigo-900 mr-4">Edit</button>
                                                 {user.id !== auth.user.id && (
                                                     <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-900">Hapus</button>
                                                 )}
@@ -200,19 +215,19 @@ export default function UserIndex({ auth, users }) {
                         {isEditMode ? 'Edit User' : 'Tambah User Baru'}
                     </h2>
 
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        
                         {/* Foto Profil Preview */}
-                        <div className="flex flex-col items-center col-span-1 mb-4 md:col-span-2">
-                            <div className="w-24 h-24 mb-2 overflow-hidden bg-gray-100 border-2 border-gray-300 rounded-full">
+                        <div className="col-span-1 md:col-span-2 flex flex-col items-center mb-4">
+                            <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-300 mb-2">
                                 {previewImage ? (
-                                    <img src={previewImage} alt="Preview" className="object-cover w-full h-full" />
+                                    <img src={previewImage} alt="Preview" className="h-full w-full object-cover" />
                                 ) : (
-                                    <div className="flex items-center justify-center w-full h-full text-gray-400">No Img</div>
+                                    <div className="h-full w-full flex items-center justify-center text-gray-400">No Img</div>
                                 )}
                             </div>
-                            <input
-                                type="file"
+                            <input 
+                                type="file" 
                                 accept="image/*"
                                 onChange={handleFileChange}
                                 className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
@@ -244,23 +259,23 @@ export default function UserIndex({ auth, users }) {
                         {/* Password */}
                         <div className="col-span-2">
                             <InputLabel htmlFor="password" value={isEditMode ? "Password (Kosongkan jika tidak diganti)" : "Password"} />
-                            <TextInput
-                                id="password"
-                                type="password"
-                                className="block w-full mt-1"
-                                value={data.password}
-                                onChange={(e) => setData('password', e.target.value)}
-                                required={!isEditMode} // Wajib hanya saat create
+                            <TextInput 
+                                id="password" 
+                                type="password" 
+                                className="block w-full mt-1" 
+                                value={data.password} 
+                                onChange={(e) => setData('password', e.target.value)} 
+                                required={!isEditMode} 
                             />
                             <InputError message={errors.password} className="mt-2" />
                         </div>
-                        
+
                         {/* Pilihan Role */}
                         <div className="col-span-2">
                             <InputLabel htmlFor="role" value="Role / Jabatan" />
                             <select
                                 id="role"
-                                className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full"
                                 value={data.role}
                                 onChange={(e) => setData('role', e.target.value)}
                             >
@@ -270,11 +285,11 @@ export default function UserIndex({ auth, users }) {
                         </div>
 
                         {/* Status Aktif */}
-                        <div className="col-span-2 p-3 mt-2 border border-gray-200 rounded bg-gray-50">
+                        <div className="col-span-2 mt-2 p-3 bg-gray-50 rounded border border-gray-200">
                             <label className="flex items-center cursor-pointer">
                                 <input
                                     type="checkbox"
-                                    className="w-5 h-5 text-indigo-600 border-gray-300 rounded shadow-sm focus:ring-indigo-500"
+                                    className="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 w-5 h-5"
                                     checked={data.is_active}
                                     onChange={(e) => setData('is_active', e.target.checked)}
                                 />
