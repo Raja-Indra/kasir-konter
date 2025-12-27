@@ -5,50 +5,78 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\PermissionRegistrar; // Import ini
+use Spatie\Permission\PermissionRegistrar;
 use App\Models\User;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Reset Cache Permission
+        // 1. Reset Cache
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // 2. Daftar Permission
+        // 2. Daftar Permission Rinci (CRUD)
         $permissions = [
-            'view dashboard',     // Pastikan ini ada
-            'manage users',
-            'manage products',
-            'manage transaction',
+            // Dashboard
+            'view dashboard',
+
+            // Manajemen User
+            'view users',
+            'create users',
+            'edit users',
+            'delete users',
+
+            // Manajemen Produk
+            'view products',
+            'create products',
+            'edit products',
+            'delete products',
+
+            // Manajemen Provider
+            'view providers',
+            'create providers',
+            'edit providers',
+            'delete providers',
+
+            // Transaksi (Kasir)
+            'view transaction',
+            'create transaction', // Melakukan transaksi
+
+            // Laporan & Riwayat
             'view reports',
-            'manage debt',
+            'delete reports', // Hapus riwayat transaksi (bahaya)
+
+            // Kasbon/Hutang
+            'view debt',
+            'create debt',
+            'pay debt', // Bayar cicilan
+
+            // Pengaturan
+            'manage settings', // Pengaturan toko
+            'manage roles',    // Akses menu roles ini
         ];
 
-        // 3. Buat Permission (Paksa guard 'web')
+        // 3. Buat Permission
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
-        // 4. Buat Role (Paksa guard 'web')
-        $roleKasir = Role::firstOrCreate(['name' => 'kasir', 'guard_name' => 'web']);
-        $roleAdmin = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        // 4. Buat Role & Assign Default
 
-        // 5. Assign Permission ke Role
-        // Kasir
-        $roleKasir->givePermissionTo([
-            'view dashboard', 
-            'manage transaction', 
-            'manage debt'
+        // A. Role KASIR (Hanya bisa transaksi dan lihat stok)
+        $roleKasir = Role::firstOrCreate(['name' => 'kasir']);
+        $roleKasir->syncPermissions([
+            'view dashboard',
+            'view products', // Kasir butuh lihat produk untuk cari harga
+            'view transaction',
+            'create transaction',
+            'view debt',
+            'create debt',
+            'pay debt',
         ]);
 
-        // Admin (Semua)
-        $roleAdmin->givePermissionTo(Permission::all());
-
-        // 6. Assign ke User (Opsional, jika user sudah ada)
-        $user = User::where('email', 'admin@admin.com')->first();
-        if ($user) {
-            $user->assignRole($roleAdmin);
-        }
+        // B. Role ADMIN (Segalanya)
+        $roleAdmin = Role::firstOrCreate(['name' => 'admin']);
+        $roleAdmin->syncPermissions(Permission::all());
     }
 }

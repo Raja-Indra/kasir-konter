@@ -1,9 +1,8 @@
 import { Link } from '@inertiajs/react';
-import logoIndra from '@/Assets/logo-1.png'; // Pastikan path ini benar
+import logoIndra from '@/Assets/logo-1.png';
 import usePermission from '@/Hooks/usePermission';
 import { usePage } from '@inertiajs/react';
 
-// Terima props isOpen dan setIsOpen dari Layout
 export default function Sidebar({ isOpen, setIsOpen }) {
     const { can } = usePermission();
     const { shop_settings } = usePage().props;
@@ -39,11 +38,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                     <Link href={route('dashboard')}>
                         {isOpen ? (
                             <img
-                                // Prioritas: Logo DB > Logo Statis File > Placeholder Text
                                 src={shop_settings?.logo_toko ? `/storage/${shop_settings.logo_toko}` : logoIndra}
                                 alt="Logo"
                                 className="object-contain w-auto h-32 transition-all"
-                                onError={(e) => { e.target.style.display = 'none'; }} 
+                                onError={(e) => { e.target.style.display = 'none'; }}
                             />
                         ) : (
                             <div className="flex items-center justify-center w-10 h-10 text-xl font-bold text-white bg-indigo-600 rounded-lg shadow">I</div>
@@ -57,18 +55,20 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
                 <ul className="space-y-2">
 
-                    {/* Dashboard */}
-                    <li>
-                        <Link href={route('dashboard')} className={`${baseLinkClass} ${route().current('dashboard') ? activeLinkClass : ''}`} title={!isOpen ? "Dashboard" : ""}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                            <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Dashboard</span>
-                        </Link>
-                    </li>
+                    {/* Dashboard - Cek izin view dashboard */}
+                    {can('view dashboard') && (
+                        <li>
+                            <Link href={route('dashboard')} className={`${baseLinkClass} ${route().current('dashboard') ? activeLinkClass : ''}`} title={!isOpen ? "Dashboard" : ""}>
+                                <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                                <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Dashboard</span>
+                            </Link>
+                        </li>
+                    )}
 
-                    {/* Kasir */}
-                    {can('manage transaction') && (
+                    {/* Kasir - Cek izin view transaction */}
+                    {can('view transaction') && (
                         <li>
                             <Link href={route('transaksi.index')} className={`${baseLinkClass} ${route().current('transaksi.*') ? activeLinkClass : ''}`} title={!isOpen ? "Kasir" : ""}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -79,18 +79,20 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                         </li>
                     )}
 
-                    {/* Riwayat */}
-                    <li>
-                        <Link href={route('riwayat.index')} className={`${baseLinkClass} ${route().current('riwayat.*') ? activeLinkClass : ''}`} title={!isOpen ? "Riwayat" : ""}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                            </svg>
-                            <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Riwayat</span>
-                        </Link>
-                    </li>
+                    {/* Riwayat - Cek izin view reports (karena riwayat bagian dari laporan) */}
+                    {can('view reports') && (
+                        <li>
+                            <Link href={route('riwayat.index')} className={`${baseLinkClass} ${route().current('riwayat.*') ? activeLinkClass : ''}`} title={!isOpen ? "Riwayat" : ""}>
+                                <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                                <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Riwayat</span>
+                            </Link>
+                        </li>
+                    )}
 
-                    {/* Kasbon */}
-                    {can('manage debt') && (
+                    {/* Kasbon - Cek izin view debt */}
+                    {can('view debt') && (
                         <li>
                             <Link href={route('hutang.index')} className={`${baseLinkClass} ${route().current('hutang.*') ? activeLinkClass : ''}`} title={!isOpen ? "Buku Kasbon" : ""}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -101,7 +103,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                         </li>
                     )}
 
-                    {/* Laporan Penjualan */}
+                    {/* Laporan Penjualan - Cek izin view reports */}
                     {can('view reports') && (
                         <li>
                             <Link href={route('laporan.index')} className={`${baseLinkClass} ${route().current('laporan.*') ? activeLinkClass : ''}`} title={!isOpen ? "Laporan Penjualan" : ""}>
@@ -113,8 +115,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                         </li>
                     )}
 
-                    {/* Manajemen User */}
-                    {can('manage users') && (
+                    {/* Manajemen User - Cek izin view users */}
+                    {can('view users') && (
                         <li>
                             <Link href={route('users.index')} className={`${baseLinkClass} ${route().current('users.*') ? activeLinkClass : ''}`} title={!isOpen ? "Manajemen User" : ""}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -125,31 +127,47 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                         </li>
                     )}
 
-                    {/* Provider & Produk */}
-                    {can('manage products') && (
+                    {/* Provider & Produk - Cek jika bisa lihat produk ATAU lihat provider */}
+                    {(can('view products') || can('view providers')) && (
                         <>
-                            <li>
-                                <Link href={route('providers.index')} className={`${baseLinkClass} ${route().current('providers.*') ? activeLinkClass : ''}`} title={!isOpen ? "Provider" : ""}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                    </svg>
-                                    <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Provider</span>
-                                </Link>
-                            </li>
+                            {can('view providers') && (
+                                <li>
+                                    <Link href={route('providers.index')} className={`${baseLinkClass} ${route().current('providers.*') ? activeLinkClass : ''}`} title={!isOpen ? "Provider" : ""}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                        </svg>
+                                        <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Provider</span>
+                                    </Link>
+                                </li>
+                            )}
 
-                            <li>
-                                <Link href={route('produk.index')} className={`${baseLinkClass} ${route().current('produk.*') ? activeLinkClass : ''}`} title={!isOpen ? "Produk" : ""}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 8V3z" />
-                                    </svg>
-                                    <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Produk</span>
-                                </Link>
-                            </li>
+                            {can('view products') && (
+                                <li>
+                                    <Link href={route('produk.index')} className={`${baseLinkClass} ${route().current('produk.*') ? activeLinkClass : ''}`} title={!isOpen ? "Produk" : ""}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 8V3z" />
+                                        </svg>
+                                        <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Produk</span>
+                                    </Link>
+                                </li>
+                            )}
                         </>
                     )}
 
-                    {/* --- MENU BARU: Pengaturan Toko --- */}
-                    {can('manage users') && (
+                    {/* Roles & Izin - Cek izin manage roles */}
+                    {can('manage roles') && (
+                        <li>
+                            <Link href={route('roles.index')} className={`${baseLinkClass} ${route().current('roles.*') ? activeLinkClass : ''}`} title={!isOpen ? "Roles & Izin" : ""}>
+                                <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                </svg>
+                                <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Roles & Izin</span>
+                            </Link>
+                        </li>
+                    )}
+
+                    {/* Pengaturan Toko - Cek izin manage settings */}
+                    {can('manage settings') && (
                         <li>
                             <Link href={route('settings.index')} className={`${baseLinkClass} ${route().current('settings.*') ? activeLinkClass : ''}`} title={!isOpen ? "Pengaturan Toko" : ""}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
