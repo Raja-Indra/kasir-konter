@@ -21,6 +21,7 @@
 
 7. Jalankan Migrasi
    - php artisan migrate
+   - php artisan migrate --seed
 
 8. Jalankan Server Laravel
    - php artisan serve
