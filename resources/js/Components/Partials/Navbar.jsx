@@ -102,9 +102,8 @@ export default function Navbar({ user }) {
 
                                 <Dropdown.Content>
                                     <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
-                                    <Dropdown.Link href={route('users.index')}>Manajemen User</Dropdown.Link>
                                     <Dropdown.Link href={route('logout')} method="post" as="button">
-                                        Log Out
+                                        Lo Outg
                                     </Dropdown.Link>
                                 </Dropdown.Content>
                             </Dropdown>

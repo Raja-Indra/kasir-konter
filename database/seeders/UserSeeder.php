@@ -16,6 +16,7 @@ class UserSeeder extends Seeder
             'email' => 'muhammadindra226@gmail.com',
             'password' => Hash::make('12345678'), // Password default
             'no_hp' => '081234567890',
+            'email_verified_at' => now(),
             'is_active' => true,
         ]);
         
@@ -29,6 +30,7 @@ class UserSeeder extends Seeder
             'email' => 'mindrarahman23@mhs.politala.ac.id',
             'password' => Hash::make('12345678'),
             'no_hp' => '089876543210',
+            'email_verified_at' => now(),
             'is_active' => true,
         ]);
         
