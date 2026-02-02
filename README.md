@@ -15,12 +15,14 @@
    - php artisan key:generate
 
 6. Atur Konfigurasi Database
-   - DB_DATABASE=nama_database
+   - DB_DATABASE=kasir-konter
    - DB_USERNAME=root
    - DB_PASSWORD=
+   - SESSION_DRIVER=file
 
 7. Jalankan Migrasi
    - php artisan migrate
+   - php artisan migrate --seed
 
 8. Jalankan Server Laravel
    - php artisan serve
