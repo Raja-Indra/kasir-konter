@@ -89,7 +89,7 @@ export default function TransaksiIndex({ auth, products }) {
                         <p>Nominal: <b>${formatRupiah(nominal)}</b></p>
                         <p>Admin: <b>${formatRupiah(biayaAdmin)}</b></p>
                         <hr class="my-2"/>
-                        <p class="text-lg">Total Tagihan: <b class="text-indigo-600">${formatRupiah(finalJual)}</b></p>
+                        <p class="text-lg">Total Tagihan: <b class="text-blue-600">${formatRupiah(finalJual)}</b></p>
                     </div>
                 `,
                 icon: 'info',
@@ -248,7 +248,7 @@ export default function TransaksiIndex({ auth, products }) {
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
                                     className={`px-4 py-1.5 rounded-full text-sm font-semibold capitalize whitespace-nowrap transition ${
-                                        activeTab === tab ? 'bg-indigo-600 text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        activeTab === tab ? 'bg-blue-600 text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
                                 >
                                     {tab === 'all' ? 'Semua' : tab}
@@ -265,7 +265,7 @@ export default function TransaksiIndex({ auth, products }) {
                                     key={product.id}
                                     onClick={() => addToCart(product)}
                                     className={`
-                                        bg-white p-3 rounded-xl shadow-sm cursor-pointer transition transform active:scale-95 border border-transparent hover:border-indigo-500 relative overflow-hidden group h-full flex flex-col justify-between
+                                        bg-white p-3 rounded-xl shadow-sm cursor-pointer transition transform active:scale-95 border border-transparent hover:border-blue-500 relative overflow-hidden group h-full flex flex-col justify-between
                                         ${product.stok <= 0 && !product.is_digital ? 'opacity-60 pointer-events-none grayscale' : ''}
                                         ${product.is_pinned ? 'ring-2 ring-yellow-400 bg-yellow-50' : ''}
                                     `} // ^ Tambahkan highlight kuning tipis jika dipin
@@ -300,7 +300,7 @@ export default function TransaksiIndex({ auth, products }) {
                                     <div className="flex items-end justify-between pt-2 mt-auto border-t">
                                         <div>
                                             <p className="text-[10px] text-gray-500">Harga</p>
-                                            <p className="text-sm font-bold text-indigo-600">{formatRupiah(product.harga_jual)}</p>
+                                            <p className="text-sm font-bold text-blue-600">{formatRupiah(product.harga_jual)}</p>
                                         </div>
                                         {!product.is_digital && (
                                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${product.stok <= 5 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
@@ -324,11 +324,11 @@ export default function TransaksiIndex({ auth, products }) {
                 <div className="w-full lg:w-[400px] bg-white border-l border-gray-200 flex flex-col h-full shadow-xl z-20">
 
                     {/* 1. Header Keranjang (Fixed) */}
-                    <div className="flex items-center justify-between flex-shrink-0 p-4 text-white bg-indigo-600 shadow-md">
+                    <div className="flex items-center justify-between flex-shrink-0 p-4 text-white bg-gradient-to-r from-blue-800 to-blue-500 shadow-md">
                         <h2 className="flex items-center text-lg font-bold">
                             <span>🛒 Keranjang</span>
                         </h2>
-                        <span className="px-2 py-1 text-xs font-bold text-indigo-600 bg-white rounded-full">{cart.length} Item</span>
+                        <span className="px-2 py-1 text-xs font-bold text-blue-800 bg-white rounded-full">{cart.length} Item</span>
                     </div>
 
                     {/* 2. List Item (Flexible & Scrollable) */}
@@ -349,11 +349,11 @@ export default function TransaksiIndex({ auth, products }) {
                                         </button>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <p className="text-sm font-bold text-indigo-600">{formatRupiah(item.harga_jual)}</p>
+                                        <p className="text-sm font-bold text-blue-600">{formatRupiah(item.harga_jual)}</p>
                                         <div className="flex items-center bg-gray-100 rounded-lg p-0.5 border border-gray-200">
-                                            <button onClick={() => updateQty(item.id, item.qty - 1)} className="flex items-center justify-center text-lg font-bold leading-none text-gray-600 bg-white rounded shadow-sm w-7 h-7 hover:text-indigo-600 disabled:opacity-50" disabled={item.qty <= 1}>-</button>
+                                            <button onClick={() => updateQty(item.id, item.qty - 1)} className="flex items-center justify-center text-lg font-bold leading-none text-gray-600 bg-white rounded shadow-sm w-7 h-7 hover:text-blue-600 disabled:opacity-50" disabled={item.qty <= 1}>-</button>
                                             <input type="text" readOnly value={item.qty} className="w-10 p-0 text-sm font-bold text-center text-gray-700 bg-transparent border-none focus:ring-0" />
-                                            <button onClick={() => updateQty(item.id, item.qty + 1)} className="flex items-center justify-center text-lg font-bold leading-none text-gray-600 bg-white rounded shadow-sm w-7 h-7 hover:text-indigo-600">+</button>
+                                            <button onClick={() => updateQty(item.id, item.qty + 1)} className="flex items-center justify-center text-lg font-bold leading-none text-gray-600 bg-white rounded shadow-sm w-7 h-7 hover:text-blue-600">+</button>
                                         </div>
                                     </div>
                                 </div>

@@ -1,28 +1,45 @@
-import { Link } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
+import { Link, usePage } from '@inertiajs/react';
 import logoIndra from '@/Assets/logo-1.png';
 import usePermission from '@/Hooks/usePermission';
-import { usePage } from '@inertiajs/react';
 
 export default function Sidebar({ isOpen, setIsOpen }) {
     const { can } = usePermission();
     const { shop_settings } = usePage().props;
 
-    // Class dinamis untuk Link
-    const baseLinkClass = `flex items-center py-3 rounded transition-all duration-200 hover:bg-indigo-50 text-gray-700 ${isOpen ? 'px-4' : 'justify-center px-2'}`;
-    const activeLinkClass = "bg-indigo-50 font-bold text-indigo-700";
+    // State untuk mengatur dropdown mana yang terbuka
+    const [activeDropdown, setActiveDropdown] = useState('');
+
+    // Buka dropdown secara otomatis jika URL saat ini ada di dalam kelompok menu tersebut
+    useEffect(() => {
+        if (route().current('riwayat.*') || route().current('hutang.*')) setActiveDropdown('transaksi');
+        if (route().current('providers.*') || route().current('produk.*')) setActiveDropdown('master');
+        if (route().current('users.*') || route().current('roles.*') || route().current('settings.*')) setActiveDropdown('konfigurasi');
+    }, []);
+
+    // Fungsi untuk toggle dropdown dan otomatis melebarkan sidebar jika sedang tertutup
+    const handleDropdownClick = (menuName) => {
+        if (!isOpen) setIsOpen(true);
+        setActiveDropdown(activeDropdown === menuName ? '' : menuName);
+    };
+
+    const baseLinkClass = `flex items-center py-3 rounded transition-all duration-200 hover:bg-blue-700 text-blue-100 ${isOpen ? 'px-4' : 'justify-center px-2'}`;
+    const activeLinkClass = "bg-blue-700 font-bold text-white shadow-md";
+    const subLinkClass = `block py-2 px-4 rounded transition-all duration-200 hover:bg-blue-700 hover:text-white text-sm text-blue-200`;
+    const activeSubLinkClass = "bg-blue-700 font-bold text-white shadow-inner";
 
     return (
         <aside
             className={`
-                bg-white border-r border-gray-200 hidden md:flex flex-col transition-all duration-300 ease-in-out relative
+                bg-gradient-to-b from-blue-800 to-blue-950 text-white hidden md:flex flex-col transition-all duration-300 ease-in-out relative
                 ${isOpen ? 'w-64' : 'w-20'}
-                min-h-screen
+                min-h-screen shadow-lg z-40
             `}
         >
             {/* --- TOMBOL TOGGLE --- */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="absolute z-50 p-1 text-gray-500 bg-white border border-gray-200 rounded-full shadow-md -right-3 top-20 hover:bg-gray-100"
+                className="absolute z-50 p-1 text-blue-600 bg-white border border-blue-200 rounded-full shadow-md -right-3 top-20 hover:bg-blue-50"
                 title={isOpen ? "Kecilkan Sidebar" : "Besarkan Sidebar"}
             >
                 {isOpen ? (
@@ -32,30 +49,30 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 )}
             </button>
 
-            <div className="flex-1 p-4">
-                {/* --- LOGO AREA DINAMIS --- */}
+            <div className="flex-1 p-4 overflow-y-auto custom-scrollbar">
+                {/* --- LOGO AREA --- */}
                 <div className={`flex items-center justify-center mb-6 transition-all duration-300 ${isOpen ? '-mt-4' : 'mt-2'}`}>
                     <Link href={route('dashboard')}>
                         {isOpen ? (
                             <img
                                 src={shop_settings?.logo_toko ? `/storage/${shop_settings.logo_toko}` : logoIndra}
                                 alt="Logo"
-                                className="object-contain w-auto h-32 transition-all"
+                                className="object-contain w-auto h-32 transition-all brightness-0 invert"
                                 onError={(e) => { e.target.style.display = 'none'; }}
                             />
                         ) : (
-                            <div className="flex items-center justify-center w-10 h-10 text-xl font-bold text-white bg-indigo-600 rounded-lg shadow">I</div>
+                            <div className="flex items-center justify-center w-10 h-10 text-xl font-bold text-white bg-blue-600 rounded-lg shadow">I</div>
                         )}
                     </Link>
                 </div>
 
-                <div className={`mb-4 text-xs font-bold tracking-wider text-gray-400 uppercase transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 hidden'}`}>
+                <div className={`mb-4 text-xs font-bold tracking-wider text-blue-300 uppercase transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 hidden'}`}>
                     Menu Utama
                 </div>
 
                 <ul className="space-y-2">
 
-                    {/* Dashboard - Cek izin view dashboard */}
+                    {/* 1. MENU AKSES CEPAT (Tanpa Dropdown) */}
                     {can('view dashboard') && (
                         <li>
                             <Link href={route('dashboard')} className={`${baseLinkClass} ${route().current('dashboard') ? activeLinkClass : ''}`} title={!isOpen ? "Dashboard" : ""}>
@@ -67,7 +84,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                         </li>
                     )}
 
-                    {/* Kasir - Cek izin view transaction */}
                     {can('view transaction') && (
                         <li>
                             <Link href={route('transaksi.index')} className={`${baseLinkClass} ${route().current('transaksi.*') ? activeLinkClass : ''}`} title={!isOpen ? "Kasir" : ""}>
@@ -79,31 +95,59 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                         </li>
                     )}
 
-                    {/* Riwayat - Cek izin view reports (karena riwayat bagian dari laporan) */}
-                    {can('view reports') && (
+                    {/* 2. TRANSAKSI DROPDOWN */}
+                    {(can('view reports') || can('view debt')) && (
                         <li>
-                            <Link href={route('riwayat.index')} className={`${baseLinkClass} ${route().current('riwayat.*') ? activeLinkClass : ''}`} title={!isOpen ? "Riwayat" : ""}>
-                                <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                                </svg>
-                                <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Riwayat</span>
-                            </Link>
+                            <button onClick={() => handleDropdownClick('transaksi')} className={`${baseLinkClass} w-full justify-between ${activeDropdown === 'transaksi' ? 'bg-blue-900' : ''}`} title={!isOpen ? "Transaksi" : ""}>
+                                <div className="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                    </svg>
+                                    <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Transaksi</span>
+                                </div>
+                                {isOpen && (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === 'transaksi' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                )}
+                            </button>
+                            
+                            <ul className={`ml-8 mt-1 space-y-1 overflow-hidden transition-all duration-300 ${activeDropdown === 'transaksi' && isOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0 hidden'}`}>
+                                {can('view reports') && (
+                                    <li><Link href={route('riwayat.index')} className={`${subLinkClass} ${route().current('riwayat.*') ? activeSubLinkClass : ''}`}>Riwayat Transaksi</Link></li>
+                                )}
+                                {can('view debt') && (
+                                    <li><Link href={route('hutang.index')} className={`${subLinkClass} ${route().current('hutang.*') ? activeSubLinkClass : ''}`}>Buku Kasbon</Link></li>
+                                )}
+                            </ul>
                         </li>
                     )}
 
-                    {/* Kasbon - Cek izin view debt */}
-                    {can('view debt') && (
+                    {/* 3. DATA MASTER DROPDOWN */}
+                    {(can('view products') || can('view providers')) && (
                         <li>
-                            <Link href={route('hutang.index')} className={`${baseLinkClass} ${route().current('hutang.*') ? activeLinkClass : ''}`} title={!isOpen ? "Buku Kasbon" : ""}>
-                                <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                                </svg>
-                                <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Buku Kasbon</span>
-                            </Link>
+                            <button onClick={() => handleDropdownClick('master')} className={`${baseLinkClass} w-full justify-between ${activeDropdown === 'master' ? 'bg-blue-900' : ''}`} title={!isOpen ? "Data Master" : ""}>
+                                <div className="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    </svg>
+                                    <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Data Master</span>
+                                </div>
+                                {isOpen && (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === 'master' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                )}
+                            </button>
+                            
+                            <ul className={`ml-8 mt-1 space-y-1 overflow-hidden transition-all duration-300 ${activeDropdown === 'master' && isOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0 hidden'}`}>
+                                {can('view products') && (
+                                    <li><Link href={route('produk.index')} className={`${subLinkClass} ${route().current('produk.*') ? activeSubLinkClass : ''}`}>Produk</Link></li>
+                                )}
+                                {can('view providers') && (
+                                    <li><Link href={route('providers.index')} className={`${subLinkClass} ${route().current('providers.*') ? activeSubLinkClass : ''}`}>Provider</Link></li>
+                                )}
+                            </ul>
                         </li>
                     )}
 
-                    {/* Laporan Penjualan - Cek izin view reports */}
+                    {/* 4. LAPORAN (Tanpa Dropdown karena baru 1, tapi siap dijadikan dropdown nanti) */}
                     {can('view reports') && (
                         <li>
                             <Link href={route('laporan.index')} className={`${baseLinkClass} ${route().current('laporan.*') ? activeLinkClass : ''}`} title={!isOpen ? "Laporan Penjualan" : ""}>
@@ -115,67 +159,41 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                         </li>
                     )}
 
-                    {/* Manajemen User - Cek izin view users */}
-                    {can('view users') && (
+                    {/* 5. KONFIGURASI DROPDOWN (Termasuk Integrasi WA) */}
+                    {(can('manage settings') || can('view users') || can('manage roles')) && (
                         <li>
-                            <Link href={route('users.index')} className={`${baseLinkClass} ${route().current('users.*') ? activeLinkClass : ''}`} title={!isOpen ? "Manajemen User" : ""}>
-                                <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                                <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Manajemen User</span>
-                            </Link>
-                        </li>
-                    )}
-
-                    {/* Provider & Produk - Cek jika bisa lihat produk ATAU lihat provider */}
-                    {(can('view products') || can('view providers')) && (
-                        <>
-                            {can('view providers') && (
-                                <li>
-                                    <Link href={route('providers.index')} className={`${baseLinkClass} ${route().current('providers.*') ? activeLinkClass : ''}`} title={!isOpen ? "Provider" : ""}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                        </svg>
-                                        <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Provider</span>
-                                    </Link>
-                                </li>
-                            )}
-
-                            {can('view products') && (
-                                <li>
-                                    <Link href={route('produk.index')} className={`${baseLinkClass} ${route().current('produk.*') ? activeLinkClass : ''}`} title={!isOpen ? "Produk" : ""}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 8V3z" />
-                                        </svg>
-                                        <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Produk</span>
-                                    </Link>
-                                </li>
-                            )}
-                        </>
-                    )}
-
-                    {/* Roles & Izin - Cek izin manage roles */}
-                    {can('manage roles') && (
-                        <li>
-                            <Link href={route('roles.index')} className={`${baseLinkClass} ${route().current('roles.*') ? activeLinkClass : ''}`} title={!isOpen ? "Roles & Izin" : ""}>
-                                <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                                </svg>
-                                <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Roles & Izin</span>
-                            </Link>
-                        </li>
-                    )}
-
-                    {/* Pengaturan Toko - Cek izin manage settings */}
-                    {can('manage settings') && (
-                        <li>
-                            <Link href={route('settings.index')} className={`${baseLinkClass} ${route().current('settings.*') ? activeLinkClass : ''}`} title={!isOpen ? "Pengaturan Toko" : ""}>
-                                <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Pengaturan Toko</span>
-                            </Link>
+                            <button onClick={() => handleDropdownClick('konfigurasi')} className={`${baseLinkClass} w-full justify-between ${activeDropdown === 'konfigurasi' ? 'bg-blue-900' : ''}`} title={!isOpen ? "Konfigurasi" : ""}>
+                                <div className="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    </svg>
+                                    <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 block' : 'opacity-0 hidden w-0'}`}>Konfigurasi</span>
+                                </div>
+                                {isOpen && (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === 'konfigurasi' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                )}
+                            </button>
+                            
+                            <ul className={`ml-8 mt-1 space-y-1 overflow-hidden transition-all duration-300 ${activeDropdown === 'konfigurasi' && isOpen ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0 hidden'}`}>
+                                {can('view users') && (
+                                    <li><Link href={route('users.index')} className={`${subLinkClass} ${route().current('users.*') ? activeSubLinkClass : ''}`}>Manajemen User</Link></li>
+                                )}
+                                {can('manage roles') && (
+                                    <li><Link href={route('roles.index')} className={`${subLinkClass} ${route().current('roles.*') ? activeSubLinkClass : ''}`}>Roles & Izin</Link></li>
+                                )}
+                                {can('manage settings') && (
+                                    <>
+                                        <li><Link href={route('settings.index')} className={`${subLinkClass} ${route().current('settings.index') ? activeSubLinkClass : ''}`}>Profil Toko</Link></li>
+                                        {/* Ganti 'settings.wa' dengan route Foonte Anda nanti */}
+                                        <li>
+                                            <Link href="#" className={`${subLinkClass} flex justify-between items-center`}>
+                                                Integrasi WA
+                                                <span className="px-1.5 py-0.5 text-[10px] bg-blue-100 text-blue-800 rounded border border-blue-200">Foonte</span>
+                                            </Link>
+                                        </li>
+                                    </>
+                                )}
+                            </ul>
                         </li>
                     )}
 

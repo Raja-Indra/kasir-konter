@@ -29,7 +29,7 @@ export default function Navbar({ user }) {
     };
 
     return (
-        <nav className="relative z-50 bg-white border-b border-gray-100">
+        <nav className="relative z-50 bg-gradient-to-r from-blue-800 to-blue-500 shadow-md">
             <div className="max-w-full px-4 mx-auto sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
 
@@ -37,7 +37,7 @@ export default function Navbar({ user }) {
                     <div className="flex items-center">
                         <button
                             onClick={() => setShowingNavigationDropdown((previousState) => !previousState)}
-                            className="inline-flex items-center justify-center p-2 text-gray-400 transition duration-150 ease-in-out rounded-md hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 md:hidden"
+                            className="inline-flex items-center justify-center p-2 text-white transition duration-150 ease-in-out rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600 md:hidden"
                         >
                             <svg className="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                 <path
@@ -58,7 +58,7 @@ export default function Navbar({ user }) {
                         </button>
 
                         {/* Judul Sistem (Opsional) */}
-                        <h1 className="hidden ml-2 text-xl font-semibold text-gray-800 md:block">
+                        <h1 className="hidden ml-2 text-xl font-semibold text-white md:block">
                             Sistem Manajemen
                         </h1>
                     </div>
@@ -69,7 +69,7 @@ export default function Navbar({ user }) {
                         {/* --- TOMBOL FULLSCREEN (BARU DISINI) --- */}
                         <button
                             onClick={toggleFullscreen}
-                            className="p-2 mr-2 text-gray-400 transition rounded-full hover:text-gray-600 hover:bg-gray-100 focus:outline-none"
+                            className="p-2 mr-2 text-white transition rounded-full hover:text-blue-100 hover:bg-blue-600 focus:outline-none"
                             title={isFullscreen ? "Keluar Fullscreen" : "Masuk Fullscreen"}
                         >
                             {isFullscreen ? (
@@ -91,7 +91,7 @@ export default function Navbar({ user }) {
                             <Dropdown>
                                 <Dropdown.Trigger>
                                     <span className="inline-flex rounded-md">
-                                        <button className="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md hover:text-gray-700 focus:outline-none">
+                                        <button className="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-white transition duration-150 ease-in-out bg-transparent border border-transparent rounded-md hover:text-blue-100 focus:outline-none">
                                             {user.name}
                                             <svg className="ms-2 -me-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -103,7 +103,7 @@ export default function Navbar({ user }) {
                                 <Dropdown.Content>
                                     <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
                                     <Dropdown.Link href={route('logout')} method="post" as="button">
-                                        Lo Outg
+                                        Logout
                                     </Dropdown.Link>
                                 </Dropdown.Content>
                             </Dropdown>
