@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -18,14 +18,33 @@ ChartJS.register(
   CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler
 );
 
-export default function Dashboard({ auth, stats, chart, top_produk }) {
+export default function Dashboard({ auth, stats, chart, top_produk, low_stock, low_balance, recent_transactions, current_filter }) {
 
     // Format Rupiah Helper
     const formatRupiah = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
 
-    // Konfigurasi Chart
-    // Konfigurasi Chart
-    // Konfigurasi Chart
+    // Format Waktu Helper
+    const formatTime = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    };
+
+    // Handler Filter Grafik
+    const handleFilterChange = (e) => {
+        router.get(route('dashboard'), { filter: e.target.value }, { preserveState: true, preserveScroll: true });
+    };
+
+    const getFilterLabel = () => {
+        switch(current_filter) {
+            case 'hari_ini': return 'Hari Ini (24 Jam)';
+            case 'minggu_ini': return '7 Hari Terakhir';
+            case 'bulan_ini': return 'Bulan Ini (Per Minggu)';
+            case 'tahun_ini': return '1 Tahun Terakhir';
+            case '5_tahun': return '5 Tahun Terakhir';
+            default: return 'Omzet';
+        }
+    };
+
     // Konfigurasi Chart
     const chartOptions = {
         responsive: true,
@@ -34,7 +53,7 @@ export default function Dashboard({ auth, stats, chart, top_produk }) {
             legend: { display: false },
             tooltip: {
                 callbacks: {
-                    label: (context) => formatRupiah(context.raw)
+                    label: (context) => 'Omzet: ' + formatRupiah(context.raw)
                 }
             }
         },
@@ -74,8 +93,8 @@ export default function Dashboard({ auth, stats, chart, top_produk }) {
                 fill: true,
                 label: 'Omzet',
                 data: chart.data,
-                borderColor: 'rgb(79, 70, 229)', // Warna Indigo
-                backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                borderColor: 'rgb(37, 99, 235)', // Warna Blue 600
+                backgroundColor: 'rgba(37, 99, 235, 0.1)', // Warna Blue transparan
                 tension: 0.4, // Garis melengkung halus
             },
         ],
@@ -88,9 +107,19 @@ export default function Dashboard({ auth, stats, chart, top_produk }) {
             <div className="py-6">
                 <div className="max-w-full px-4 mx-auto sm:px-6 lg:px-8">
 
-                    <div className="mb-6">
-                        <h2 className="text-2xl font-bold text-gray-800">Halo, {auth.user.name} 👋</h2>
-                        <p className="text-sm text-gray-500">Inilah performa usaha Anda hari ini.</p>
+                    <div className="flex flex-col items-start justify-between mb-6 md:flex-row md:items-center">
+                        <div>
+                            <h2 className="text-2xl font-bold text-gray-800">Halo, {auth.user.name} 👋</h2>
+                            <p className="text-sm text-gray-500">Inilah performa usaha Anda hari ini.</p>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
+                            <Link href={route('transaksi.index')} className="px-4 py-2 text-sm font-semibold text-white transition bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700">
+                                🛒 Buka Kasir
+                            </Link>
+                            <Link href={route('produk.index')} className="px-4 py-2 text-sm font-semibold text-blue-700 transition bg-blue-100 rounded-lg hover:bg-blue-200">
+                                📦 Tambah Produk
+                            </Link>
+                        </div>
                     </div>
 
                     {/* --- KARTU STATISTIK --- */}
@@ -112,7 +141,7 @@ export default function Dashboard({ auth, stats, chart, top_produk }) {
                                 <p className="text-xs font-bold tracking-wider text-gray-400 uppercase">Laba Bersih Hari Ini</p>
                                 <h3 className="mt-1 text-2xl font-extrabold text-green-600">+{formatRupiah(stats.laba_hari_ini)}</h3>
                             </div>
-                            <div className="px-2 py-1 text-xs font-bold text-indigo-500 rounded-full bg-indigo-50 w-fit">
+                            <div className="px-2 py-1 text-xs font-bold text-blue-500 rounded-full bg-blue-50 w-fit">
                                 🚀 Keuntungan
                             </div>
                         </div>
@@ -141,12 +170,24 @@ export default function Dashboard({ auth, stats, chart, top_produk }) {
                     </div>
 
                     {/* --- GRAFIK & TOP PRODUK --- */}
-                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-3">
 
                         {/* Grafik Area (2/3 layar) */}
-                        {/* Grafik Area (2/3 layar) */}
                         <div className="p-6 bg-white border border-gray-100 shadow-sm lg:col-span-2 rounded-xl">
-                            <h3 className="mb-4 text-lg font-bold text-gray-800">Grafik Omzet 7 Hari Terakhir</h3>
+                            <div className="flex flex-col items-start justify-between mb-4 sm:flex-row sm:items-center">
+                                <h3 className="text-lg font-bold text-gray-800">Grafik Omzet {getFilterLabel()}</h3>
+                                <select 
+                                    className="mt-2 sm:mt-0 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2"
+                                    value={current_filter || 'minggu_ini'}
+                                    onChange={handleFilterChange}
+                                >
+                                    <option value="hari_ini">Hari Ini</option>
+                                    <option value="minggu_ini">Minggu Ini (7 Hari)</option>
+                                    <option value="bulan_ini">Bulan Ini</option>
+                                    <option value="tahun_ini">1 Tahun Terakhir</option>
+                                    <option value="5_tahun">5 Tahun Terakhir</option>
+                                </select>
+                            </div>
 
                             {/* UBAH DI SINI: h-64 jadi h-80, tambah relative w-full */}
                             <div className="relative w-full h-80">
@@ -175,7 +216,7 @@ export default function Dashboard({ auth, stats, chart, top_produk }) {
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <span className="block text-sm font-bold text-indigo-600">{item.total_qty}</span>
+                                                <span className="block text-sm font-bold text-blue-600">{item.total_qty}</span>
                                                 <span className="text-[10px] text-gray-400">Terjual</span>
                                             </div>
                                         </div>
@@ -183,6 +224,100 @@ export default function Dashboard({ auth, stats, chart, top_produk }) {
                                 ) : (
                                     <p className="py-4 text-sm text-center text-gray-400">Belum ada data penjualan bulan ini.</p>
                                 )}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {/* --- ALERTS & RECENT TRANSACTIONS --- */}
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                        
+                        {/* Transaksi Terakhir (2/3 layar) */}
+                        <div className="p-6 bg-white border border-gray-100 shadow-sm lg:col-span-2 rounded-xl">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-bold text-gray-800">🧾 Transaksi Hari Ini</h3>
+                                <Link href={route('riwayat.index')} className="text-sm font-medium text-blue-600 hover:underline">Lihat Semua</Link>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm text-left whitespace-nowrap">
+                                    <thead className="text-xs text-gray-500 uppercase bg-gray-50">
+                                        <tr>
+                                            <th className="px-4 py-3 rounded-l-lg">Waktu</th>
+                                            <th className="px-4 py-3">Nota</th>
+                                            <th className="px-4 py-3">Kasir</th>
+                                            <th className="px-4 py-3 text-right rounded-r-lg">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {recent_transactions.length > 0 ? (
+                                            recent_transactions.map((trx, index) => (
+                                                <tr key={index} className="border-b border-gray-50 last:border-0 hover:bg-gray-50">
+                                                    <td className="px-4 py-3 text-gray-500">{formatTime(trx.created_at)}</td>
+                                                    <td className="px-4 py-3 font-semibold text-gray-800">{trx.no_nota}</td>
+                                                    <td className="px-4 py-3 text-gray-500">{trx.user?.name || '-'}</td>
+                                                    <td className="px-4 py-3 font-bold text-right text-green-600">{formatRupiah(trx.total_harga)}</td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="4" className="px-4 py-4 text-center text-gray-400">Belum ada transaksi hari ini.</td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Alerts (1/3 layar) */}
+                        <div className="space-y-6">
+                            {/* Peringatan Saldo */}
+                            <div className="p-6 bg-white border border-red-100 shadow-sm rounded-xl">
+                                <h3 className="flex items-center mb-4 text-lg font-bold text-gray-800">
+                                    <span className="mr-2 text-xl">⚠️</span> Saldo Provider Menipis
+                                </h3>
+                                <div className="space-y-3">
+                                    {low_balance.length > 0 ? (
+                                        low_balance.map((provider, index) => (
+                                            <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-red-50">
+                                                <div>
+                                                    <p className="text-sm font-semibold text-red-800">{provider.nama_provider}</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-sm font-bold text-red-600">{formatRupiah(provider.saldo)}</p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="p-3 text-sm text-center text-green-700 bg-green-50 rounded-lg">
+                                            Semua saldo provider aman 👍
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Peringatan Stok Fisik */}
+                            <div className="p-6 bg-white border border-orange-100 shadow-sm rounded-xl">
+                                <h3 className="flex items-center mb-4 text-lg font-bold text-gray-800">
+                                    <span className="mr-2 text-xl">📦</span> Stok Barang Tipis
+                                </h3>
+                                <div className="space-y-3">
+                                    {low_stock.length > 0 ? (
+                                        low_stock.map((product, index) => (
+                                            <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-orange-50">
+                                                <div>
+                                                    <p className="text-sm font-semibold text-orange-900 truncate w-44">{product.nama_produk}</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-sm font-bold text-orange-700">{product.stok} sisa</p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="p-3 text-sm text-center text-green-700 bg-green-50 rounded-lg">
+                                            Stok barang fisik aman 👍
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 

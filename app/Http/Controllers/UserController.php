@@ -14,7 +14,7 @@ class UserController extends Controller
     public function index()
     {
         return Inertia::render('Users/Index', [
-            'users' => User::latest()->get()
+            'users' => User::with('roles')->latest()->get()
         ]);
     }
 
@@ -69,6 +69,9 @@ class UserController extends Controller
                 Storage::disk('public')->delete($user->foto);
             }
             $validated['foto'] = $request->file('foto')->store('avatars', 'public');
+        } else {
+            // Jika tidak ada foto baru diupload, hapus dari array validasi agar tidak menimpa foto lama jadi null
+            unset($validated['foto']);
         }
 
         $user->update($validated);

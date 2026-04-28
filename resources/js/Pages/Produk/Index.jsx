@@ -15,15 +15,19 @@ const MySwal = withReactContent(Swal);
 export default function ProdukIndex({ auth, products, providers }) {
     // State Tab (Default ke Digital)
     const [activeTab, setActiveTab] = useState('digital');
+    const [searchKeyword, setSearchKeyword] = useState(''); // State Pencarian
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [productToEdit, setProductToEdit] = useState(null);
 
-    // Filter Data Berdasarkan Tab
-    const filteredProducts = products.filter(product =>
-        activeTab === 'digital' ? product.is_digital : !product.is_digital
-    );
+    // Filter Data Berdasarkan Tab dan Pencarian
+    const filteredProducts = products.filter(product => {
+        const matchTab = activeTab === 'digital' ? product.is_digital : !product.is_digital;
+        const matchSearch = product.nama_produk.toLowerCase().includes(searchKeyword.toLowerCase()) || 
+                            (product.provider && product.provider.nama_provider.toLowerCase().includes(searchKeyword.toLowerCase()));
+        return matchTab && matchSearch;
+    });
 
     const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
         provider_id: '',
@@ -147,9 +151,23 @@ export default function ProdukIndex({ auth, products, providers }) {
                 <div className="max-w-full px-4 mx-auto sm:px-6 lg:px-8">
                     <div className="p-6 bg-white shadow-sm sm:rounded-lg">
 
-                        <div className="flex flex-col justify-between gap-4 mb-6 sm:flex-row sm:items-center">
-                            <h3 className="text-lg font-medium text-gray-900">Daftar Produk</h3>
-                            <PrimaryButton onClick={openCreateModal}>+ Tambah Produk</PrimaryButton>
+                        <div className="flex flex-col justify-between gap-4 p-4 mb-6 text-white rounded-lg shadow-md sm:flex-row sm:items-center bg-gradient-to-r from-blue-800 to-blue-500">
+                            <h3 className="text-lg font-bold">Daftar Produk</h3>
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="Cari nama atau provider..."
+                                        className="block w-full py-2 pl-10 pr-3 text-sm text-gray-900 bg-white border-none rounded-md shadow-inner focus:ring-blue-300 focus:border-blue-300 sm:w-64"
+                                        value={searchKeyword}
+                                        onChange={(e) => setSearchKeyword(e.target.value)}
+                                    />
+                                </div>
+                                <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={openCreateModal}>+ Tambah Produk</PrimaryButton>
+                            </div>
                         </div>
 
                         {/* --- TAB NAVIGATION (BARU) --- */}
@@ -160,12 +178,12 @@ export default function ProdukIndex({ auth, products, providers }) {
                                     className={`
                                         whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200
                                         ${activeTab === 'digital'
-                                            ? 'border-indigo-500 text-indigo-600'
+                                            ? 'border-blue-500 text-blue-600'
                                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
                                     `}
                                 >
                                     📱 Produk Digital
-                                    <span className="ml-2 bg-indigo-100 text-indigo-600 py-0.5 px-2.5 rounded-full text-xs">
+                                    <span className="ml-2 bg-blue-100 text-blue-600 py-0.5 px-2.5 rounded-full text-xs">
                                         {products.filter(p => p.is_digital).length}
                                     </span>
                                 </button>
@@ -175,7 +193,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                     className={`
                                         whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200
                                         ${activeTab === 'fisik'
-                                            ? 'border-indigo-500 text-indigo-600'
+                                            ? 'border-blue-500 text-blue-600'
                                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
                                     `}
                                 >
@@ -212,7 +230,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                         filteredProducts.map((item, index) => (
                                             <tr key={item.id} className="hover:bg-gray-50">
                                                 <td className="px-6 py-4 text-sm text-gray-500">{index + 1}</td>
-                                                <td className="px-6 py-4 text-sm font-medium text-indigo-600">
+                                                <td className="px-6 py-4 text-sm font-medium text-blue-600">
                                                     {item.provider ? item.provider.nama_provider : '-'}
                                                 </td>
                                                 <td className="px-6 py-4 text-sm font-bold text-gray-900">{item.nama_produk}</td>
@@ -239,7 +257,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                                 </td>
 
                                                 <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                                    <button onClick={() => openEditModal(item)} className="mr-4 text-indigo-600 transition hover:text-indigo-900">Edit</button>
+                                                    <button onClick={() => openEditModal(item)} className="mr-4 text-blue-600 transition hover:text-blue-900">Edit</button>
                                                     <button onClick={() => handleDelete(item.id)} className="text-red-600 transition hover:text-red-900">Hapus</button>
                                                 </td>
                                             </tr>
@@ -269,7 +287,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                             <InputLabel htmlFor="provider_id" value="Provider" />
                             <select
                                 id="provider_id"
-                                className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 value={data.provider_id}
                                 onChange={(e) => setData('provider_id', e.target.value)}
                             >
@@ -368,7 +386,7 @@ export default function ProdukIndex({ auth, products, providers }) {
 
                             {/* Helper text untuk flexible price */}
                             {data.is_flexible_price && (
-                                <p className="mt-1 text-xs text-indigo-600">
+                                <p className="mt-1 text-xs text-blue-600">
                                     * Isi dengan keuntungan yang ingin diambil. <br/>
                                     Contoh: Jika isi 2.000, dan kasir input nominal 50.000, total bayar jadi 52.000.
                                 </p>
@@ -380,7 +398,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                             <label className="flex items-center cursor-pointer">
                                 <input
                                     type="checkbox"
-                                    className="w-5 h-5 text-indigo-600 border-gray-300 rounded shadow-sm focus:ring-indigo-500"
+                                    className="w-5 h-5 text-blue-600 border-gray-300 rounded shadow-sm focus:ring-blue-500"
                                     checked={data.is_digital}
                                     onChange={(e) => setData('is_digital', e.target.checked)}
                                 />
@@ -402,7 +420,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                 <label className="flex items-center cursor-pointer">
                                     <input
                                         type="checkbox"
-                                        className="w-5 h-5 text-indigo-600 border-gray-300 rounded shadow-sm focus:ring-indigo-500"
+                                        className="w-5 h-5 text-blue-600 border-gray-300 rounded shadow-sm focus:ring-blue-500"
                                         checked={data.is_flexible_price}
                                         onChange={(e) => setData('is_flexible_price', e.target.checked)}
                                     />

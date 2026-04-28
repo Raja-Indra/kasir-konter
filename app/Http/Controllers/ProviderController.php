@@ -42,6 +42,17 @@ class ProviderController extends Controller
         return redirect()->back();
     }
 
+    public function addSaldo(Request $request, Provider $provider)
+    {
+        $validated = $request->validate([
+            'tambah_saldo' => 'required|numeric|min:1',
+        ]);
+
+        $provider->increment('saldo', $validated['tambah_saldo']);
+
+        return redirect()->back();
+    }
+
     public function destroy(Provider $provider)
     {
         $provider->delete();

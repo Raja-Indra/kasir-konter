@@ -88,9 +88,9 @@ export default function HutangIndex({ auth, hutangs }) {
                 <div className="max-w-full px-4 mx-auto sm:px-6 lg:px-8">
                     <div className="p-6 bg-white shadow-sm sm:rounded-lg">
 
-                        <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-lg font-bold text-gray-900">Buku Kasbon / Piutang</h3>
-                            <PrimaryButton onClick={() => setIsCreateModalOpen(true)}>+ Catat Kasbon Baru</PrimaryButton>
+                        <div className="flex items-center justify-between p-4 mb-6 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-800 to-blue-500">
+                            <h3 className="text-lg font-bold">Buku Kasbon / Piutang</h3>
+                            <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={() => setIsCreateModalOpen(true)}>+ Catat Kasbon Baru</PrimaryButton>
                         </div>
 
                         <div className="overflow-x-auto">
@@ -135,7 +135,7 @@ export default function HutangIndex({ auth, hutangs }) {
                                             </td>
                                             <td className="px-4 py-3 space-x-2 text-center">
                                                 {item.status !== 'lunas' && (
-                                                    <button onClick={() => handleBayar(item)} className="px-3 py-1 text-xs text-white bg-indigo-600 rounded hover:bg-indigo-700">
+                                                    <button onClick={() => handleBayar(item)} className="px-3 py-1 text-xs text-white bg-blue-600 rounded hover:bg-blue-700">
                                                         Bayar
                                                     </button>
                                                 )}

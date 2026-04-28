@@ -124,9 +124,9 @@ export default function UserIndex({ auth, users }) {
                 <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8">
                     <div className="p-6 bg-white shadow-sm sm:rounded-lg">
                         
-                        <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-lg font-medium text-gray-900">Daftar Pengguna / Kasir</h3>
-                            <PrimaryButton onClick={openCreateModal}>+ Tambah User</PrimaryButton>
+                        <div className="flex items-center justify-between p-4 mb-6 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-800 to-blue-500">
+                            <h3 className="text-lg font-bold">Daftar Pengguna / Kasir</h3>
+                            <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={openCreateModal}>+ Tambah User</PrimaryButton>
                         </div>
 
                         <div className="overflow-x-auto">
@@ -194,7 +194,7 @@ export default function UserIndex({ auth, users }) {
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <button onClick={() => openEditModal(user)} className="text-indigo-600 hover:text-indigo-900 mr-4">Edit</button>
+                                                <button onClick={() => openEditModal(user)} className="text-blue-600 hover:text-blue-900 mr-4">Edit</button>
                                                 {user.id !== auth.user.id && (
                                                     <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-900">Hapus</button>
                                                 )}
@@ -230,7 +230,7 @@ export default function UserIndex({ auth, users }) {
                                 type="file" 
                                 accept="image/*"
                                 onChange={handleFileChange}
-                                className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                             />
                             <InputError message={errors.foto} className="mt-2" />
                         </div>
@@ -275,7 +275,7 @@ export default function UserIndex({ auth, users }) {
                             <InputLabel htmlFor="role" value="Role / Jabatan" />
                             <select
                                 id="role"
-                                className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full"
+                                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm mt-1 block w-full"
                                 value={data.role}
                                 onChange={(e) => setData('role', e.target.value)}
                             >
@@ -289,7 +289,7 @@ export default function UserIndex({ auth, users }) {
                             <label className="flex items-center cursor-pointer">
                                 <input
                                     type="checkbox"
-                                    className="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 w-5 h-5"
+                                    className="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500 w-5 h-5"
                                     checked={data.is_active}
                                     onChange={(e) => setData('is_active', e.target.checked)}
                                 />

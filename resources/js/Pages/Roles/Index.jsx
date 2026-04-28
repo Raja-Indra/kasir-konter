@@ -97,22 +97,22 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
             <Head title="Manajemen Roles" />
             <div className="px-4 py-6 sm:px-6 lg:px-8">
                 <div className="p-6 bg-white shadow-sm sm:rounded-lg">
-                    <div className="flex justify-between mb-6">
+                    <div className="flex items-center justify-between p-4 mb-6 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-800 to-blue-500">
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900">Roles & Hak Akses</h3>
-                            <p className="text-sm text-gray-500">Buat jabatan baru dan atur izin secara rinci.</p>
+                            <h3 className="text-lg font-bold">Roles & Hak Akses</h3>
+                            <p className="text-sm text-blue-100">Buat jabatan baru dan atur izin secara rinci.</p>
                         </div>
-                        <PrimaryButton onClick={() => openModal()}>+ Role Baru</PrimaryButton>
+                        <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={() => openModal()}>+ Role Baru</PrimaryButton>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                         {roles.map(role => (
                             <div key={role.id} className="relative p-4 transition bg-white border rounded-lg hover:shadow-md">
                                 <div className="flex items-start justify-between mb-2">
-                                    <h4 className="text-lg font-bold text-indigo-700 uppercase">{role.name}</h4>
+                                    <h4 className="text-lg font-bold text-blue-700 uppercase">{role.name}</h4>
                                     {role.name !== 'admin' && (
                                         <div className="flex space-x-2">
-                                            <button onClick={() => openModal(role)} className="px-2 py-1 text-xs font-bold text-gray-500 border rounded hover:text-indigo-600">EDIT</button>
+                                            <button onClick={() => openModal(role)} className="px-2 py-1 text-xs font-bold text-gray-500 border rounded hover:text-blue-600">EDIT</button>
                                             <button onClick={() => deleteRole(role.id)} className="px-2 py-1 text-xs font-bold text-red-400 border rounded hover:text-red-600">HAPUS</button>
                                         </div>
                                     )}
@@ -162,12 +162,12 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
                     <div key={groupKey} className="mb-4 overflow-hidden bg-white border border-gray-100 rounded-md shadow-sm last:mb-0">
 
                         {/* Header Group (Klik tombol All/None) */}
-                        <div className="flex items-center justify-between px-3 py-2 border-b border-indigo-100 bg-indigo-50">
-                            <h5 className="text-xs font-bold text-indigo-800 uppercase">
+                        <div className="flex items-center justify-between px-3 py-2 border-b border-blue-100 bg-blue-50">
+                            <h5 className="text-xs font-bold text-blue-800 uppercase">
                                 {groupLabels[groupKey] || groupKey}
                             </h5>
                             <div className="text-[10px] space-x-2">
-                                <button type="button" onClick={() => handleCheckGroup(groupKey, true)} className="font-bold text-indigo-600 hover:text-indigo-800">ALL</button>
+                                <button type="button" onClick={() => handleCheckGroup(groupKey, true)} className="font-bold text-blue-600 hover:text-blue-800">ALL</button>
                                 <span className="text-gray-300">|</span>
                                 <button type="button" onClick={() => handleCheckGroup(groupKey, false)} className="font-bold text-red-500 hover:text-red-700">NONE</button>
                             </div>
@@ -181,7 +181,7 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
                                         type="checkbox"
                                         checked={data.permissions.includes(perm.name)}
                                         onChange={() => handleCheckbox(perm.name)}
-                                        className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                     />
                                     <span className="text-xs font-medium text-gray-700">
                                         {/* Hapus nama grup agar teks pendek. Contoh: "view users" -> "view" */}

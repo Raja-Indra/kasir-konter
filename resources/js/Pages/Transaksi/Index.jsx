@@ -294,6 +294,9 @@ export default function TransaksiIndex({ auth, products }) {
 
                                     <div className="mt-6 mb-2"> {/* Margin top diperbesar dikit biar ga nabrak pin */}
                                         <h3 className="text-sm font-bold leading-tight text-gray-800 line-clamp-2">{product.nama_produk}</h3>
+                                        {product.jenis && (
+                                            <p className="mt-1 text-[10px] text-gray-500 uppercase">{product.jenis}</p>
+                                        )}
                                     </div>
 
                                     {/* ... Sisa kode harga dan stok (biarkan sama) ... */}

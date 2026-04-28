@@ -144,4 +144,10 @@ class TransaksiController extends Controller
             'transaksi' => $transaksi
         ]);
     }
+
+    public function destroy(Transaksi $transaksi)
+    {
+        $transaksi->delete();
+        return redirect()->back();
+    }
 }

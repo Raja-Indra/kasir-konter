@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import Modal from '@/Components/Modal';
 import SecondaryButton from '@/Components/SecondaryButton';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 export default function RiwayatIndex({ auth, transaksi }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,6 +44,31 @@ export default function RiwayatIndex({ auth, transaksi }) {
         setSelectedTrx(null);
     };
 
+    const handleDelete = (id) => {
+        MySwal.fire({
+            title: 'Hapus Transaksi?',
+            text: "Data yang dihapus tidak dapat dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route('transaksi.destroy', id), {
+                    onSuccess: () => {
+                        MySwal.fire(
+                            'Terhapus!',
+                            'Transaksi berhasil dihapus.',
+                            'success'
+                        );
+                    }
+                });
+            }
+        });
+    };
+
     return (
         <AuthenticatedLayout user={auth.user}>
             <Head title="Riwayat Transaksi" />
@@ -48,8 +77,8 @@ export default function RiwayatIndex({ auth, transaksi }) {
                 <div className="max-w-full px-4 mx-auto sm:px-6 lg:px-8">
                     <div className="p-6 bg-white shadow-sm sm:rounded-lg">
 
-                        <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-lg font-medium text-gray-900">Riwayat Transaksi</h3>
+                        <div className="flex items-center justify-between p-4 mb-6 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-800 to-blue-500">
+                            <h3 className="text-lg font-bold">Riwayat Transaksi</h3>
                         </div>
 
                         {/* TABEL TRANSAKSI UTAMA */}
@@ -80,12 +109,18 @@ export default function RiwayatIndex({ auth, transaksi }) {
                                                 <td className="px-6 py-4 text-sm font-medium text-right text-green-600">
                                                     +{formatRupiah(item.total_laba)}
                                                 </td>
-                                                <td className="px-6 py-4 text-center">
+                                                <td className="px-6 py-4 space-x-3 text-center whitespace-nowrap">
                                                     <button
                                                         onClick={() => openDetailModal(item)}
-                                                        className="text-sm font-medium text-indigo-600 hover:text-indigo-900"
+                                                        className="text-sm font-medium text-blue-600 hover:text-blue-900"
                                                     >
                                                         Lihat Detail
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(item.id)}
+                                                        className="text-sm font-medium text-red-600 hover:text-red-900"
+                                                    >
+                                                        Hapus
                                                     </button>
                                                 </td>
                                             </tr>
@@ -107,7 +142,7 @@ export default function RiwayatIndex({ auth, transaksi }) {
                                     href={link.url || '#'}
                                     className={`px-3 py-1 border rounded mx-1 text-sm ${
                                         link.active
-                                            ? 'bg-indigo-600 text-white border-indigo-600'
+                                            ? 'bg-blue-600 text-white border-blue-600'
                                             : 'bg-white text-gray-700 hover:bg-gray-50'
                                     } ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
@@ -171,7 +206,7 @@ export default function RiwayatIndex({ auth, transaksi }) {
                                     <span className="text-gray-600">Tunai</span>
                                     <span>{formatRupiah(selectedTrx.bayar)}</span>
                                 </div>
-                                <div className="flex justify-between font-semibold text-indigo-600">
+                                <div className="flex justify-between font-semibold text-blue-600">
                                     <span>Kembalian</span>
                                     <span>{formatRupiah(selectedTrx.kembalian)}</span>
                                 </div>
@@ -183,7 +218,7 @@ export default function RiwayatIndex({ auth, transaksi }) {
                                     href={route('transaksi.print', selectedTrx.id)}
                                     target="_blank" // Buka di tab baru
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-gray-800 border border-transparent rounded-md hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                    className="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-gray-800 border border-transparent rounded-md hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />

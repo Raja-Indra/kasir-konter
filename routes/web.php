@@ -42,10 +42,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::resource('providers', ProviderController::class);
+    Route::post('/providers/{provider}/add-saldo', [ProviderController::class, 'addSaldo'])->name('providers.add_saldo');
     Route::resource('produk', ProdukController::class);
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
     Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store');
     Route::get('/riwayat-transaksi', [TransaksiController::class, 'history'])->name('riwayat.index');
+    Route::delete('/transaksi/{transaksi}', [TransaksiController::class, 'destroy'])->name('transaksi.destroy');
     Route::get('/transaksi/{transaksi}/print', [TransaksiController::class, 'print'])->name('transaksi.print');
     Route::resource('users', UserController::class);
     Route::get('/hutang', [HutangController::class, 'index'])->name('hutang.index');
