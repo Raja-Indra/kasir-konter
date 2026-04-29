@@ -56,12 +56,17 @@ export default function TransaksiIndex({ auth, products }) {
         if (product.is_flexible_price) {
             // Kita ambil Biaya Admin dari database (yang disimpan di kolom harga_jual)
             const biayaAdmin = parseFloat(product.harga_jual);
+            const minText = product.min_nominal ? `<br/>Min Nominal: <b>${formatRupiah(product.min_nominal)}</b>` : '';
+            const maxText = product.max_nominal ? `<br/>Max Nominal: <b>${formatRupiah(product.max_nominal)}</b>` : '';
+
+            const titleText = product.is_tarik_tunai ? 'Input Nominal Tarik Tunai' : 'Input Nominal Top Up';
+            const labelText = product.is_tarik_tunai ? 'Nominal Penarikan' : 'Nominal Pengisian';
 
             const { value: nominalInput } = await MySwal.fire({
-                title: 'Input Nominal Top Up',
+                title: titleText,
                 html:
-                    `<p class="text-sm text-gray-600 mb-4">Biaya Admin: <b>${formatRupiah(biayaAdmin)}</b></p>` +
-                    '<label class="block text-left text-sm mb-1 font-bold">Nominal Pengisian</label>' +
+                    `<p class="text-sm text-gray-600 mb-4">Biaya Admin: <b>${formatRupiah(biayaAdmin)}</b>${minText}${maxText}</p>` +
+                    `<label class="block text-left text-sm mb-1 font-bold">${labelText}</label>` +
                     '<input id="swal-nominal" type="number" class="swal2-input" placeholder="Contoh: 50000" autofocus>',
                 focusConfirm: false,
                 showCancelButton: true,
@@ -74,6 +79,25 @@ export default function TransaksiIndex({ auth, products }) {
             if (!nominalInput) return; // Jika di-cancel atau kosong
 
             const nominal = parseFloat(nominalInput);
+
+            // VALIDASI MIN & MAX NOMINAL
+            if (product.min_nominal && nominal < parseFloat(product.min_nominal)) {
+                MySwal.fire({
+                    icon: 'error',
+                    title: 'Nominal Terlalu Kecil',
+                    text: `Minimal nominal untuk produk ini adalah ${formatRupiah(product.min_nominal)}`,
+                });
+                return;
+            }
+
+            if (product.max_nominal && nominal > parseFloat(product.max_nominal)) {
+                MySwal.fire({
+                    icon: 'error',
+                    title: 'Nominal Terlalu Besar',
+                    text: `Maksimal nominal untuk produk ini adalah ${formatRupiah(product.max_nominal)}`,
+                });
+                return;
+            }
 
             // RUMUS UTAMA:
             // Harga Modal = Nominal yang diinput (Saldo provider terpotong segini)
@@ -294,6 +318,11 @@ export default function TransaksiIndex({ auth, products }) {
 
                                     <div className="mt-6 mb-2"> {/* Margin top diperbesar dikit biar ga nabrak pin */}
                                         <h3 className="text-sm font-bold leading-tight text-gray-800 line-clamp-2">{product.nama_produk}</h3>
+                                        {product.is_flexible_price && (product.min_nominal || product.max_nominal) && (
+                                            <div className="mt-1 text-[10px] font-medium text-blue-600 bg-blue-50 inline-block px-1.5 py-0.5 rounded border border-blue-100">
+                                                Range: {product.min_nominal ? `Rp ${parseFloat(product.min_nominal).toLocaleString('id-ID')}` : '0'} - {product.max_nominal ? `Rp ${parseFloat(product.max_nominal).toLocaleString('id-ID')}` : '∞'}
+                                            </div>
+                                        )}
                                         {product.jenis && (
                                             <p className="mt-1 text-[10px] text-gray-500 uppercase">{product.jenis}</p>
                                         )}

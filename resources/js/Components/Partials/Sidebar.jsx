@@ -186,9 +186,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                         <li><Link href={route('settings.index')} className={`${subLinkClass} ${route().current('settings.index') ? activeSubLinkClass : ''}`}>Profil Toko</Link></li>
                                         {/* Ganti 'settings.wa' dengan route Foonte Anda nanti */}
                                         <li>
-                                            <Link href="#" className={`${subLinkClass} flex justify-between items-center`}>
+                                            <Link href={route('settings.wa')} className={`${subLinkClass} flex justify-between items-center ${route().current('settings.wa') ? activeSubLinkClass : ''}`}>
                                                 Integrasi WA
-                                                <span className="px-1.5 py-0.5 text-[10px] bg-blue-100 text-blue-800 rounded border border-blue-200">Foonte</span>
+                                                <span className="px-1.5 py-0.5 text-[10px] bg-blue-100 text-blue-800 rounded border border-blue-200">Fonnte</span>
                                             </Link>
                                         </li>
                                     </>

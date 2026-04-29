@@ -80,13 +80,19 @@ class TransaksiController extends Controller
                         // Total modal yang dibutuhkan = Harga Modal Satuan * Qty
                         $total_modal_dibutuhkan = $harga_modal_final * $item['qty'];
 
-                        // Cek Saldo Cukup?
-                        if ($provider->saldo < $total_modal_dibutuhkan) {
-                            throw new \Exception("Saldo Provider {$provider->nama_provider} Kurang! Sisa: " . number_format($provider->saldo));
-                        }
+                        if ($produkDb->is_tarik_tunai) {
+                            // Untuk Tarik Tunai: Provider menerima saldo digital dari pelanggan
+                            // Sesuai kesepakatan, provider saldo bertambah sebesar harga modal.
+                            $provider->increment('saldo', $total_modal_dibutuhkan);
+                        } else {
+                            // Cek Saldo Cukup?
+                            if ($provider->saldo < $total_modal_dibutuhkan) {
+                                throw new \Exception("Saldo Provider {$provider->nama_provider} Kurang! Sisa: " . number_format($provider->saldo));
+                            }
 
-                        // Potong Saldo
-                        $provider->decrement('saldo', $total_modal_dibutuhkan);
+                            // Potong Saldo
+                            $provider->decrement('saldo', $total_modal_dibutuhkan);
+                        }
 
                     } else {
                         // B. PRODUK FISIK: Kurangi Stok Barang

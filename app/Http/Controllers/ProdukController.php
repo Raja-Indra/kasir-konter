@@ -30,7 +30,10 @@ class ProdukController extends Controller
             'stok' => 'required|integer',
             'jenis' => 'required|string',
             'is_digital' => 'required|boolean',
+            'is_tarik_tunai' => 'boolean',
             'is_flexible_price' => 'boolean',
+            'min_nominal' => 'nullable|numeric',
+            'max_nominal' => 'nullable|numeric|gte:min_nominal',
         ]);
 
         // Jika harga modal kosong/null, kita set jadi 0 agar aman di kalkulasi
@@ -55,7 +58,10 @@ class ProdukController extends Controller
             'stok' => 'required|integer',
             'jenis' => 'required|string',
             'is_digital' => 'required|boolean',
+            'is_tarik_tunai' => 'boolean',
             'is_flexible_price' => 'boolean',
+            'min_nominal' => 'nullable|numeric',
+            'max_nominal' => 'nullable|numeric|gte:min_nominal',
         ]);
 
         if (is_null($validated['harga_modal'])) {
@@ -77,7 +83,14 @@ class ProdukController extends Controller
 
     public function destroy(Produk $produk)
     {
-        $produk->delete();
-        return redirect()->back();
+        try {
+            $produk->delete();
+            return redirect()->back();
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() == "23000") {
+                return redirect()->back()->withErrors(['error' => 'Produk tidak dapat dihapus karena sudah ada di riwayat transaksi.']);
+            }
+            return redirect()->back()->withErrors(['error' => 'Gagal menghapus produk.']);
+        }
     }
 }

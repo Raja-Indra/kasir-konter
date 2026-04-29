@@ -37,6 +37,7 @@ export default function ProdukIndex({ auth, products, providers }) {
         stok: 0,
         jenis: '',
         is_digital: true,
+        is_tarik_tunai: false,
         is_flexible_price: false,
     });
 
@@ -78,6 +79,7 @@ export default function ProdukIndex({ auth, products, providers }) {
             stok: item.stok,
             jenis: item.jenis,
             is_digital: item.is_digital ? true : false,
+            is_tarik_tunai: item.is_tarik_tunai ? true : false,
             is_flexible_price: item.is_flexible_price ? true : false,
         });
         clearErrors();
@@ -233,11 +235,23 @@ export default function ProdukIndex({ auth, products, providers }) {
                                                 <td className="px-6 py-4 text-sm font-medium text-blue-600">
                                                     {item.provider ? item.provider.nama_provider : '-'}
                                                 </td>
-                                                <td className="px-6 py-4 text-sm font-bold text-gray-900">{item.nama_produk}</td>
+                                                <td className="px-6 py-4 text-sm font-bold text-gray-900">
+                                                    <div>{item.nama_produk}</div>
+                                                    {item.is_flexible_price && (item.min_nominal || item.max_nominal) && (
+                                                        <div className="mt-1 text-[11px] font-normal text-blue-600 bg-blue-50 inline-block px-1.5 py-0.5 rounded border border-blue-100">
+                                                            Range: {item.min_nominal ? `Rp ${parseFloat(item.min_nominal).toLocaleString('id-ID')}` : '0'} - {item.max_nominal ? `Rp ${parseFloat(item.max_nominal).toLocaleString('id-ID')}` : '∞'}
+                                                        </div>
+                                                    )}
+                                                </td>
                                                 <td className="px-6 py-4 text-sm text-gray-500">
                                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${activeTab === 'digital' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}`}>
                                                         {item.jenis}
                                                     </span>
+                                                    {/* {item.is_tarik_tunai && (
+                                                        <span className="ml-2 px-2 inline-flex text-[10px] leading-5 font-bold rounded-full bg-green-100 text-green-800">
+                                                            Tarik Tunai
+                                                        </span>
+                                                    )} */}
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-gray-500">Rp {parseFloat(item.harga_modal).toLocaleString('id-ID')}</td>
                                                 <td className="px-6 py-4 text-sm font-bold text-green-600">Rp {parseFloat(item.harga_jual).toLocaleString('id-ID')}</td>
@@ -432,6 +446,55 @@ export default function ProdukIndex({ auth, products, providers }) {
                                             {data.is_flexible_price
                                                 ? "Aktif: Kasir akan diminta input Harga Modal & Jual saat transaksi (Cocok untuk Top Up E-Wallet)."
                                                 : "Non-aktif: Kasir menggunakan harga fix dari database."}
+                                        </span>
+                                    </div>
+                                </label>
+                                {data.is_flexible_price && (
+                                    <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-yellow-300">
+                                        <div>
+                                            <InputLabel htmlFor="min_nominal" value="Minimal Nominal (Opsional)" />
+                                            <TextInput
+                                                id="min_nominal"
+                                                type="number"
+                                                className="block w-full mt-1"
+                                                value={data.min_nominal}
+                                                onChange={(e) => setData('min_nominal', e.target.value)}
+                                                placeholder="Contoh: 10000"
+                                            />
+                                            <InputError message={errors.min_nominal} className="mt-2" />
+                                        </div>
+                                        <div>
+                                            <InputLabel htmlFor="max_nominal" value="Maksimal Nominal (Opsional)" />
+                                            <TextInput
+                                                id="max_nominal"
+                                                type="number"
+                                                className="block w-full mt-1"
+                                                value={data.max_nominal}
+                                                onChange={(e) => setData('max_nominal', e.target.value)}
+                                                placeholder="Contoh: 1000000"
+                                            />
+                                            <InputError message={errors.max_nominal} className="mt-2" />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {data.is_digital && (
+                            <div className="col-span-2 p-3 mt-2 border border-green-200 rounded bg-green-50">
+                                <label className="flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="w-5 h-5 text-blue-600 border-gray-300 rounded shadow-sm focus:ring-blue-500"
+                                        checked={data.is_tarik_tunai}
+                                        onChange={(e) => setData('is_tarik_tunai', e.target.checked)}
+                                    />
+                                    <div className="ms-3">
+                                        <span className="block text-sm font-medium text-gray-900">
+                                            Jasa Tarik Tunai (Saldo Masuk)
+                                        </span>
+                                        <span className="block text-xs text-gray-500">
+                                            Centang jika produk ini merupakan Jasa Tarik Tunai. Saldo provider akan bertambah sesuai nominal Modal.
                                         </span>
                                     </div>
                                 </label>

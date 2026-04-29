@@ -59,6 +59,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan/export', [LaporanController::class, 'exportPdf'])->name('laporan.export');
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
+    Route::get('/settings/wa', [SettingController::class, 'wa'])->name('settings.wa');
+    Route::post('/settings/wa', [SettingController::class, 'updateWa'])->name('settings.wa.update');
+    Route::post('/settings/wa/test', [SettingController::class, 'testWa'])->name('settings.wa.test');
     Route::resource('roles', RoleController::class)->except(['create', 'edit', 'show']);
 });
 
