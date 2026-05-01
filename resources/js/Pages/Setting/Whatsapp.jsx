@@ -18,6 +18,13 @@ export default function WhatsappSetting({ auth }) {
         no_hp: '',
     });
 
+    const alertForm = useForm({
+        alert_stok_aktif: shop_settings.alert_stok_aktif === '1',
+        alert_stok_mode: shop_settings.alert_stok_mode || 'manual',
+        alert_stok_jam: shop_settings.alert_stok_jam || '08:00',
+        alert_stok_no_hp: shop_settings.alert_stok_no_hp || '',
+    });
+
     const handleSubmit = (e) => {
         e.preventDefault();
         post(route('settings.wa.update'), {
@@ -41,6 +48,36 @@ export default function WhatsappSetting({ auth }) {
             },
             onError: (err) => {
                 Swal.fire('Gagal', err.error || 'Pesan percobaan gagal dikirim', 'error');
+            }
+        });
+    };
+
+    const handleAlertSubmit = (e) => {
+        e.preventDefault();
+        alertForm.post(route('settings.wa.alert'), {
+            preserveScroll: true,
+            onSuccess: () => Swal.fire('Berhasil', 'Pengaturan Alert Stok Disimpan', 'success'),
+            onError: (err) => Swal.fire('Gagal', err.error || 'Terjadi kesalahan', 'error'),
+        });
+    };
+
+    const handleManualAlert = () => {
+        Swal.fire({
+            title: 'Kirim Alert Sekarang?',
+            text: "Sistem akan mengecek stok (<= 5) dan mengirimkan pesannya ke WhatsApp admin.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Kirim',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                alertForm.post(route('settings.wa.alert.manual'), {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        const flashMessage = usePage().props.flash?.success;
+                        Swal.fire('Selesai', flashMessage || 'Alert berhasil dikirim.', 'success');
+                    },
+                    onError: (err) => Swal.fire('Gagal', err.error || 'Gagal memproses alert manual', 'error'),
+                });
             }
         });
     };
@@ -112,6 +149,89 @@ export default function WhatsappSetting({ auth }) {
                             </form>
                         </div>
 
+                        {/* PENGATURAN ALERT STOK */}
+                        <div className="bg-white p-6 shadow-sm sm:rounded-lg md:col-span-2 border border-orange-200">
+                            <div className="flex items-center justify-between border-b pb-2 mb-6">
+                                <h2 className="text-lg font-bold text-gray-900 flex items-center">
+                                    <span className="mr-2">⚠️</span> Notifikasi Stok Menipis (WhatsApp)
+                                </h2>
+                                <div className="flex items-center space-x-2">
+                                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${alertForm.data.alert_stok_aktif ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                                        {alertForm.data.alert_stok_aktif ? 'AKTIF' : 'NONAKTIF'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <form onSubmit={handleAlertSubmit}>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <div>
+                                        <label className="flex items-center cursor-pointer mb-4">
+                                            <input
+                                                type="checkbox"
+                                                className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                                                checked={alertForm.data.alert_stok_aktif}
+                                                onChange={(e) => alertForm.setData('alert_stok_aktif', e.target.checked)}
+                                            />
+                                            <span className="ml-2 font-medium text-gray-700">Aktifkan Notifikasi Stok Menipis</span>
+                                        </label>
+
+                                        <InputLabel value="Nomor HP Tujuan (Admin)" />
+                                        <TextInput
+                                            type="text"
+                                            className="w-full mt-1 mb-2"
+                                            placeholder="08..."
+                                            value={alertForm.data.alert_stok_no_hp}
+                                            onChange={(e) => alertForm.setData('alert_stok_no_hp', e.target.value)}
+                                        />
+                                        <p className="text-xs text-gray-500">
+                                            Nomor WhatsApp yang akan menerima alert saat stok barang habis (sisa ≤ 5).
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="bg-gray-50 p-4 rounded-lg border">
+                                        <InputLabel value="Mode Pengiriman" />
+                                        <select
+                                            className="w-full mt-1 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mb-4"
+                                            value={alertForm.data.alert_stok_mode}
+                                            onChange={(e) => alertForm.setData('alert_stok_mode', e.target.value)}
+                                        >
+                                            <option value="manual">Kirim Manual</option>
+                                            <option value="otomatis">Kirim Otomatis (Terjadwal)</option>
+                                        </select>
+
+                                        {alertForm.data.alert_stok_mode === 'otomatis' && (
+                                            <div>
+                                                <InputLabel value="Jam Pengiriman Otomatis (Setiap Hari)" />
+                                                <TextInput
+                                                    type="time"
+                                                    className="w-full mt-1"
+                                                    value={alertForm.data.alert_stok_jam}
+                                                    onChange={(e) => alertForm.setData('alert_stok_jam', e.target.value)}
+                                                />
+                                                <p className="text-xs text-gray-500 mt-2 text-justify">
+                                                    Sistem akan mengecek stok setiap jam ini, dan jika ada barang yang menipis, pesan akan otomatis terkirim.
+                                                </p>
+                                            </div>
+                                        )}
+                                        {alertForm.data.alert_stok_mode === 'manual' && (
+                                            <p className="text-xs text-gray-500 mt-2 text-justify">
+                                                Pilih "Kirim Manual" jika Anda ingin memicu pengiriman alert secara langsung melalui tombol di bawah ini.
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-between items-center border-t pt-4">
+                                    <SecondaryButton type="button" onClick={handleManualAlert} disabled={alertForm.processing} className="border-orange-500 text-orange-600 hover:bg-orange-50">
+                                        🚀 Kirim Alert Sekarang
+                                    </SecondaryButton>
+
+                                    <PrimaryButton type="submit" disabled={alertForm.processing}>
+                                        Simpan Pengaturan
+                                    </PrimaryButton>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
                 </div>

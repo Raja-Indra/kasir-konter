@@ -18,7 +18,8 @@ class RolesAndPermissionsSeeder extends Seeder
         // 2. Daftar Permission Rinci (CRUD)
         $permissions = [
             // Dashboard
-            'view dashboard',
+            'view dashboard owner',
+            'view dashboard kasir',
 
             // Manajemen User
             'view users',
@@ -66,7 +67,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // A. Role KASIR (Hanya bisa transaksi dan lihat stok)
         $roleKasir = Role::firstOrCreate(['name' => 'kasir']);
         $roleKasir->syncPermissions([
-            'view dashboard',
+            'view dashboard kasir',
             'view products', // Kasir butuh lihat produk untuk cari harga
             'view transaction',
             'create transaction',

@@ -14,7 +14,8 @@ class UserController extends Controller
     public function index()
     {
         return Inertia::render('Users/Index', [
-            'users' => User::with('roles')->latest()->get()
+            'users' => User::with('roles')->latest()->get(),
+            'roles' => \Spatie\Permission\Models\Role::all()
         ]);
     }
 
@@ -24,7 +25,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'no_hp' => 'nullable|string|max:20',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:6|confirmed',
             'foto' => 'nullable|image|max:2048', // Max 2MB
             'is_active' => 'boolean'
         ]);
@@ -50,7 +51,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'no_hp' => 'nullable|string|max:20',
-            'password' => 'nullable|string|min:6',
+            'password' => 'nullable|string|min:6|confirmed',
             'foto' => 'nullable|image|max:2048',
             'is_active' => 'boolean'
         ]);

@@ -16,6 +16,8 @@ export default function TransaksiIndex({ auth, products }) {
     const [cart, setCart] = useState([]);
     const [bayar, setBayar] = useState('');
     const [umur, setUmur] = useState('');
+    const [metodePembayaran, setMetodePembayaran] = useState('tunai'); // 'tunai' atau 'hutang'
+    const [namaPelanggan, setNamaPelanggan] = useState('');
 
     // --- HELPER: Format Rupiah ---
     const formatRupiah = (number) => {
@@ -188,11 +190,20 @@ export default function TransaksiIndex({ auth, products }) {
     // --- LOGIC 5: Submit Transaksi ---
     const handleCheckout = () => {
         if (cart.length === 0) return MySwal.fire('Keranjang Kosong', 'Pilih produk dulu', 'warning');
-        if ((parseFloat(bayar) || 0) < totalHarga) return MySwal.fire('Uang Kurang', 'Nominal pembayaran kurang dari total belanja', 'error');
+        
+        const bayarNominal = parseFloat(bayar) || 0;
+
+        if (metodePembayaran === 'tunai' && bayarNominal < totalHarga) {
+            return MySwal.fire('Uang Kurang', 'Nominal pembayaran kurang dari total belanja', 'error');
+        }
+
+        if (metodePembayaran === 'hutang' && !namaPelanggan.trim()) {
+            return MySwal.fire('Nama Pelanggan Wajib', 'Masukkan nama pelanggan untuk catatan hutang', 'warning');
+        }
 
         MySwal.fire({
             title: 'Proses Transaksi?',
-            text: `Total: ${formatRupiah(totalHarga)}`,
+            text: `Total: ${formatRupiah(totalHarga)}${metodePembayaran === 'hutang' ? ` | Hutang: ${formatRupiah(totalHarga - bayarNominal)}` : ''}`,
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Ya, Bayar',
@@ -202,17 +213,22 @@ export default function TransaksiIndex({ auth, products }) {
                 router.post(route('transaksi.store'), {
                     cart: cart,
                     total_harga: totalHarga,
-                    bayar: parseFloat(bayar),
-                    umur_pelanggan: umur
+                    bayar: bayarNominal,
+                    umur_pelanggan: umur,
+                    metode_pembayaran: metodePembayaran,
+                    nama_pelanggan: namaPelanggan
                 }, {
                     onSuccess: () => {
                         setCart([]);
                         setBayar('');
                         setUmur('');
+                        setMetodePembayaran('tunai');
+                        setNamaPelanggan('');
                         MySwal.fire('Berhasil!', 'Transaksi tersimpan & Stok berkurang.', 'success');
                     },
                     onError: (errors) => {
-                        MySwal.fire('Gagal', errors.error || 'Terjadi kesalahan sistem', 'error');
+                        const firstError = Object.values(errors)[0];
+                        MySwal.fire('Gagal', errors.error || firstError || 'Terjadi kesalahan sistem', 'error');
                     }
                 });
             }
@@ -241,10 +257,10 @@ export default function TransaksiIndex({ auth, products }) {
             <Head title="Kasir" />
 
             {/* FIX 1: Main Container
-               h-[calc(100vh-64px)] -> Tinggi layar dikurangi tinggi Navbar (64px)
+               h-[calc(100vh-125px)] -> Tinggi layar dikurangi tinggi Navbar dan Footer
                overflow-hidden -> Mencegah scroll pada window browser utama
             */}
-            <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)] overflow-hidden bg-gray-100">
+            <div className="flex flex-col lg:flex-row h-[calc(100vh-125px)] overflow-hidden bg-gray-100">
 
                 {/* --- KIRI: KATALOG (70%) --- */}
                 <div className="flex flex-col flex-1 h-full overflow-hidden border-r border-gray-200">
@@ -402,10 +418,41 @@ export default function TransaksiIndex({ auth, products }) {
                             <span className="text-2xl font-extrabold text-gray-900">{formatRupiah(totalHarga)}</span>
                         </div>
 
+                        {/* Pilihan Metode Pembayaran */}
+                        <div className="flex space-x-2 mb-3">
+                            <button
+                                className={`flex-1 py-2 text-sm font-bold rounded-lg border ${metodePembayaran === 'tunai' ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-100 text-gray-600 border-gray-300'}`}
+                                onClick={() => setMetodePembayaran('tunai')}
+                            >
+                                Tunai
+                            </button>
+                            <button
+                                className={`flex-1 py-2 text-sm font-bold rounded-lg border ${metodePembayaran === 'hutang' ? 'bg-red-600 text-white border-red-600' : 'bg-gray-100 text-gray-600 border-gray-300'}`}
+                                onClick={() => setMetodePembayaran('hutang')}
+                            >
+                                Hutang
+                            </button>
+                        </div>
+
                         {/* Input Area */}
+                        {metodePembayaran === 'hutang' && (
+                            <div className="mb-3">
+                                <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Nama Pelanggan (Wajib)</label>
+                                <TextInput
+                                    type="text"
+                                    className="w-full h-10 text-sm"
+                                    placeholder="Nama penghutang..."
+                                    value={namaPelanggan}
+                                    onChange={(e) => setNamaPelanggan(e.target.value)}
+                                />
+                            </div>
+                        )}
+
                         <div className="grid grid-cols-12 gap-2 mb-3">
                             <div className="col-span-8">
-                                <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Bayar (Rp)</label>
+                                <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                                    {metodePembayaran === 'hutang' ? 'Bayar / DP (Rp)' : 'Bayar (Rp)'}
+                                </label>
                                 <TextInput
                                     type="number"
                                     className="w-full h-10 font-mono text-lg font-bold text-right"
@@ -429,7 +476,7 @@ export default function TransaksiIndex({ auth, products }) {
                         {/* Kembalian Info */}
                         <div className={`flex justify-between items-center px-3 py-1.5 rounded-lg mb-3 transition-colors ${kembalian >= 0 ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
                             <span className={`text-xs font-bold uppercase ${kembalian >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                                {kembalian >= 0 ? 'Kembalian' : 'Kurang'}
+                                {metodePembayaran === 'hutang' && kembalian < 0 ? 'Sisa Hutang' : (kembalian >= 0 ? 'Kembalian' : 'Kurang')}
                             </span>
                             <span className={`font-bold font-mono text-sm ${kembalian >= 0 ? 'text-green-700' : 'text-red-700'}`}>
                                 {formatRupiah(Math.abs(kembalian))}
@@ -439,7 +486,7 @@ export default function TransaksiIndex({ auth, products }) {
                         <PrimaryButton
                             className="justify-center w-full h-12 text-lg transition-all shadow-lg hover:shadow-xl"
                             onClick={handleCheckout}
-                            disabled={cart.length === 0 || kembalian < 0}
+                            disabled={cart.length === 0 || (metodePembayaran === 'tunai' && kembalian < 0)}
                         >
                             PROSES BAYAR
                         </PrimaryButton>

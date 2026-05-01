@@ -8,13 +8,13 @@ export default function Authenticated({ user, header, children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     return (
-        <div className="flex min-h-screen overflow-hidden bg-gray-100">
+        <div className="flex h-screen overflow-hidden bg-gray-100">
 
             {/* 1. Sidebar: Kirim state dan fungsi pengubahnya ke komponen Sidebar */}
             <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
             {/* 2. Wrapper Kanan */}
-            <div className="flex flex-col flex-1 min-h-screen overflow-hidden transition-all duration-300 ease-in-out">
+            <div className="flex flex-col flex-1 h-screen overflow-hidden transition-all duration-300 ease-in-out">
 
                 {/* Navbar */}
                 <Navbar user={user} />

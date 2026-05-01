@@ -73,7 +73,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 <ul className="space-y-2">
 
                     {/* 1. MENU AKSES CEPAT (Tanpa Dropdown) */}
-                    {can('view dashboard') && (
+                    {(can('view dashboard owner') || can('view dashboard kasir')) && (
                         <li>
                             <Link href={route('dashboard')} className={`${baseLinkClass} ${route().current('dashboard') ? activeLinkClass : ''}`} title={!isOpen ? "Dashboard" : ""}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className={`w-6 h-6 transition-all ${isOpen ? 'mr-3' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">

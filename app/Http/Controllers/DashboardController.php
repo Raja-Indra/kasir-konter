@@ -16,6 +16,40 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $today = Carbon::today();
+        $user = $request->user();
+
+        // -------------------------------------------------------------
+        // DASHBOARD KASIR (KARYAWAN)
+        // -------------------------------------------------------------
+        if (!$user->can('view dashboard owner')) {
+            if (!$user->can('view dashboard kasir')) {
+                abort(403, 'Anda tidak memiliki akses ke dashboard manapun.');
+            }
+            
+            // Statistik khusus kasir (hanya yang dia input hari ini)
+            $statsKasir = [
+                'omzet_hari_ini' => Transaksi::where('user_id', $user->id)->whereDate('created_at', $today)->sum('total_harga'),
+                'transaksi_hari_ini' => Transaksi::where('user_id', $user->id)->whereDate('created_at', $today)->count(),
+            ];
+
+            // 5 Transaksi terakhir kasir hari ini
+            $recentTransactionsKasir = Transaksi::with('user')
+                ->where('user_id', $user->id)
+                ->whereDate('created_at', $today)
+                ->latest()
+                ->limit(5)
+                ->get();
+
+            return Inertia::render('DashboardKasir', [
+                'stats' => $statsKasir,
+                'recent_transactions' => $recentTransactionsKasir
+            ]);
+        }
+
+
+        // -------------------------------------------------------------
+        // DASHBOARD ADMIN (OWNER)
+        // -------------------------------------------------------------
         $filter = $request->query('filter', 'minggu_ini'); // Default 7 hari terakhir
 
         // 1. STATISTIK HARI INI

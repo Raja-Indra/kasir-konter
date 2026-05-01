@@ -12,7 +12,7 @@ import withReactContent from 'sweetalert2-react-content';
 
 const MySwal = withReactContent(Swal);
 
-export default function UserIndex({ auth, users }) {
+export default function UserIndex({ auth, users, roles }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [userToEdit, setUserToEdit] = useState(null);
@@ -23,6 +23,7 @@ export default function UserIndex({ auth, users }) {
         email: '',
         no_hp: '',
         password: '',
+        password_confirmation: '',
         role: 'kasir', // Default role
         is_active: true,
         foto: null, 
@@ -44,7 +45,7 @@ export default function UserIndex({ auth, users }) {
         reset();
         clearErrors();
         setData({
-            name: '', email: '', no_hp: '', password: '', role: 'kasir', is_active: true, foto: null, _method: 'POST'
+            name: '', email: '', no_hp: '', password: '', password_confirmation: '', role: roles.length > 0 ? roles[0].name : 'kasir', is_active: true, foto: null, _method: 'POST'
         });
         setIsModalOpen(true);
     };
@@ -59,8 +60,9 @@ export default function UserIndex({ auth, users }) {
             email: user.email,
             no_hp: user.no_hp || '',
             password: '', 
+            password_confirmation: '',
             // Ambil role pertama user (jika ada), kalau tidak default kasir
-            role: user.roles && user.roles.length > 0 ? user.roles[0].name : 'kasir',
+            role: user.roles && user.roles.length > 0 ? user.roles[0].name : (roles.length > 0 ? roles[0].name : 'kasir'),
             is_active: user.is_active ? true : false,
             foto: null, 
             _method: 'PUT' 
@@ -257,7 +259,7 @@ export default function UserIndex({ auth, users }) {
                         </div>
 
                         {/* Password */}
-                        <div className="col-span-2">
+                        <div>
                             <InputLabel htmlFor="password" value={isEditMode ? "Password (Kosongkan jika tidak diganti)" : "Password"} />
                             <TextInput 
                                 id="password" 
@@ -270,6 +272,20 @@ export default function UserIndex({ auth, users }) {
                             <InputError message={errors.password} className="mt-2" />
                         </div>
 
+                        {/* Password Confirmation */}
+                        <div>
+                            <InputLabel htmlFor="password_confirmation" value="Konfirmasi Password" />
+                            <TextInput 
+                                id="password_confirmation" 
+                                type="password" 
+                                className="block w-full mt-1" 
+                                value={data.password_confirmation} 
+                                onChange={(e) => setData('password_confirmation', e.target.value)} 
+                                required={!isEditMode || data.password.length > 0} 
+                            />
+                            <InputError message={errors.password_confirmation} className="mt-2" />
+                        </div>
+
                         {/* Pilihan Role */}
                         <div className="col-span-2">
                             <InputLabel htmlFor="role" value="Role / Jabatan" />
@@ -279,8 +295,11 @@ export default function UserIndex({ auth, users }) {
                                 value={data.role}
                                 onChange={(e) => setData('role', e.target.value)}
                             >
-                                <option value="kasir">Kasir (Transaksi Saja)</option>
-                                <option value="admin">Admin (Akses Penuh)</option>
+                                {roles.map((r) => (
+                                    <option key={r.id} value={r.name}>
+                                        {r.name.charAt(0).toUpperCase() + r.name.slice(1)}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 

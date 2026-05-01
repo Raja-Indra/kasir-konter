@@ -41,13 +41,35 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
         'settings': 'Pengaturan Toko',
         'roles': 'Hak Akses (Roles)'
     };
+    
+    // Translasi action permission
+    const translateAction = (actionName) => {
+        const actionMap = {
+            'view': 'Lihat',
+            'create': 'Tambah',
+            'edit': 'Ubah',
+            'delete': 'Hapus',
+            'manage': 'Kelola',
+            'pay': 'Bayar'
+        };
+        return actionMap[actionName] || actionName;
+    };
     // ----------------------------------
 
     const handleCheckbox = (permName) => {
         if (data.permissions.includes(permName)) {
             setData('permissions', data.permissions.filter(p => p !== permName));
         } else {
-            setData('permissions', [...data.permissions, permName]);
+            let newPerms = [...data.permissions, permName];
+            
+            // Aturan khusus: hanya boleh 1 dashboard yang terpilih
+            if (permName === 'view dashboard owner') {
+                newPerms = newPerms.filter(p => p !== 'view dashboard kasir');
+            } else if (permName === 'view dashboard kasir') {
+                newPerms = newPerms.filter(p => p !== 'view dashboard owner');
+            }
+            
+            setData('permissions', newPerms);
         }
     };
 
@@ -76,12 +98,25 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
 
     const submit = (e) => {
         e.preventDefault();
-        const action = isEdit ? put(route('roles.update', editRole.id)) : post(route('roles.store'));
+        
+        const options = {
+            onSuccess: () => {
+                setIsModalOpen(false);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sukses',
+                    text: 'Data tersimpan',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        };
 
-        action.then(() => {
-             setIsModalOpen(false);
-             Swal.fire('Sukses', 'Data tersimpan', 'success');
-        });
+        if (isEdit) {
+            put(route('roles.update', editRole.id), options);
+        } else {
+            post(route('roles.store'), options);
+        }
     };
 
     const deleteRole = (id) => {
@@ -97,34 +132,67 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
             <Head title="Manajemen Roles" />
             <div className="px-4 py-6 sm:px-6 lg:px-8">
                 <div className="p-6 bg-white shadow-sm sm:rounded-lg">
-                    <div className="flex items-center justify-between p-4 mb-6 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-800 to-blue-500">
-                        <div>
-                            <h3 className="text-lg font-bold">Roles & Hak Akses</h3>
-                            <p className="text-sm text-blue-100">Buat jabatan baru dan atur izin secara rinci.</p>
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-5 mb-6 text-white rounded-xl shadow-md bg-gradient-to-r from-blue-700 to-blue-500">
+                        <div className="mb-4 md:mb-0">
+                            <h3 className="text-xl font-bold">Manajemen Role & Akses</h3>
+                            <p className="text-sm text-blue-100 mt-1">Atur hak akses karyawan untuk setiap fitur aplikasi.</p>
                         </div>
-                        <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={() => openModal()}>+ Role Baru</PrimaryButton>
+                        <button 
+                            onClick={() => openModal()} 
+                            className="px-4 py-2 text-sm font-bold text-blue-700 transition bg-white rounded-lg shadow hover:bg-gray-50 focus:ring-4 focus:ring-blue-300"
+                        >
+                            + Tambah Role
+                        </button>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {roles.map(role => (
-                            <div key={role.id} className="relative p-4 transition bg-white border rounded-lg hover:shadow-md">
-                                <div className="flex items-start justify-between mb-2">
-                                    <h4 className="text-lg font-bold text-blue-700 uppercase">{role.name}</h4>
+                            <div key={role.id} className="flex flex-col p-5 transition bg-white border border-gray-200 rounded-xl hover:shadow-lg hover:border-blue-200">
+                                <div className="flex items-start justify-between mb-4 border-b border-gray-100 pb-3">
+                                    <div>
+                                        <h4 className="text-lg font-bold text-gray-800 capitalize">{role.name}</h4>
+                                        <p className="text-xs text-gray-500 mt-0.5">{role.permissions.length} Hak Akses</p>
+                                    </div>
                                     {role.name !== 'admin' && (
                                         <div className="flex space-x-2">
-                                            <button onClick={() => openModal(role)} className="px-2 py-1 text-xs font-bold text-gray-500 border rounded hover:text-blue-600">EDIT</button>
-                                            <button onClick={() => deleteRole(role.id)} className="px-2 py-1 text-xs font-bold text-red-400 border rounded hover:text-red-600">HAPUS</button>
+                                            <button onClick={() => openModal(role)} className="px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition">Edit</button>
+                                            <button onClick={() => deleteRole(role.id)} className="px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition">Hapus</button>
                                         </div>
                                     )}
-                                    {role.name === 'admin' && <span className="px-2 py-1 text-xs text-purple-800 bg-purple-100 rounded">Super User</span>}
+                                    {role.name === 'admin' && <span className="px-3 py-1 text-xs font-bold text-purple-700 bg-purple-100 rounded-full">Super Admin</span>}
                                 </div>
-                                <div className="pt-2 mt-2 text-xs text-gray-500 border-t">
-                                    <p className="mb-1 font-semibold">Akses ({role.permissions.length}):</p>
-                                    <div className="flex flex-wrap h-16 gap-1 overflow-hidden">
-                                        {role.permissions.map(p => (
-                                            <span key={p.id} className="px-1 bg-gray-100 rounded">{p.name}</span>
-                                        ))}
-                                    </div>
+                                <div className="flex-1">
+                                    {role.name === 'admin' ? (
+                                        <div className="p-3 text-sm text-center text-purple-700 bg-purple-50 rounded-lg border border-purple-100">
+                                            Role ini memiliki <b>semua</b> hak akses sistem tanpa batas.
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto custom-scrollbar pr-1">
+                                            {role.permissions.length > 0 ? role.permissions.map(p => {
+                                                const action = p.name.split(' ')[0];
+                                                const group = p.name.split(' ')[1] || 'other';
+                                                
+                                                // Warna badge berdasarkan action (view, create, etc)
+                                                let badgeClass = "bg-gray-100 text-gray-700 border-gray-200";
+                                                if(action === 'view') badgeClass = "bg-blue-50 text-blue-700 border-blue-200";
+                                                if(action === 'create') badgeClass = "bg-green-50 text-green-700 border-green-200";
+                                                if(action === 'edit' || action === 'manage') badgeClass = "bg-orange-50 text-orange-700 border-orange-200";
+                                                if(action === 'delete') badgeClass = "bg-red-50 text-red-700 border-red-200";
+
+                                                let labelText = `${translateAction(action)} ${groupLabels[group] || group}`;
+                                                if (p.name === 'view dashboard owner') labelText = 'Dashboard Owner';
+                                                if (p.name === 'view dashboard kasir') labelText = 'Dashboard Kasir';
+
+                                                return (
+                                                    <span key={p.id} className={`px-2 py-1 text-[10px] font-medium border rounded-md ${badgeClass}`}>
+                                                        {labelText}
+                                                    </span>
+                                                );
+                                            }) : (
+                                                <span className="text-sm text-gray-400 italic">Belum ada hak akses.</span>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -134,75 +202,94 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
 
             {/* MODAL BESAR */}
             {/* MODAL (Ukuran Diperkecil jadi 2xl) */}
-<Modal show={isModalOpen} onClose={() => setIsModalOpen(false)} maxWidth="2xl">
-    <form onSubmit={submit} className="p-6">
-        <h2 className="pb-2 mb-4 text-lg font-bold text-gray-800 border-b">
-            {isEdit ? `Edit Role: ${data.name}` : 'Buat Role Baru'}
-        </h2>
+            <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)} maxWidth="2xl">
+                <form onSubmit={submit} className="p-6">
+                    <div className="flex items-center justify-between pb-3 mb-4 border-b">
+                        <h2 className="text-xl font-bold text-gray-800">
+                            {isEdit ? `Edit Akses: ${data.name}` : 'Buat Role Baru'}
+                        </h2>
+                        <button type="button" onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                            <span className="text-2xl">&times;</span>
+                        </button>
+                    </div>
 
-        {/* Input Nama Role */}
-        <div className="mb-4">
-            <InputLabel value="Nama Jabatan / Role" className="mb-1 text-xs font-bold text-gray-500 uppercase" />
-            <TextInput
-                value={data.name}
-                onChange={e => setData('name', e.target.value)}
-                className="w-full text-sm"
-                placeholder="Contoh: Admin Gudang"
-                required
-            />
-        </div>
+                    {/* Input Nama Role */}
+                    <div className="mb-5">
+                        <InputLabel value="Nama Role" className="mb-1 text-sm font-bold text-gray-700" />
+                        <TextInput
+                            value={data.name}
+                            onChange={e => setData('name', e.target.value)}
+                            className="w-full"
+                            placeholder="Contoh: Kasir Shift Pagi"
+                            required
+                            disabled={isEdit && editRole?.name === 'admin'}
+                        />
+                    </div>
 
-        {/* List Permission (Scrollable) */}
-        <div className="mb-4">
-            <InputLabel value="Izin Akses" className="mb-2 text-xs font-bold text-gray-500 uppercase" />
-
-            {/* Container dengan Border & Scroll */}
-            <div className="border border-gray-200 rounded-lg bg-gray-50 h-[50vh] overflow-y-auto p-3 custom-scrollbar">
-                {Object.keys(groupedPermissions).map((groupKey) => (
-                    <div key={groupKey} className="mb-4 overflow-hidden bg-white border border-gray-100 rounded-md shadow-sm last:mb-0">
-
-                        {/* Header Group (Klik tombol All/None) */}
-                        <div className="flex items-center justify-between px-3 py-2 border-b border-blue-100 bg-blue-50">
-                            <h5 className="text-xs font-bold text-blue-800 uppercase">
-                                {groupLabels[groupKey] || groupKey}
-                            </h5>
-                            <div className="text-[10px] space-x-2">
-                                <button type="button" onClick={() => handleCheckGroup(groupKey, true)} className="font-bold text-blue-600 hover:text-blue-800">ALL</button>
-                                <span className="text-gray-300">|</span>
-                                <button type="button" onClick={() => handleCheckGroup(groupKey, false)} className="font-bold text-red-500 hover:text-red-700">NONE</button>
-                            </div>
+                    {/* List Permission (Scrollable) */}
+                    <div className="mb-4">
+                        <div className="flex items-center justify-between mb-2">
+                            <InputLabel value="Pengaturan Izin Fitur" className="text-sm font-bold text-gray-700" />
+                            <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                                {data.permissions.length} Terpilih
+                            </span>
                         </div>
 
-                        {/* List Checkbox */}
-                        <div className="grid grid-cols-2 gap-2 p-2">
-                            {groupedPermissions[groupKey].map(perm => (
-                                <label key={perm.id} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1.5 rounded transition select-none">
-                                    <input
-                                        type="checkbox"
-                                        checked={data.permissions.includes(perm.name)}
-                                        onChange={() => handleCheckbox(perm.name)}
-                                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                    />
-                                    <span className="text-xs font-medium text-gray-700">
-                                        {/* Hapus nama grup agar teks pendek. Contoh: "view users" -> "view" */}
-                                        {perm.name.replace(groupKey, '').trim() || perm.name}
-                                    </span>
-                                </label>
+                        {/* Container dengan Border & Scroll */}
+                        <div className="border border-gray-200 rounded-xl bg-gray-50/50 h-[45vh] overflow-y-auto p-4 custom-scrollbar space-y-4">
+                            {Object.keys(groupedPermissions).map((groupKey) => (
+                                <div key={groupKey} className="overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm">
+                                    {/* Header Group */}
+                                    <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-100">
+                                        <h5 className="text-sm font-bold text-gray-800">
+                                            {groupLabels[groupKey] || groupKey}
+                                        </h5>
+                                        <div className="flex items-center space-x-3">
+                                            {groupKey !== 'dashboard' && (
+                                                <button type="button" onClick={() => handleCheckGroup(groupKey, true)} className="text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded">PILIH SEMUA</button>
+                                            )}
+                                            <button type="button" onClick={() => handleCheckGroup(groupKey, false)} className="text-[11px] font-bold text-gray-500 hover:text-gray-700 bg-gray-200 px-2 py-1 rounded">BATALKAN</button>
+                                        </div>
+                                    </div>
+
+                                    {/* List Checkbox */}
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4">
+                                        {groupedPermissions[groupKey].map(perm => {
+                                            const action = perm.name.split(' ')[0];
+                                            const isChecked = data.permissions.includes(perm.name);
+                                            
+                                            let labelText = translateAction(action);
+                                            if (perm.name === 'view dashboard owner') labelText = 'Owner';
+                                            if (perm.name === 'view dashboard kasir') labelText = 'Kasir';
+
+                                            return (
+                                                <label key={perm.id} className={`flex items-center space-x-2 cursor-pointer p-2 rounded-md transition select-none border ${isChecked ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isChecked}
+                                                        onChange={() => handleCheckbox(perm.name)}
+                                                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                                    />
+                                                    <span className={`text-sm font-medium ${isChecked ? 'text-blue-700' : 'text-gray-700'}`}>
+                                                        {labelText}
+                                                    </span>
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     </div>
-                ))}
-            </div>
-            <p className="text-[10px] text-gray-400 mt-1 text-right">*Centang fitur yang boleh diakses jabatan ini.</p>
-        </div>
 
-        {/* Footer Tombol */}
-        <div className="sticky bottom-0 flex justify-end pt-3 bg-white border-t">
-            <SecondaryButton onClick={() => setIsModalOpen(false)} className="text-xs">Batal</SecondaryButton>
-            <PrimaryButton className="ml-2 text-xs" disabled={processing}>Simpan</PrimaryButton>
-        </div>
-    </form>
-</Modal>
+                    {/* Footer Tombol */}
+                    <div className="flex justify-end pt-4 border-t gap-2">
+                        <SecondaryButton onClick={() => setIsModalOpen(false)}>Batal</SecondaryButton>
+                        <PrimaryButton disabled={processing} className="bg-blue-600 hover:bg-blue-700">Simpan Perubahan</PrimaryButton>
+                    </div>
+                </form>
+            </Modal>
         </AuthenticatedLayout>
     );
 }
+

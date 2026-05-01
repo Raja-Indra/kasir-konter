@@ -19,10 +19,15 @@ class ProviderController extends Controller
     {
         $validated = $request->validate([
             'nama_provider' => 'required|string|max:255',
-            'saldo' => 'required|numeric',
+            'saldo' => 'nullable|numeric',
+            'is_digital' => 'boolean',
         ]);
 
-        // HAPUS baris manual UUID: $validated['uid'] = ... (Sudah otomatis di Model)
+        if (!$request->boolean('is_digital')) {
+            $validated['saldo'] = 0;
+        } else {
+            $validated['saldo'] = $validated['saldo'] ?? 0;
+        }
 
         Provider::create($validated);
 
@@ -31,11 +36,17 @@ class ProviderController extends Controller
 
     public function update(Request $request, Provider $provider)
     {
-        // Validasi normal
         $validated = $request->validate([
             'nama_provider' => 'required|string|max:255',
-            'saldo' => 'required|numeric',
+            'saldo' => 'nullable|numeric',
+            'is_digital' => 'boolean',
         ]);
+
+        if (!$request->boolean('is_digital')) {
+            $validated['saldo'] = 0;
+        } else {
+            $validated['saldo'] = $validated['saldo'] ?? 0;
+        }
 
         $provider->update($validated);
 

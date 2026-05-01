@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('providers', ProviderController::class);
     Route::post('/providers/{provider}/add-saldo', [ProviderController::class, 'addSaldo'])->name('providers.add_saldo');
     Route::resource('produk', ProdukController::class);
+    Route::post('/produk/{produk}/add-stock', [ProdukController::class, 'addStock'])->name('produk.add_stock');
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
     Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store');
     Route::get('/riwayat-transaksi', [TransaksiController::class, 'history'])->name('riwayat.index');
@@ -62,6 +63,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings/wa', [SettingController::class, 'wa'])->name('settings.wa');
     Route::post('/settings/wa', [SettingController::class, 'updateWa'])->name('settings.wa.update');
     Route::post('/settings/wa/test', [SettingController::class, 'testWa'])->name('settings.wa.test');
+    Route::post('/settings/wa/alert', [SettingController::class, 'updateAlertSetting'])->name('settings.wa.alert');
+    Route::post('/settings/wa/alert/manual', [SettingController::class, 'sendManualAlert'])->name('settings.wa.alert.manual');
     Route::resource('roles', RoleController::class)->except(['create', 'edit', 'show']);
 });
 

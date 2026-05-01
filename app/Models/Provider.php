@@ -14,6 +14,11 @@ class Provider extends Model
     protected $fillable = [
         'nama_provider',
         'saldo',
+        'is_digital',
+    ];
+
+    protected $casts = [
+        'is_digital' => 'boolean',
     ];
 
     // Opsional: Beritahu Laravel kalau tipe ID kita adalah string

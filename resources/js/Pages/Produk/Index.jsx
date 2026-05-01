@@ -21,6 +21,19 @@ export default function ProdukIndex({ auth, products, providers }) {
     const [isEditMode, setIsEditMode] = useState(false);
     const [productToEdit, setProductToEdit] = useState(null);
 
+    // State Tambah Stok
+    const [isAddStockModalOpen, setIsAddStockModalOpen] = useState(false);
+    const [productToAddStock, setProductToAddStock] = useState(null);
+    const {
+        data: stockData,
+        setData: setStockData,
+        post: postStock,
+        processing: stockProcessing,
+        errors: stockErrors,
+        reset: resetStock,
+        clearErrors: clearStockErrors
+    } = useForm({ tambah_stok: '' });
+
     // Filter Data Berdasarkan Tab dan Pencarian
     const filteredProducts = products.filter(product => {
         const matchTab = activeTab === 'digital' ? product.is_digital : !product.is_digital;
@@ -89,6 +102,44 @@ export default function ProdukIndex({ auth, products, providers }) {
     const closeModal = () => {
         setIsModalOpen(false);
         reset();
+    };
+
+    const openAddStockModal = (product) => {
+        setProductToAddStock(product);
+        resetStock();
+        clearStockErrors();
+        setIsAddStockModalOpen(true);
+    };
+
+    const closeAddStockModal = () => {
+        setIsAddStockModalOpen(false);
+        resetStock();
+    };
+
+    const handleAddStockSubmit = (e) => {
+        e.preventDefault();
+        MySwal.fire({
+            title: 'Tambah Stok?',
+            text: `Tambahkan stok untuk ${productToAddStock.nama_produk}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Tambah',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                postStock(route('produk.add_stock', productToAddStock.id), {
+                    onSuccess: () => {
+                        closeAddStockModal();
+                        const Toast = Swal.mixin({
+                            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true
+                        });
+                        Toast.fire({ icon: 'success', title: 'Stok berhasil ditambahkan' });
+                    },
+                });
+            }
+        });
     };
 
     const handleSubmit = (e) => {
@@ -271,6 +322,9 @@ export default function ProdukIndex({ auth, products, providers }) {
                                                 </td>
 
                                                 <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                                                    {!item.is_digital && (
+                                                        <button onClick={() => openAddStockModal(item)} className="mr-4 text-green-600 transition hover:text-green-900">Tambah Stok</button>
+                                                    )}
                                                     <button onClick={() => openEditModal(item)} className="mr-4 text-blue-600 transition hover:text-blue-900">Edit</button>
                                                     <button onClick={() => handleDelete(item.id)} className="text-red-600 transition hover:text-red-900">Hapus</button>
                                                 </td>
@@ -505,6 +559,36 @@ export default function ProdukIndex({ auth, products, providers }) {
                     <div className="flex justify-end mt-6">
                         <SecondaryButton onClick={closeModal}>Batal</SecondaryButton>
                         <PrimaryButton className="ms-3" disabled={processing}>{isEditMode ? 'Simpan Perubahan' : 'Simpan'}</PrimaryButton>
+                    </div>
+                </form>
+            </Modal>
+
+            {/* MODAL TAMBAH STOK */}
+            <Modal show={isAddStockModalOpen} onClose={closeAddStockModal}>
+                <form onSubmit={handleAddStockSubmit} className="p-6">
+                    <h2 className="mb-4 text-lg font-medium text-gray-900">
+                        Tambah Stok untuk {productToAddStock?.nama_produk}
+                    </h2>
+
+                    <div className="mb-4">
+                        <InputLabel htmlFor="tambah_stok" value="Jumlah Tambahan Stok" />
+                        <TextInput
+                            id="tambah_stok"
+                            type="number"
+                            className="block w-full mt-1"
+                            value={stockData.tambah_stok}
+                            onChange={(e) => setStockData('tambah_stok', e.target.value)}
+                            isFocused
+                            placeholder="Contoh: 10"
+                        />
+                        <InputError message={stockErrors.tambah_stok} className="mt-2" />
+                    </div>
+
+                    <div className="flex justify-end mt-6">
+                        <SecondaryButton onClick={closeAddStockModal}>Batal</SecondaryButton>
+                        <PrimaryButton className="ms-3" disabled={stockProcessing}>
+                            Tambah Stok
+                        </PrimaryButton>
                     </div>
                 </form>
             </Modal>

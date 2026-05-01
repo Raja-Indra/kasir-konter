@@ -29,7 +29,7 @@ export default function Navbar({ user }) {
     };
 
     return (
-        <nav className="relative z-50 bg-gradient-to-r from-blue-800 to-blue-500 shadow-md">
+        <nav className="sticky top-0 z-50 w-full bg-gradient-to-r from-blue-800 to-blue-500 shadow-md">
             <div className="max-w-full px-4 mx-auto sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
 

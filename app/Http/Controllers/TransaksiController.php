@@ -30,6 +30,8 @@ class TransaksiController extends Controller
             'cart' => 'required|array|min:1',
             'bayar' => 'required|numeric',
             'total_harga' => 'required|numeric',
+            'metode_pembayaran' => 'nullable|string',
+            'nama_pelanggan' => 'nullable|string|required_if:metode_pembayaran,hutang',
         ]);
 
         try {
@@ -37,8 +39,9 @@ class TransaksiController extends Controller
                 $no_nota = 'TRX-' . date('Ymd-His');
                 $kembalian = $request->bayar - $request->total_harga;
                 $total_laba_nota = 0;
+                $isHutang = $request->metode_pembayaran === 'hutang';
 
-                if ($kembalian < 0) throw new \Exception('Uang pembayaran kurang!');
+                if (!$isHutang && $kembalian < 0) throw new \Exception('Uang pembayaran kurang!');
 
                 // 1. Simpan Header Transaksi
                 $transaksi = Transaksi::create([
@@ -50,6 +53,26 @@ class TransaksiController extends Controller
                     'umur_pelanggan' => $request->umur_pelanggan,
                     'total_laba' => 0,
                 ]);
+
+                // Jika Hutang, catat ke tabel hutangs
+                if ($isHutang) {
+                    $sisaHutang = $request->total_harga - $request->bayar;
+                    if ($sisaHutang > 0) {
+                        // Ambil daftar nama produk dari keranjang
+                        $namaProdukList = collect($request->cart)->pluck('nama_produk')->implode(', ');
+                        $keteranganHutang = 'Hutang: ' . (strlen($namaProdukList) > 200 ? substr($namaProdukList, 0, 200) . '...' : $namaProdukList);
+
+                        \App\Models\Hutang::create([
+                            'transaksi_id' => $transaksi->id,
+                            'nama_pelanggan' => $request->nama_pelanggan,
+                            'keterangan' => $keteranganHutang,
+                            'total_hutang' => $request->total_harga,
+                            'terbayar' => $request->bayar,
+                            'sisa' => $sisaHutang,
+                            'status' => 'belum_lunas',
+                        ]);
+                    }
+                }
 
                 // 2. Looping Barang
                 foreach ($request->cart as $item) {
@@ -134,7 +157,7 @@ class TransaksiController extends Controller
         // 'details.produk' = Eager Loading (biar hemat query database)
         $transaksi = Transaksi::with(['user', 'details.produk'])
             ->latest() // Urutkan created_at desc
-            ->paginate(10); // Tampilkan 10 per halaman
+            ->paginate(50); // Tampilkan 10 per halaman
 
         return Inertia::render('Riwayat/Index', [
             'transaksi' => $transaksi

@@ -41,6 +41,7 @@ export default function ProviderIndex({ auth, providers }) {
     const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
         nama_provider: '',
         saldo: 0,
+        is_digital: true,
     });
 
     const openCreateModal = () => {
@@ -57,6 +58,7 @@ export default function ProviderIndex({ auth, providers }) {
         setData({
             nama_provider: provider.nama_provider,
             saldo: provider.saldo,
+            is_digital: provider.is_digital ?? true,
         });
         clearErrors();
         setIsModalOpen(true);
@@ -240,14 +242,20 @@ export default function ProviderIndex({ auth, providers }) {
                                                 </td>
 
                                                 <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{item.nama_provider}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">Rp {parseFloat(item.saldo).toLocaleString('id-ID')}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    {item.is_digital === false 
+                                                        ? <span className="px-2 py-1 text-xs text-yellow-800 bg-yellow-100 rounded-full">Gudang Fisik</span> 
+                                                        : `Rp ${parseFloat(item.saldo).toLocaleString('id-ID')}`}
+                                                </td>
                                                 <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                                    <button
-                                                        onClick={() => openAddSaldoModal(item)}
-                                                        className="mr-4 text-green-600 transition hover:text-green-900"
-                                                    >
-                                                        Tambah Saldo
-                                                    </button>
+                                                    {item.is_digital !== false && (
+                                                        <button
+                                                            onClick={() => openAddSaldoModal(item)}
+                                                            className="mr-4 text-green-600 transition hover:text-green-900"
+                                                        >
+                                                            Tambah Saldo
+                                                        </button>
+                                                    )}
                                                     <button
                                                         onClick={() => openEditModal(item)}
                                                         className="mr-4 text-blue-600 transition hover:text-blue-900"
@@ -296,16 +304,32 @@ export default function ProviderIndex({ auth, providers }) {
                     </div>
 
                     <div className="mb-4">
-                        <InputLabel htmlFor="saldo" value="Saldo Awal" />
-                        <TextInput
-                            id="saldo"
-                            type="number"
-                            className="block w-full mt-1"
-                            value={data.saldo}
-                            onChange={(e) => setData('saldo', e.target.value)}
-                        />
-                        <InputError message={errors.saldo} className="mt-2" />
+                        <InputLabel htmlFor="is_digital" value="Jenis Provider" />
+                        <select
+                            id="is_digital"
+                            className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            value={data.is_digital ? 'true' : 'false'}
+                            onChange={(e) => setData('is_digital', e.target.value === 'true')}
+                        >
+                            <option value="true">Provider Digital (Pulsa, Token, dll)</option>
+                            <option value="false">Gudang Fisik (Aksesoris, Perdana, dll)</option>
+                        </select>
+                        <InputError message={errors.is_digital} className="mt-2" />
                     </div>
+
+                    {data.is_digital && (
+                        <div className="mb-4">
+                            <InputLabel htmlFor="saldo" value="Saldo Awal" />
+                            <TextInput
+                                id="saldo"
+                                type="number"
+                                className="block w-full mt-1"
+                                value={data.saldo}
+                                onChange={(e) => setData('saldo', e.target.value)}
+                            />
+                            <InputError message={errors.saldo} className="mt-2" />
+                        </div>
+                    )}
 
                     <div className="flex justify-end mt-6">
                         <SecondaryButton onClick={closeModal}>Batal</SecondaryButton>

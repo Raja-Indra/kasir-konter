@@ -71,6 +71,17 @@ class ProdukController extends Controller
         $produk->update($validated);
         return redirect()->back();
     }
+
+    public function addStock(Request $request, Produk $produk)
+    {
+        $validated = $request->validate([
+            'tambah_stok' => 'required|integer|min:1',
+        ]);
+
+        $produk->increment('stok', $validated['tambah_stok']);
+
+        return redirect()->back()->with('success', 'Stok berhasil ditambahkan.');
+    }
     
     public function togglePin(Produk $produk)
     {

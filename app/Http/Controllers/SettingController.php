@@ -94,4 +94,39 @@ class SettingController extends Controller
             return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
         }
     }
+
+    public function updateAlertSetting(Request $request)
+    {
+        $data = $request->validate([
+            'alert_stok_aktif' => 'nullable|boolean',
+            'alert_stok_mode' => 'nullable|string|in:manual,otomatis',
+            'alert_stok_jam' => 'nullable|string',
+            'alert_stok_no_hp' => 'nullable|string',
+        ]);
+
+        $keys = ['alert_stok_aktif', 'alert_stok_mode', 'alert_stok_jam', 'alert_stok_no_hp'];
+        foreach ($keys as $key) {
+            if (array_key_exists($key, $data)) {
+                $val = is_bool($data[$key]) ? ($data[$key] ? '1' : '0') : $data[$key];
+                Setting::updateOrCreate(['key' => $key], ['value' => $val]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Pengaturan Alert Stok berhasil disimpan!');
+    }
+
+    public function sendManualAlert()
+    {
+        // Panggil command artisan
+        \Illuminate\Support\Facades\Artisan::call('app:send-stock-alert');
+        $exitCode = \Illuminate\Support\Facades\Artisan::output();
+        
+        if (str_contains($exitCode, 'Tidak ada stok produk yang menipis')) {
+            return redirect()->back()->with('success', 'Pengecekan selesai: Tidak ada stok yang menipis (<= 5).');
+        } elseif (str_contains($exitCode, 'Pesan notifikasi berhasil dikirim.')) {
+            return redirect()->back()->with('success', 'Alert Stok manual berhasil dikirim ke WhatsApp!');
+        } else {
+            return redirect()->back()->withErrors(['error' => 'Gagal mengirim Alert: ' . $exitCode]);
+        }
+    }
 }
