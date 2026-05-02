@@ -45,8 +45,11 @@ export default function ProdukIndex({ auth, products, providers }) {
     const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
         provider_id: '',
         nama_produk: '',
+        harga_admin_provider: '',
         harga_modal: '',
         harga_jual: '',
+        min_nominal: '',
+        max_nominal: '',
         stok: 0,
         jenis: '',
         is_digital: true,
@@ -87,8 +90,11 @@ export default function ProdukIndex({ auth, products, providers }) {
         setData({
             provider_id: item.provider_id,
             nama_produk: item.nama_produk,
+            harga_admin_provider: item.harga_admin_provider || '',
             harga_modal: item.harga_modal,
             harga_jual: item.harga_jual,
+            min_nominal: item.min_nominal || '',
+            max_nominal: item.max_nominal || '',
             stok: item.stok,
             jenis: item.jenis,
             is_digital: item.is_digital ? true : false,
@@ -304,7 +310,9 @@ export default function ProdukIndex({ auth, products, providers }) {
                                                         </span>
                                                     )} */}
                                                 </td>
-                                                <td className="px-6 py-4 text-sm text-gray-500">Rp {parseFloat(item.harga_modal).toLocaleString('id-ID')}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-500">
+                                                    Rp {parseFloat(parseFloat(item.harga_modal) + (parseFloat(item.harga_admin_provider) || 0)).toLocaleString('id-ID')}
+                                                </td>
                                                 <td className="px-6 py-4 text-sm font-bold text-green-600">Rp {parseFloat(item.harga_jual).toLocaleString('id-ID')}</td>
 
                                                 <td className="px-6 py-4 text-sm text-center">
@@ -396,25 +404,38 @@ export default function ProdukIndex({ auth, products, providers }) {
                         </div>
 
                         {/* Stok (Hanya muncul jika TIDAK Digital) */}
-                        <div>
-                            {!data.is_digital ? (
-                                <>
-                                    <InputLabel htmlFor="stok" value="Stok Fisik" />
-                                    <TextInput
-                                        id="stok"
-                                        type="number"
-                                        className="block w-full mt-1"
-                                        value={data.stok}
-                                        onChange={(e) => setData('stok', e.target.value)}
-                                    />
-                                    <InputError message={errors.stok} className="mt-2" />
-                                </>
-                            ) : (
-                                <div className="p-2 border border-dashed border-gray-300 rounded bg-gray-50 mt-1 h-[42px] flex items-center">
-                                    <span className="text-xs text-gray-500">Stok: Unlimited (Digital)</span>
-                                </div>
-                            )}
-                        </div>
+                        {!data.is_digital && (
+                            <div>
+                                <InputLabel htmlFor="stok" value="Stok Fisik" />
+                                <TextInput
+                                    id="stok"
+                                    type="number"
+                                    className="block w-full mt-1"
+                                    value={data.stok}
+                                    onChange={(e) => setData('stok', e.target.value)}
+                                />
+                                <InputError message={errors.stok} className="mt-2" />
+                            </div>
+                        )}
+
+                        {/* Harga Admin Provider */}
+                        {data.is_digital && (
+                            <div>
+                                <InputLabel
+                                    htmlFor="harga_admin_provider"
+                                    value="Harga Admin Provider (Opsional)"
+                                />
+                                <TextInput
+                                    id="harga_admin_provider"
+                                    type="number"
+                                    className="block w-full mt-1"
+                                    value={data.harga_admin_provider ?? ''}
+                                    onChange={(e) => setData('harga_admin_provider', e.target.value)}
+                                    placeholder="Contoh: 150"
+                                />
+                                <InputError message={errors.harga_admin_provider} className="mt-2" />
+                            </div>
+                        )}
 
                         {/* Harga Modal */}
                         <div>

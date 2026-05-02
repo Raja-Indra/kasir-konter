@@ -87,7 +87,7 @@ class TransaksiController extends Controller
                         $harga_modal_final = $item['harga_modal']; // Dari inputan React
                         $harga_jual_final = $item['harga_jual'];   // Dari inputan React
                     } else {
-                        $harga_modal_final = $produkDb->harga_modal;
+                        $harga_modal_final = $produkDb->harga_modal + ($produkDb->harga_admin_provider ?? 0);
                         $harga_jual_final = $produkDb->harga_jual;
                     }
 
@@ -151,16 +151,33 @@ class TransaksiController extends Controller
         }
     }
 
-    public function history()
+    public function history(Request $request)
     {
-        // Ambil data transaksi, urutkan dari yang terbaru
-        // 'details.produk' = Eager Loading (biar hemat query database)
-        $transaksi = Transaksi::with(['user', 'details.produk'])
-            ->latest() // Urutkan created_at desc
-            ->paginate(50); // Tampilkan 10 per halaman
+        $query = Transaksi::with(['user', 'details.produk'])
+            ->latest(); // Urutkan created_at desc
+
+        if ($request->filled('provider_id')) {
+            $query->whereHas('details.produk', function($q) use ($request) {
+                $q->where('provider_id', $request->provider_id);
+            });
+        }
+
+        if ($request->filled('jenis')) {
+            $query->whereHas('details.produk', function($q) use ($request) {
+                $q->where('jenis', $request->jenis);
+            });
+        }
+
+        $transaksi = $query->paginate(50)->withQueryString();
+
+        $providers = Provider::all();
+        $jenis_produk = Produk::select('jenis')->distinct()->whereNotNull('jenis')->pluck('jenis');
 
         return Inertia::render('Riwayat/Index', [
-            'transaksi' => $transaksi
+            'transaksi' => $transaksi,
+            'providers' => $providers,
+            'jenis_produk' => $jenis_produk,
+            'filters' => $request->only(['provider_id', 'jenis'])
         ]);
     }
 

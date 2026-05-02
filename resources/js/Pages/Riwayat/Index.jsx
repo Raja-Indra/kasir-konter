@@ -8,9 +8,25 @@ import withReactContent from 'sweetalert2-react-content';
 
 const MySwal = withReactContent(Swal);
 
-export default function RiwayatIndex({ auth, transaksi }) {
+export default function RiwayatIndex({ auth, transaksi, providers, jenis_produk, filters }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTrx, setSelectedTrx] = useState(null);
+
+    const [filterProvider, setFilterProvider] = useState(filters?.provider_id || '');
+    const [filterJenis, setFilterJenis] = useState(filters?.jenis || '');
+
+    const handleFilter = () => {
+        router.get(route('riwayat.index'), {
+            provider_id: filterProvider,
+            jenis: filterJenis
+        }, { preserveState: true });
+    };
+
+    const handleResetFilter = () => {
+        setFilterProvider('');
+        setFilterJenis('');
+        router.get(route('riwayat.index'), {}, { preserveState: true });
+    };
 
     // --- HELPER: Format Rupiah ---
     const formatRupiah = (number) => {
@@ -79,6 +95,50 @@ export default function RiwayatIndex({ auth, transaksi }) {
 
                         <div className="flex items-center justify-between p-4 mb-6 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-800 to-blue-500">
                             <h3 className="text-lg font-bold">Riwayat Transaksi</h3>
+                        </div>
+
+                        {/* FILTER TRANSAKSI */}
+                        <div className="flex flex-col md:flex-row gap-4 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <div className="flex-1">
+                                <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">Filter Provider</label>
+                                <select
+                                    className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    value={filterProvider}
+                                    onChange={(e) => setFilterProvider(e.target.value)}
+                                >
+                                    <option value="">-- Semua Provider --</option>
+                                    {providers && providers.map(p => (
+                                        <option key={p.id} value={p.id}>{p.nama_provider}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex-1">
+                                <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">Filter Jenis Produk</label>
+                                <select
+                                    className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    value={filterJenis}
+                                    onChange={(e) => setFilterJenis(e.target.value)}
+                                >
+                                    <option value="">-- Semua Jenis --</option>
+                                    {jenis_produk && jenis_produk.map((j, i) => (
+                                        <option key={i} value={j}>{j}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex items-end space-x-2">
+                                <button
+                                    onClick={handleFilter}
+                                    className="px-4 py-2 text-sm font-bold bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 transition"
+                                >
+                                    Terapkan Filter
+                                </button>
+                                <button
+                                    onClick={handleResetFilter}
+                                    className="px-4 py-2 text-sm font-bold bg-gray-200 text-gray-700 rounded-md shadow-sm hover:bg-gray-300 transition"
+                                >
+                                    Reset
+                                </button>
+                            </div>
                         </div>
 
                         {/* TABEL TRANSAKSI UTAMA */}

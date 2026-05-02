@@ -64,7 +64,7 @@ export default function WhatsappSetting({ auth }) {
     const handleManualAlert = () => {
         Swal.fire({
             title: 'Kirim Alert Sekarang?',
-            text: "Sistem akan mengecek stok (<= 5) dan mengirimkan pesannya ke WhatsApp admin.",
+            text: "Sistem akan mengecek stok yang dibawah 3 dan mengirimkan pesannya ke WhatsApp Owner.",
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Ya, Kirim',

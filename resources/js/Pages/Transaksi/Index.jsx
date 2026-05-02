@@ -51,8 +51,8 @@ export default function TransaksiIndex({ auth, products }) {
             return;
         }
 
-        let finalModal = product.harga_modal;
-        let finalJual = product.harga_jual;
+        let finalModal = parseFloat(product.harga_modal) + (parseFloat(product.harga_admin_provider) || 0);
+        let finalJual = parseFloat(product.harga_jual);
 
         // --- LOGIKA HARGA FLEKSIBEL (POPUP UPDATE) ---
         if (product.is_flexible_price) {
@@ -102,10 +102,10 @@ export default function TransaksiIndex({ auth, products }) {
             }
 
             // RUMUS UTAMA:
-            // Harga Modal = Nominal yang diinput (Saldo provider terpotong segini)
-            // Harga Jual  = Nominal + Biaya Admin
-            finalModal = nominal;
-            finalJual  = nominal + biayaAdmin;
+            // Harga Modal = Nominal yang diinput (Saldo provider terpotong segini) + Harga Admin Provider
+            // Harga Jual  = Nominal + Biaya Admin + Harga Admin Provider
+            finalModal = nominal + (parseFloat(product.harga_admin_provider) || 0);
+            finalJual  = nominal + biayaAdmin + (parseFloat(product.harga_admin_provider) || 0);
 
             // Konfirmasi Akhir ke Kasir (Opsional, biar gak salah input)
             const confirm = await MySwal.fire({
@@ -113,7 +113,8 @@ export default function TransaksiIndex({ auth, products }) {
                 html: `
                     <div class="text-left text-sm">
                         <p>Nominal: <b>${formatRupiah(nominal)}</b></p>
-                        <p>Admin: <b>${formatRupiah(biayaAdmin)}</b></p>
+                        <p>Admin Provider: <b>${formatRupiah(parseFloat(product.harga_admin_provider) || 0)}</b></p>
+                        <p>Biaya Admin (Margin): <b>${formatRupiah(biayaAdmin)}</b></p>
                         <hr class="my-2"/>
                         <p class="text-lg">Total Tagihan: <b class="text-blue-600">${formatRupiah(finalJual)}</b></p>
                     </div>
@@ -185,15 +186,16 @@ export default function TransaksiIndex({ auth, products }) {
 
     // --- HITUNGAN TOTAL ---
     const totalHarga = cart.reduce((acc, item) => acc + (item.harga_jual * item.qty), 0);
-    const kembalian = (parseFloat(bayar) || 0) - totalHarga;
+    const hasTarikTunai = cart.some(item => item.is_tarik_tunai);
+    const kembalian = hasTarikTunai ? 0 : ((parseFloat(bayar) || 0) - totalHarga);
 
     // --- LOGIC 5: Submit Transaksi ---
     const handleCheckout = () => {
         if (cart.length === 0) return MySwal.fire('Keranjang Kosong', 'Pilih produk dulu', 'warning');
         
-        const bayarNominal = parseFloat(bayar) || 0;
+        const bayarNominal = hasTarikTunai ? totalHarga : (parseFloat(bayar) || 0);
 
-        if (metodePembayaran === 'tunai' && bayarNominal < totalHarga) {
+        if (!hasTarikTunai && metodePembayaran === 'tunai' && bayarNominal < totalHarga) {
             return MySwal.fire('Uang Kurang', 'Nominal pembayaran kurang dari total belanja', 'error');
         }
 
@@ -455,10 +457,11 @@ export default function TransaksiIndex({ auth, products }) {
                                 </label>
                                 <TextInput
                                     type="number"
-                                    className="w-full h-10 font-mono text-lg font-bold text-right"
+                                    className={`w-full h-10 font-mono text-lg font-bold text-right ${hasTarikTunai ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
                                     placeholder="0"
-                                    value={bayar}
+                                    value={hasTarikTunai ? totalHarga : bayar}
                                     onChange={(e) => setBayar(e.target.value)}
+                                    disabled={hasTarikTunai}
                                 />
                             </div>
                             <div className="col-span-4">

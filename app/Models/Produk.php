@@ -23,6 +23,7 @@ class Produk extends Model
     protected $fillable = [
         'provider_id',
         'nama_produk',
+        'harga_admin_provider',
         'harga_modal',
         'harga_jual',
         'stok',
@@ -40,6 +41,7 @@ class Produk extends Model
         'is_tarik_tunai' => 'boolean',
         'is_flexible_price' => 'boolean',
         'is_pinned' => 'boolean',
+        'harga_admin_provider' => 'decimal:2',
         'harga_modal' => 'decimal:2',
         'harga_jual' => 'decimal:2',
         'min_nominal' => 'decimal:2',

@@ -50,6 +50,7 @@ class ProdukController extends Controller
         $validated = $request->validate([
             'provider_id' => 'required|exists:providers,id',
             'nama_produk' => 'required|string|max:255',
+            'harga_admin_provider' => 'nullable|numeric',
 
             // UBAH DI SINI JUGA
             'harga_modal' => 'nullable|numeric',
