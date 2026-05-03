@@ -149,11 +149,11 @@ export default function WhatsappSetting({ auth }) {
                             </form>
                         </div>
 
-                        {/* PENGATURAN ALERT STOK */}
+                        {/* PENGATURAN ALERT STOK & SALDO */}
                         <div className="bg-white p-6 shadow-sm sm:rounded-lg md:col-span-2 border border-orange-200">
                             <div className="flex items-center justify-between border-b pb-2 mb-6">
                                 <h2 className="text-lg font-bold text-gray-900 flex items-center">
-                                    <span className="mr-2">⚠️</span> Notifikasi Stok Menipis (WhatsApp)
+                                    <span className="mr-2">⚠️</span> Notifikasi Stok & Saldo Menipis (WhatsApp)
                                 </h2>
                                 <div className="flex items-center space-x-2">
                                     <span className={`text-xs font-bold px-2 py-1 rounded-full ${alertForm.data.alert_stok_aktif ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
@@ -172,7 +172,7 @@ export default function WhatsappSetting({ auth }) {
                                                 checked={alertForm.data.alert_stok_aktif}
                                                 onChange={(e) => alertForm.setData('alert_stok_aktif', e.target.checked)}
                                             />
-                                            <span className="ml-2 font-medium text-gray-700">Aktifkan Notifikasi Stok Menipis</span>
+                                            <span className="ml-2 font-medium text-gray-700">Aktifkan Notifikasi Stok & Saldo Menipis</span>
                                         </label>
 
                                         <InputLabel value="Nomor HP Tujuan (Admin)" />
@@ -184,7 +184,7 @@ export default function WhatsappSetting({ auth }) {
                                             onChange={(e) => alertForm.setData('alert_stok_no_hp', e.target.value)}
                                         />
                                         <p className="text-xs text-gray-500">
-                                            Nomor WhatsApp yang akan menerima alert saat stok barang habis (sisa ≤ 5).
+                                            Nomor WhatsApp yang akan menerima alert saat stok barang habis (sisa ≤ 5) atau saldo provider menipis (≤ Rp 50.000).
                                         </p>
                                     </div>
                                     
@@ -209,7 +209,7 @@ export default function WhatsappSetting({ auth }) {
                                                     onChange={(e) => alertForm.setData('alert_stok_jam', e.target.value)}
                                                 />
                                                 <p className="text-xs text-gray-500 mt-2 text-justify">
-                                                    Sistem akan mengecek stok setiap jam ini, dan jika ada barang yang menipis, pesan akan otomatis terkirim.
+                                                    Sistem akan mengecek stok dan saldo setiap jam ini, dan jika ada barang atau saldo yang menipis, pesan akan otomatis terkirim.
                                                 </p>
                                             </div>
                                         )}

@@ -121,10 +121,10 @@ class SettingController extends Controller
         \Illuminate\Support\Facades\Artisan::call('app:send-stock-alert');
         $exitCode = \Illuminate\Support\Facades\Artisan::output();
         
-        if (str_contains($exitCode, 'Tidak ada stok produk yang menipis')) {
-            return redirect()->back()->with('success', 'Pengecekan selesai: Tidak ada stok yang menipis (<= 5).');
+        if (str_contains($exitCode, 'Tidak ada stok produk atau saldo provider yang menipis')) {
+            return redirect()->back()->with('success', 'Pengecekan selesai: Tidak ada stok (<= 5) atau saldo provider (<= Rp 50.000) yang menipis.');
         } elseif (str_contains($exitCode, 'Pesan notifikasi berhasil dikirim.')) {
-            return redirect()->back()->with('success', 'Alert Stok manual berhasil dikirim ke WhatsApp!');
+            return redirect()->back()->with('success', 'Alert Stok & Saldo manual berhasil dikirim ke WhatsApp!');
         } else {
             return redirect()->back()->withErrors(['error' => 'Gagal mengirim Alert: ' . $exitCode]);
         }
