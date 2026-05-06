@@ -147,7 +147,7 @@ export default function TransaksiIndex({ auth, products }) {
 
             // Logika merge produk biasa
             if (!product.is_digital && existingItem.qty >= product.stok) {
-                MySwal.fire({ icon: 'warning', title: 'Stok Terbatas', timer: 1500, showConfirmButton: false });
+                MySwal.fire({ icon: 'warning', title: 'Stok Habis', timer: 1500, showConfirmButton: false });
                 return;
             }
 
@@ -172,7 +172,7 @@ export default function TransaksiIndex({ auth, products }) {
 
         // Cek stok fisik
         if (!productAsli.is_digital && newQty > productAsli.stok) {
-            MySwal.fire({ icon: 'warning', title: 'Stok Terbatas', timer: 1000, showConfirmButton: false });
+            MySwal.fire({ icon: 'warning', title: 'Stok Habis', timer: 1000, showConfirmButton: false });
             return;
         }
 
@@ -336,21 +336,29 @@ export default function TransaksiIndex({ auth, products }) {
 
                                     <div className="mt-6 mb-2"> {/* Margin top diperbesar dikit biar ga nabrak pin */}
                                         <h3 className="text-sm font-bold leading-tight text-gray-800 line-clamp-2">{product.nama_produk}</h3>
-                                        {product.is_flexible_price && (product.min_nominal || product.max_nominal) && (
-                                            <div className="mt-1 text-[10px] font-medium text-blue-600 bg-blue-50 inline-block px-1.5 py-0.5 rounded border border-blue-100">
-                                                Range: {product.min_nominal ? `Rp ${parseFloat(product.min_nominal).toLocaleString('id-ID')}` : '0'} - {product.max_nominal ? `Rp ${parseFloat(product.max_nominal).toLocaleString('id-ID')}` : '∞'}
-                                            </div>
-                                        )}
                                         {product.jenis && (
                                             <p className="mt-1 text-[10px] text-gray-500 uppercase">{product.jenis}</p>
+                                        )}
+                                        {product.is_flexible_price && (
+                                            <div className="mt-1 text-[10px] font-medium text-orange-600 bg-orange-50 inline-block px-1.5 py-0.5 rounded border border-orange-100">
+                                                Admin: {formatRupiah(product.harga_jual)}
+                                            </div>
                                         )}
                                     </div>
 
                                     {/* ... Sisa kode harga dan stok (biarkan sama) ... */}
                                     <div className="flex items-end justify-between pt-2 mt-auto border-t">
                                         <div>
-                                            <p className="text-[10px] text-gray-500">Harga</p>
-                                            <p className="text-sm font-bold text-blue-600">{formatRupiah(product.harga_jual)}</p>
+                                            <p className="text-[10px] text-gray-500">
+                                                {product.is_flexible_price ? 'Range Nominal' : 'Harga'}
+                                            </p>
+                                            {product.is_flexible_price && (product.min_nominal || product.max_nominal) ? (
+                                                <p className="text-xs font-bold text-blue-600">
+                                                    {product.min_nominal ? `Rp${parseFloat(product.min_nominal).toLocaleString('id-ID')}` : '0'} - {product.max_nominal ? `Rp${parseFloat(product.max_nominal).toLocaleString('id-ID')}` : '∞'}
+                                                </p>
+                                            ) : (
+                                                <p className="text-sm font-bold text-blue-600">{formatRupiah(product.harga_jual)}</p>
+                                            )}
                                         </div>
                                         {!product.is_digital && (
                                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${product.stok <= 5 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>

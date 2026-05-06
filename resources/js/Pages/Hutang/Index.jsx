@@ -109,7 +109,6 @@ export default function HutangIndex({ auth, hutangs }) {
 
                         <div className="flex items-center justify-between p-4 mb-6 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-800 to-blue-500">
                             <h3 className="text-lg font-bold">Buku Kasbon / Piutang</h3>
-                            <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={() => setIsCreateModalOpen(true)}>+ Catat Kasbon Baru</PrimaryButton>
                         </div>
 
                         <div className="overflow-x-auto">

@@ -153,7 +153,7 @@ class TransaksiController extends Controller
 
     public function history(Request $request)
     {
-        $query = Transaksi::with(['user', 'details.produk'])
+        $query = Transaksi::with(['user', 'details.produk', 'hutang'])
             ->latest(); // Urutkan created_at desc
 
         if ($request->filled('provider_id')) {

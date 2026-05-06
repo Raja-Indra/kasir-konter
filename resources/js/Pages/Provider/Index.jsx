@@ -149,6 +149,15 @@ export default function ProviderIndex({ auth, providers }) {
                             title: 'Data berhasil disimpan'
                         });
                     },
+                    onError: (errors) => {
+                        if (errors.nama_provider) {
+                            MySwal.fire({
+                                icon: 'error',
+                                title: 'Gagal Menyimpan',
+                                text: errors.nama_provider,
+                            });
+                        }
+                    },
                 };
 
                 if (isEditMode) {

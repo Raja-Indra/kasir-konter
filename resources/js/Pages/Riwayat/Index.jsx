@@ -151,6 +151,7 @@ export default function RiwayatIndex({ auth, transaksi, providers, jenis_produk,
                                         <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Kasir</th>
                                         <th className="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">Total Belanja</th>
                                         <th className="px-6 py-3 text-xs font-medium tracking-wider text-right text-green-600 uppercase">Laba</th>
+                                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">Status</th>
                                         <th className="px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">Aksi</th>
                                     </tr>
                                 </thead>
@@ -168,6 +169,13 @@ export default function RiwayatIndex({ auth, transaksi, providers, jenis_produk,
                                                 </td>
                                                 <td className="px-6 py-4 text-sm font-medium text-right text-green-600">
                                                     +{formatRupiah(item.total_laba)}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-center">
+                                                    {item.hutang ? (
+                                                        <span className="px-2 py-1 text-xs font-bold text-red-700 bg-red-100 rounded-full">Hutang</span>
+                                                    ) : (
+                                                        <span className="px-2 py-1 text-xs font-bold text-green-700 bg-green-100 rounded-full">Lunas</span>
+                                                    )}
                                                 </td>
                                                 <td className="px-6 py-4 space-x-3 text-center whitespace-nowrap">
                                                     <button

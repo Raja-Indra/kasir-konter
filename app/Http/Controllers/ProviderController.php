@@ -18,9 +18,11 @@ class ProviderController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama_provider' => 'required|string|max:255',
+            'nama_provider' => 'required|string|max:255|unique:providers,nama_provider',
             'saldo' => 'nullable|numeric',
             'is_digital' => 'boolean',
+        ], [
+            'nama_provider.unique' => 'Nama provider sudah ada, silakan gunakan nama lain.',
         ]);
 
         if (!$request->boolean('is_digital')) {
@@ -37,9 +39,11 @@ class ProviderController extends Controller
     public function update(Request $request, Provider $provider)
     {
         $validated = $request->validate([
-            'nama_provider' => 'required|string|max:255',
+            'nama_provider' => 'required|string|max:255|unique:providers,nama_provider,' . $provider->id,
             'saldo' => 'nullable|numeric',
             'is_digital' => 'boolean',
+        ], [
+            'nama_provider.unique' => 'Nama provider sudah ada, silakan gunakan nama lain.',
         ]);
 
         if (!$request->boolean('is_digital')) {

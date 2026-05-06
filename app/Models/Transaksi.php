@@ -28,6 +28,11 @@ class Transaksi extends Model
         return $this->hasMany(DetailTransaksi::class);
     }
 
+    public function hutang()
+    {
+        return $this->hasOne(Hutang::class);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
