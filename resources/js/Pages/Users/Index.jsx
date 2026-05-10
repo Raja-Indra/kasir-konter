@@ -176,7 +176,7 @@ export default function UserIndex({ auth, users, roles }) {
                                             {/* Kolom Role */}
                                             <td className="px-6 py-4 whitespace-nowrap text-center">
                                                 {user.roles && user.roles.length > 0 ? (
-                                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.roles[0].name === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
+                                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.roles[0].name === 'owner' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
                                                         {user.roles[0].name.toUpperCase()}
                                                     </span>
                                                 ) : (

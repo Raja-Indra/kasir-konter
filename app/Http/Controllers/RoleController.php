@@ -42,6 +42,10 @@ class RoleController extends Controller
             'permissions' => 'array'
         ]);
 
+        if ($role->name === 'owner' && $request->name !== 'owner') {
+            return redirect()->back()->with('error', 'Nama Role Owner Utama tidak boleh diubah.');
+        }
+
         $role->update(['name' => $request->name]);
         $role->syncPermissions($request->permissions);
 
@@ -50,8 +54,8 @@ class RoleController extends Controller
 
     public function destroy(Role $role)
     {
-        if($role->name === 'admin') {
-            return redirect()->back()->with('error', 'Role Admin Utama tidak boleh dihapus.');
+        if($role->name === 'owner') {
+            return redirect()->back()->with('error', 'Role Owner Utama tidak boleh dihapus.');
         }
 
         $role->delete();

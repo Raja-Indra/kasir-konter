@@ -20,8 +20,8 @@ class UserSeeder extends Seeder
             'is_active' => true,
         ]);
         
-        // Langsung beri role admin
-        $admin->assignRole('admin');
+        // Langsung beri role owner
+        $admin->assignRole('owner');
 
 
         // 2. Buat User KASIR (Untuk Test)

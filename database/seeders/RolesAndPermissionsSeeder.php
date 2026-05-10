@@ -76,8 +76,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'pay debt',
         ]);
 
-        // B. Role ADMIN (Segalanya)
-        $roleAdmin = Role::firstOrCreate(['name' => 'admin']);
-        $roleAdmin->syncPermissions(Permission::all());
+        // B. Role OWNER (Segalanya)
+        $roleOwner = Role::firstOrCreate(['name' => 'owner']);
+        $roleOwner->syncPermissions(Permission::all());
     }
 }
