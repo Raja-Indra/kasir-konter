@@ -42,8 +42,8 @@ class RoleController extends Controller
             'permissions' => 'array'
         ]);
 
-        if ($role->name === 'owner' && $request->name !== 'owner') {
-            return redirect()->back()->with('error', 'Nama Role Owner Utama tidak boleh diubah.');
+        if (strtolower($role->name) === 'owner') {
+            return redirect()->back()->with('error', 'Role Owner Utama tidak boleh diedit.');
         }
 
         $role->update(['name' => $request->name]);
@@ -54,7 +54,7 @@ class RoleController extends Controller
 
     public function destroy(Role $role)
     {
-        if($role->name === 'owner') {
+        if(strtolower($role->name) === 'owner') {
             return redirect()->back()->with('error', 'Role Owner Utama tidak boleh dihapus.');
         }
 

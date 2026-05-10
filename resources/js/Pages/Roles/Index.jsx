@@ -153,16 +153,16 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
                                         <h4 className="text-lg font-bold text-gray-800 capitalize">{role.name}</h4>
                                         <p className="text-xs text-gray-500 mt-0.5">{role.permissions.length} Hak Akses</p>
                                     </div>
-                                    {role.name !== 'owner' && (
+                                    {role.name.toLowerCase() !== 'owner' && (
                                         <div className="flex space-x-2">
                                             <button onClick={() => openModal(role)} className="px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition">Edit</button>
                                             <button onClick={() => deleteRole(role.id)} className="px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition">Hapus</button>
                                         </div>
                                     )}
-                                    {role.name === 'owner' && <span className="px-3 py-1 text-xs font-bold text-purple-700 bg-purple-100 rounded-full">Owner</span>}
+                                    {role.name.toLowerCase() === 'owner' && <span className="px-3 py-1 text-xs font-bold text-purple-700 bg-purple-100 rounded-full">Owner</span>}
                                 </div>
                                 <div className="flex-1">
-                                    {role.name === 'owner' ? (
+                                    {role.name.toLowerCase() === 'owner' ? (
                                         <div className="p-3 text-sm text-center text-purple-700 bg-purple-50 rounded-lg border border-purple-100">
                                             Role ini memiliki <b>semua</b> hak akses sistem tanpa batas.
                                         </div>
@@ -222,7 +222,7 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
                             className="w-full"
                             placeholder="Contoh: Kasir Shift Pagi"
                             required
-                            disabled={isEdit && editRole?.name === 'owner'}
+                            disabled={isEdit && editRole?.name.toLowerCase() === 'owner'}
                         />
                     </div>
 
