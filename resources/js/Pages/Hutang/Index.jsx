@@ -128,16 +128,16 @@ export default function HutangIndex({ auth, hutangs, filters }) {
                 <div className="max-w-full px-4 mx-auto sm:px-6 lg:px-8">
                     <div className="p-6 bg-white shadow-sm sm:rounded-lg">
 
-                        <div className="flex flex-col md:flex-row md:items-center justify-between p-4 mb-6 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-800 to-blue-500 gap-4">
+                        <div className="flex flex-col justify-between gap-4 p-4 mb-6 text-white rounded-lg shadow-md md:flex-row md:items-center bg-gradient-to-r from-blue-800 to-blue-500">
                             <div className="flex items-center gap-3">
                                 <h3 className="text-lg font-bold">Buku Kasbon / Piutang</h3>
-                                <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-semibold bg-blue-700 rounded-full uppercase tracking-wider">
+                                {/* <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-semibold bg-blue-700 rounded-full uppercase tracking-wider">
                                     {hutangs.total} Data
-                                </span>
+                                </span> */}
                             </div>
-                            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                            <div className="flex flex-col items-center w-full gap-3 sm:flex-row md:w-auto">
                                 {/* Search input placed to the left of the button */}
-                                <div className="relative w-full sm:w-64 text-gray-900">
+                                <div className="relative w-full text-gray-900 sm:w-64">
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                                         <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none">
                                             <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -227,7 +227,7 @@ export default function HutangIndex({ auth, hutangs, filters }) {
 
                         {/* Pagination Links */}
                         {hutangs.links && hutangs.links.length > 3 && (
-                            <div className="mt-6 flex flex-wrap justify-center gap-1">
+                            <div className="flex flex-wrap justify-center gap-1 mt-6">
                                 {hutangs.links.map((link, key) => (
                                     <Link
                                         key={key}
@@ -281,35 +281,35 @@ export default function HutangIndex({ auth, hutangs, filters }) {
             <Modal show={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} maxWidth="2xl">
                 {selectedHutang && (
                     <div className="p-6">
-                        <div className="flex items-center justify-between mb-4 pb-4 border-b">
+                        <div className="flex items-center justify-between pb-4 mb-4 border-b">
                             <h2 className="text-xl font-bold">Detail Kasbon: {selectedHutang.nama_pelanggan}</h2>
                             <button onClick={() => setIsDetailModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                                 ✖
                             </button>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4 mb-6">
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Informasi Hutang</p>
-                                <p className="text-sm mb-1"><span className="font-semibold text-gray-700">Tanggal:</span> {formatDate(selectedHutang.created_at)}</p>
-                                <p className="text-sm mb-1"><span className="font-semibold text-gray-700">Total:</span> <span className="font-bold">{formatRupiah(selectedHutang.total_hutang)}</span></p>
-                                <p className="text-sm mb-1"><span className="font-semibold text-gray-700">Terbayar:</span> <span className="text-green-600 font-bold">{formatRupiah(selectedHutang.terbayar)}</span></p>
-                                <p className="text-sm"><span className="font-semibold text-gray-700">Sisa:</span> <span className="text-red-600 font-bold">{formatRupiah(selectedHutang.sisa)}</span></p>
+                            <div className="p-4 rounded-lg bg-gray-50">
+                                <p className="mb-1 text-xs font-bold tracking-wider text-gray-500 uppercase">Informasi Hutang</p>
+                                <p className="mb-1 text-sm"><span className="font-semibold text-gray-700">Tanggal:</span> {formatDate(selectedHutang.created_at)}</p>
+                                <p className="mb-1 text-sm"><span className="font-semibold text-gray-700">Total:</span> <span className="font-bold">{formatRupiah(selectedHutang.total_hutang)}</span></p>
+                                <p className="mb-1 text-sm"><span className="font-semibold text-gray-700">Terbayar:</span> <span className="font-bold text-green-600">{formatRupiah(selectedHutang.terbayar)}</span></p>
+                                <p className="text-sm"><span className="font-semibold text-gray-700">Sisa:</span> <span className="font-bold text-red-600">{formatRupiah(selectedHutang.sisa)}</span></p>
                             </div>
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Keterangan Tambahan</p>
-                                <p className="text-sm mb-1"><span className="font-semibold text-gray-700">No. HP:</span> {selectedHutang.no_hp || '-'}</p>
-                                <p className="text-sm mb-1"><span className="font-semibold text-gray-700">Status:</span> {selectedHutang.status === 'lunas' ? <span className="text-green-600 font-bold">LUNAS</span> : <span className="text-red-600 font-bold">BELUM LUNAS</span>}</p>
-                                <p className="text-sm mt-2 font-semibold text-gray-700">Keterangan/Produk:</p>
+                            <div className="p-4 rounded-lg bg-gray-50">
+                                <p className="mb-1 text-xs font-bold tracking-wider text-gray-500 uppercase">Keterangan Tambahan</p>
+                                <p className="mb-1 text-sm"><span className="font-semibold text-gray-700">No. HP:</span> {selectedHutang.no_hp || '-'}</p>
+                                <p className="mb-1 text-sm"><span className="font-semibold text-gray-700">Status:</span> {selectedHutang.status === 'lunas' ? <span className="font-bold text-green-600">LUNAS</span> : <span className="font-bold text-red-600">BELUM LUNAS</span>}</p>
+                                <p className="mt-2 text-sm font-semibold text-gray-700">Keterangan/Produk:</p>
                                 <p className="text-sm text-gray-600">{selectedHutang.keterangan || '-'}</p>
                             </div>
                         </div>
 
-                        <h3 className="text-md font-bold mb-3">Riwayat Cicilan / Pembayaran</h3>
+                        <h3 className="mb-3 font-bold text-md">Riwayat Cicilan / Pembayaran</h3>
                         {selectedHutang.cicilan && selectedHutang.cicilan.length > 0 ? (
                             <div className="overflow-x-auto border rounded-lg">
                                 <table className="w-full text-sm text-left">
-                                    <thead className="bg-gray-100 text-gray-600">
+                                    <thead className="text-gray-600 bg-gray-100">
                                         <tr>
                                             <th className="px-4 py-2">Waktu</th>
                                             <th className="px-4 py-2">Nominal</th>
@@ -328,11 +328,11 @@ export default function HutangIndex({ auth, hutangs, filters }) {
                                 </table>
                             </div>
                         ) : (
-                            <div className="bg-orange-50 border border-orange-100 p-4 rounded-lg text-center">
+                            <div className="p-4 text-center border border-orange-100 rounded-lg bg-orange-50">
                                 <p className="text-sm text-orange-600">Belum ada riwayat pembayaran/cicilan.</p>
                             </div>
                         )}
-                        
+
                         <div className="mt-6 text-right">
                             <SecondaryButton onClick={() => setIsDetailModalOpen(false)}>Tutup</SecondaryButton>
                         </div>
