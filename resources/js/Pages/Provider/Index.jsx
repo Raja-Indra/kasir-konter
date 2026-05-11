@@ -10,10 +10,12 @@ import SecondaryButton from '@/Components/SecondaryButton';
 // Import SweetAlert2
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import usePermission from '@/Hooks/usePermission';
 
 const MySwal = withReactContent(Swal);
 
 export default function ProviderIndex({ auth, providers }) {
+    const { can } = usePermission();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [providerToEdit, setProviderToEdit] = useState(null);
@@ -224,7 +226,9 @@ export default function ProviderIndex({ auth, providers }) {
                                         onChange={(e) => setSearchKeyword(e.target.value)}
                                     />
                                 </div>
-                                <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={openCreateModal}>+ Tambah Provider</PrimaryButton>
+                                {can('create providers') && (
+                                    <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={openCreateModal}>+ Tambah Provider</PrimaryButton>
+                                )}
                             </div>
                         </div>
 
@@ -237,7 +241,9 @@ export default function ProviderIndex({ auth, providers }) {
                                         <th className="w-16 px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">No</th>
                                         <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nama Provider</th>
                                         <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Saldo</th>
-                                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">Aksi</th>
+                                        {(can('edit providers') || can('delete providers')) && (
+                                            <th className="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">Aksi</th>
+                                        )}
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
@@ -256,28 +262,34 @@ export default function ProviderIndex({ auth, providers }) {
                                                         ? <span className="px-2 py-1 text-xs text-yellow-800 bg-yellow-100 rounded-full">Gudang Fisik</span> 
                                                         : `Rp ${parseFloat(item.saldo).toLocaleString('id-ID')}`}
                                                 </td>
-                                                <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                                    {item.is_digital !== false && (
-                                                        <button
-                                                            onClick={() => openAddSaldoModal(item)}
-                                                            className="mr-4 text-green-600 transition hover:text-green-900"
-                                                        >
-                                                            Tambah Saldo
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        onClick={() => openEditModal(item)}
-                                                        className="mr-4 text-blue-600 transition hover:text-blue-900"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(item.id)}
-                                                        className="text-red-600 transition hover:text-red-900"
-                                                    >
-                                                        Hapus
-                                                    </button>
-                                                </td>
+                                                {(can('edit providers') || can('delete providers')) && (
+                                                    <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                                                        {item.is_digital !== false && can('edit providers') && (
+                                                            <button
+                                                                onClick={() => openAddSaldoModal(item)}
+                                                                className="mr-4 text-green-600 transition hover:text-green-900"
+                                                            >
+                                                                Tambah Saldo
+                                                            </button>
+                                                        )}
+                                                        {can('edit providers') && (
+                                                            <button
+                                                                onClick={() => openEditModal(item)}
+                                                                className="mr-4 text-blue-600 transition hover:text-blue-900"
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                        )}
+                                                        {can('delete providers') && (
+                                                            <button
+                                                                onClick={() => handleDelete(item.id)}
+                                                                className="text-red-600 transition hover:text-red-900"
+                                                            >
+                                                                Hapus
+                                                            </button>
+                                                        )}
+                                                    </td>
+                                                )}
                                             </tr>
                                         ))
                                     ) : (

@@ -19,6 +19,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $permissions = [
             // Dashboard
             'view dashboard owner',
+            'view dashboard admin',
             'view dashboard kasir',
 
             // Manajemen User
@@ -43,9 +44,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'view transaction',
             'create transaction', // Melakukan transaksi
 
-            // Laporan & Riwayat
+            // Riwayat Transaksi
+            'view history',
+            'delete history', // Hapus riwayat transaksi (bahaya)
+
+            // Laporan Penjualan
             'view reports',
-            'delete reports', // Hapus riwayat transaksi (bahaya)
 
             // Kasbon/Hutang
             'view debt',
@@ -74,6 +78,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view debt',
             'create debt',
             'pay debt',
+            'view history', // Kasir biasanya boleh lihat riwayat transaksi sendiri
         ]);
 
         // B. Role OWNER (Segalanya)

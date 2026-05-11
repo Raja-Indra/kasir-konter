@@ -6,11 +6,13 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\Gate;
 
 class RoleController extends Controller
 {
     public function index()
     {
+        Gate::authorize('manage roles');
         // Ambil roles beserta permissions-nya
         // Ambil juga SEMUA permission yang ada untuk ditampilkan di checkbox
         return Inertia::render('Roles/Index', [
@@ -21,6 +23,7 @@ class RoleController extends Controller
 
     public function store(Request $request)
     {
+        Gate::authorize('manage roles');
         $request->validate([
             'name' => 'required|unique:roles,name',
             'permissions' => 'array'
@@ -37,6 +40,7 @@ class RoleController extends Controller
 
     public function update(Request $request, Role $role)
     {
+        Gate::authorize('manage roles');
         $request->validate([
             'name' => 'required|unique:roles,name,'.$role->id,
             'permissions' => 'array'
@@ -54,6 +58,7 @@ class RoleController extends Controller
 
     public function destroy(Role $role)
     {
+        Gate::authorize('manage roles');
         if(strtolower($role->name) === 'owner') {
             return redirect()->back()->with('error', 'Role Owner Utama tidak boleh dihapus.');
         }

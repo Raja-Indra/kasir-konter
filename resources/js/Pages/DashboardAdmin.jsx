@@ -18,7 +18,7 @@ ChartJS.register(
   CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler
 );
 
-export default function Dashboard({ auth, stats, chart, top_produk, low_stock, low_balance, recent_transactions, current_filter }) {
+export default function DashboardAdmin({ auth, stats, chart, top_produk, low_stock, low_balance, recent_transactions, current_filter }) {
 
     // Format Rupiah Helper
     const formatRupiah = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
@@ -61,13 +61,10 @@ export default function Dashboard({ auth, stats, chart, top_produk, low_stock, l
             y: {
                 beginAtZero: true,
                 border: { dash: [4, 4] },
-
-                // Grid Horizontal (Tetap ada, warna abu-abu tipis)
                 grid: {
-                    color: '#e5e7eb', // Warna grid lebih terlihat dikit
+                    color: '#e5e7eb',
                     display: true
                 },
-
                 ticks: {
                     callback: (value) => {
                         if (value >= 1000000) return (value / 1000000).toLocaleString('id-ID') + ' Jt';
@@ -77,10 +74,9 @@ export default function Dashboard({ auth, stats, chart, top_produk, low_stock, l
                 }
             },
             x: {
-                // Grid Vertikal (Ubah display: false menjadi true)
                 grid: {
-                    display: true, // <--- UBAH INI (Tampilkan Grid)
-                    color: '#f3f4f6' // Warna grid vertikal (biar tidak terlalu ramai, buat tipis)
+                    display: true,
+                    color: '#f3f4f6'
                 }
             }
         }
@@ -93,16 +89,16 @@ export default function Dashboard({ auth, stats, chart, top_produk, low_stock, l
                 fill: true,
                 label: 'Omzet',
                 data: chart.data,
-                borderColor: 'rgb(37, 99, 235)', // Warna Blue 600
-                backgroundColor: 'rgba(37, 99, 235, 0.1)', // Warna Blue transparan
-                tension: 0.4, // Garis melengkung halus
+                borderColor: 'rgb(37, 99, 235)',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                tension: 0.4,
             },
         ],
     };
 
     return (
         <AuthenticatedLayout user={auth.user}>
-            <Head title="Dashboard" />
+            <Head title="Dashboard Admin" />
 
             <div className="py-6">
                 <div className="max-w-full px-4 mx-auto sm:px-6 lg:px-8">
@@ -110,7 +106,7 @@ export default function Dashboard({ auth, stats, chart, top_produk, low_stock, l
                     <div className="flex flex-col items-start justify-between mb-6 md:flex-row md:items-center">
                         <div>
                             <h2 className="text-2xl font-bold text-gray-800">Halo, {auth.user.name} 👋</h2>
-                            <p className="text-sm text-gray-500">Inilah performa usaha Anda hari ini.</p>
+                            <p className="text-sm text-gray-500">Selamat datang di Dashboard Admin.</p>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
                             <Link href={route('transaksi.index')} className="px-4 py-2 text-sm font-semibold text-white transition bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700">
@@ -123,7 +119,7 @@ export default function Dashboard({ auth, stats, chart, top_produk, low_stock, l
                     </div>
 
                     {/* --- KARTU STATISTIK --- */}
-                    <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-2 lg:grid-cols-5">
+                    <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-3">
                         {/* Omzet */}
                         <div className="flex flex-col justify-between h-32 p-5 bg-white border border-gray-100 shadow-sm rounded-xl">
                             <div>
@@ -132,28 +128,6 @@ export default function Dashboard({ auth, stats, chart, top_produk, low_stock, l
                             </div>
                             <div className="px-2 py-1 text-xs font-bold text-green-500 rounded-full bg-green-50 w-fit">
                                 💰 Penjualan Kotor
-                            </div>
-                        </div>
-
-                        {/* Laba Bersih */}
-                        <div className="flex flex-col justify-between h-32 p-5 bg-white border border-gray-100 shadow-sm rounded-xl">
-                            <div>
-                                <p className="text-xs font-bold tracking-wider text-gray-400 uppercase">Laba Bersih Hari Ini</p>
-                                <h3 className="mt-1 text-2xl font-extrabold text-green-600">+{formatRupiah(stats.laba_bersih_hari_ini)}</h3>
-                            </div>
-                            <div className="px-2 py-1 text-xs font-bold text-blue-500 rounded-full bg-blue-50 w-fit">
-                                🚀 Laba (Tunai)
-                            </div>
-                        </div>
-
-                        {/* Laba Hutang */}
-                        <div className="flex flex-col justify-between h-32 p-5 bg-white border border-gray-100 shadow-sm rounded-xl">
-                            <div>
-                                <p className="text-xs font-bold tracking-wider text-gray-400 uppercase">Laba Hutang</p>
-                                <h3 className="mt-1 text-2xl font-extrabold text-orange-500">{formatRupiah(stats.laba_hutang_hari_ini)}</h3>
-                            </div>
-                            <div className="px-2 py-1 text-xs font-bold text-orange-600 rounded-full bg-orange-50 w-fit">
-                                ⏳ Tertahan
                             </div>
                         </div>
 
@@ -171,7 +145,7 @@ export default function Dashboard({ auth, stats, chart, top_produk, low_stock, l
                         {/* Total Hutang Pelanggan */}
                         <div className="flex flex-col justify-between h-32 p-5 bg-white border border-gray-100 shadow-sm rounded-xl">
                             <div>
-                                <p className="text-xs font-bold tracking-wider text-gray-400 uppercase">Total Piutang</p>
+                                <p className="text-xs font-bold tracking-wider text-gray-400 uppercase">Total Piutang (Kasbon)</p>
                                 <h3 className="mt-1 text-2xl font-extrabold text-red-500">{formatRupiah(stats.total_sisa_hutang)}</h3>
                             </div>
                             <div className="px-2 py-1 text-xs font-bold text-red-500 rounded-full bg-red-50 w-fit">
@@ -200,7 +174,6 @@ export default function Dashboard({ auth, stats, chart, top_produk, low_stock, l
                                 </select>
                             </div>
 
-                            {/* UBAH DI SINI: h-64 jadi h-80, tambah relative w-full */}
                             <div className="relative w-full h-80">
                                 <Line options={chartOptions} data={chartDataConfig} />
                             </div>

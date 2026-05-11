@@ -8,11 +8,14 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
     public function index()
     {
+        Gate::authorize('view users');
+        
         return Inertia::render('Users/Index', [
             'users' => User::with('roles')->latest()->get(),
             'roles' => \Spatie\Permission\Models\Role::all()
@@ -21,6 +24,8 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        Gate::authorize('create users');
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -46,6 +51,8 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        Gate::authorize('edit users');
+        
         // Validasi sedikit beda: Email boleh sama dengan punya sendiri, Password boleh kosong (kalau ga mau diganti)
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -82,6 +89,8 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        Gate::authorize('delete users');
+        
         // Hapus file foto jika ada
         if ($user->foto) {
             Storage::disk('public')->delete($user->foto);

@@ -36,7 +36,8 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
         'products': 'Produk & Stok',
         'providers': 'Provider / Supplier',
         'transaction': 'Transaksi Kasir',
-        'reports': 'Laporan & Riwayat',
+        'history': 'Riwayat Transaksi',
+        'reports': 'Laporan Penjualan',
         'debt': 'Kasbon / Hutang',
         'settings': 'Pengaturan Toko',
         'roles': 'Hak Akses (Roles)'
@@ -64,9 +65,11 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
             
             // Aturan khusus: hanya boleh 1 dashboard yang terpilih
             if (permName === 'view dashboard owner') {
-                newPerms = newPerms.filter(p => p !== 'view dashboard kasir');
+                newPerms = newPerms.filter(p => p !== 'view dashboard kasir' && p !== 'view dashboard admin');
+            } else if (permName === 'view dashboard admin') {
+                newPerms = newPerms.filter(p => p !== 'view dashboard kasir' && p !== 'view dashboard owner');
             } else if (permName === 'view dashboard kasir') {
-                newPerms = newPerms.filter(p => p !== 'view dashboard owner');
+                newPerms = newPerms.filter(p => p !== 'view dashboard owner' && p !== 'view dashboard admin');
             }
             
             setData('permissions', newPerms);
@@ -181,6 +184,7 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
 
                                                 let labelText = `${translateAction(action)} ${groupLabels[group] || group}`;
                                                 if (p.name === 'view dashboard owner') labelText = 'Dashboard Owner';
+                                                if (p.name === 'view dashboard admin') labelText = 'Dashboard Admin';
                                                 if (p.name === 'view dashboard kasir') labelText = 'Dashboard Kasir';
 
                                                 return (
@@ -260,6 +264,7 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
                                             
                                             let labelText = translateAction(action);
                                             if (perm.name === 'view dashboard owner') labelText = 'Owner';
+                                            if (perm.name === 'view dashboard admin') labelText = 'Admin';
                                             if (perm.name === 'view dashboard kasir') labelText = 'Kasir';
 
                                             return (
@@ -292,4 +297,3 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
         </AuthenticatedLayout>
     );
 }
-

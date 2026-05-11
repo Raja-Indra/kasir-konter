@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Provider;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Gate;
 
 class ProviderController extends Controller
 {
     public function index()
     {
+        Gate::authorize('view providers');
+        
         return Inertia::render('Provider/Index', [
             'providers' => Provider::latest()->get()
         ]);
@@ -17,6 +20,8 @@ class ProviderController extends Controller
 
     public function store(Request $request)
     {
+        Gate::authorize('create providers');
+        
         $validated = $request->validate([
             'nama_provider' => 'required|string|max:255|unique:providers,nama_provider',
             'saldo' => 'nullable|numeric',
@@ -38,6 +43,8 @@ class ProviderController extends Controller
 
     public function update(Request $request, Provider $provider)
     {
+        Gate::authorize('edit providers');
+        
         $validated = $request->validate([
             'nama_provider' => 'required|string|max:255|unique:providers,nama_provider,' . $provider->id,
             'saldo' => 'nullable|numeric',
@@ -59,6 +66,8 @@ class ProviderController extends Controller
 
     public function addSaldo(Request $request, Provider $provider)
     {
+        Gate::authorize('edit providers');
+        
         $validated = $request->validate([
             'tambah_saldo' => 'required|numeric|min:1',
         ]);
@@ -70,6 +79,8 @@ class ProviderController extends Controller
 
     public function destroy(Provider $provider)
     {
+        Gate::authorize('delete providers');
+        
         $provider->delete();
         return redirect()->back();
     }

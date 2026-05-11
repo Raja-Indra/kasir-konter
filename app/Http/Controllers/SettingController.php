@@ -7,16 +7,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Gate;
 
 class SettingController extends Controller
 {
     public function index()
     {
+        Gate::authorize('manage settings');
         return Inertia::render('Setting/Index');
     }
 
     public function update(Request $request)
     {
+        Gate::authorize('manage settings');
         $data = $request->validate([
             'nama_toko' => 'required|string',
             'alamat_toko' => 'required|string',
@@ -47,11 +50,13 @@ class SettingController extends Controller
 
     public function wa()
     {
+        Gate::authorize('manage settings');
         return Inertia::render('Setting/Whatsapp');
     }
 
     public function updateWa(Request $request)
     {
+        Gate::authorize('manage settings');
         $data = $request->validate([
             'fonnte_token' => 'nullable|string',
         ]);
@@ -63,6 +68,7 @@ class SettingController extends Controller
 
     public function testWa(Request $request)
     {
+        Gate::authorize('manage settings');
         $request->validate([
             'no_hp' => 'required|string',
         ]);
@@ -97,6 +103,7 @@ class SettingController extends Controller
 
     public function updateAlertSetting(Request $request)
     {
+        Gate::authorize('manage settings');
         $data = $request->validate([
             'alert_stok_aktif' => 'nullable|boolean',
             'alert_stok_mode' => 'nullable|string|in:manual,otomatis',
@@ -117,6 +124,7 @@ class SettingController extends Controller
 
     public function sendManualAlert()
     {
+        Gate::authorize('manage settings');
         // Panggil command artisan
         \Illuminate\Support\Facades\Artisan::call('app:send-stock-alert');
         $exitCode = \Illuminate\Support\Facades\Artisan::output();

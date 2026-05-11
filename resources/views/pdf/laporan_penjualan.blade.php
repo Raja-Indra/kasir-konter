@@ -46,7 +46,12 @@
             <tr>
                 <td class="text-center">{{ $index + 1 }}</td>
                 <td>{{ $item->created_at->format('d/m/Y H:i') }}</td>
-                <td>{{ $item->no_nota }}</td>
+                <td>
+                    {{ $item->no_nota }}
+                    @if($item->hutang)
+                        <br><small style="color: #d97706;">(Hutang)</small>
+                    @endif
+                </td>
                 <td>{{ $item->user->name ?? '-' }}</td>
                 <td class="text-right">Rp {{ number_format($item->total_harga, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($item->total_laba, 0, ',', '.') }}</td>
@@ -59,9 +64,20 @@
         </tbody>
         <tfoot>
             <tr class="bg-gray">
-                <td colspan="4" class="font-bold text-right">TOTAL</td>
-                <td class="font-bold text-right">Rp {{ number_format($totalOmzet, 0, ',', '.') }}</td>
-                <td class="font-bold text-right">Rp {{ number_format($totalLaba, 0, ',', '.') }}</td>
+                <td colspan="4" class="font-bold text-right" style="font-weight: bold;">TOTAL OMZET</td>
+                <td class="font-bold text-right" style="font-weight: bold;" colspan="2">Rp {{ number_format($totalOmzet, 0, ',', '.') }}</td>
+            </tr>
+            <tr class="bg-gray">
+                <td colspan="4" class="font-bold text-right" style="font-weight: bold;">TOTAL LABA BERSIH</td>
+                <td class="font-bold text-right" style="font-weight: bold;" colspan="2">Rp {{ number_format($totalLabaBersih, 0, ',', '.') }}</td>
+            </tr>
+            <tr class="bg-gray">
+                <td colspan="4" class="font-bold text-right" style="font-weight: bold;">TOTAL LABA HUTANG</td>
+                <td class="font-bold text-right" style="font-weight: bold; color: #d97706;" colspan="2">Rp {{ number_format($totalLabaHutang, 0, ',', '.') }}</td>
+            </tr>
+            <tr class="bg-gray">
+                <td colspan="4" class="font-bold text-right" style="font-weight: bold;">TOTAL KESELURUHAN LABA</td>
+                <td class="font-bold text-right" style="font-weight: bold;" colspan="2">Rp {{ number_format($totalLabaBersih + $totalLabaHutang, 0, ',', '.') }}</td>
             </tr>
         </tfoot>
     </table>

@@ -9,10 +9,12 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import usePermission from '@/Hooks/usePermission';
 
 const MySwal = withReactContent(Swal);
 
 export default function UserIndex({ auth, users, roles }) {
+    const { can } = usePermission();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [userToEdit, setUserToEdit] = useState(null);
@@ -77,7 +79,7 @@ export default function UserIndex({ auth, users, roles }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
+
         const actionText = isEditMode ? 'mengubah data user' : 'menambahkan user baru';
 
         MySwal.fire({
@@ -90,7 +92,7 @@ export default function UserIndex({ auth, users, roles }) {
         }).then((result) => {
             if (result.isConfirmed) {
                 const routeName = isEditMode ? route('users.update', userToEdit.id) : route('users.store');
-                
+
                 post(routeName, {
                     onSuccess: () => {
                         closeModal();
@@ -125,10 +127,12 @@ export default function UserIndex({ auth, users, roles }) {
             <div className="py-6">
                 <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8">
                     <div className="p-6 bg-white shadow-sm sm:rounded-lg">
-                        
+
                         <div className="flex items-center justify-between p-4 mb-6 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-800 to-blue-500">
                             <h3 className="text-lg font-bold">Daftar Pengguna / Kasir</h3>
-                            <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={openCreateModal}>+ Tambah User</PrimaryButton>
+                            {can('create users') && (
+                                <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={openCreateModal}>+ Tambah User</PrimaryButton>
+                            )}
                         </div>
 
                         <div className="overflow-x-auto">
@@ -139,7 +143,9 @@ export default function UserIndex({ auth, users, roles }) {
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kontak</th>
                                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Role</th>
                                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
-                                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                        {(can('edit users') || can('delete users')) && (
+                                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                        )}
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
@@ -158,13 +164,13 @@ export default function UserIndex({ auth, users, roles }) {
                                                     </div>
                                                     <div className="ml-4">
                                                         <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                                                        
+
                                                         {/* --- PERBAIKAN DI SINI (ID String) --- */}
                                                         <div className="text-xs text-gray-500">
                                                             ID: ...{String(user.id).slice(-8)}
                                                         </div>
                                                         {/* ----------------------------------- */}
-                                                        
+
                                                     </div>
                                                 </div>
                                             </td>
@@ -172,7 +178,7 @@ export default function UserIndex({ auth, users, roles }) {
                                                 <div className="text-sm text-gray-900">{user.email}</div>
                                                 <div className="text-sm text-gray-500">{user.no_hp || '-'}</div>
                                             </td>
-                                            
+
                                             {/* Kolom Role */}
                                             <td className="px-6 py-4 whitespace-nowrap text-center">
                                                 {user.roles && user.roles.length > 0 ? (
@@ -195,12 +201,16 @@ export default function UserIndex({ auth, users, roles }) {
                                                     </span>
                                                 )}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <button onClick={() => openEditModal(user)} className="text-blue-600 hover:text-blue-900 mr-4">Edit</button>
-                                                {user.id !== auth.user.id && (
-                                                    <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-900">Hapus</button>
-                                                )}
-                                            </td>
+                                            {(can('edit users') || can('delete users')) && (
+                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                    {can('edit users') && (
+                                                        <button onClick={() => openEditModal(user)} className="text-blue-600 hover:text-blue-900 mr-4">Edit</button>
+                                                    )}
+                                                    {can('delete users') && user.id !== auth.user.id && (
+                                                        <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-900">Hapus</button>
+                                                    )}
+                                                </td>
+                                            )}
                                         </tr>
                                     ))}
                                 </tbody>
@@ -218,7 +228,7 @@ export default function UserIndex({ auth, users, roles }) {
                     </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        
+
                         {/* Foto Profil Preview */}
                         <div className="col-span-1 md:col-span-2 flex flex-col items-center mb-4">
                             <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-300 mb-2">

@@ -5,10 +5,12 @@ import Modal from '@/Components/Modal';
 import SecondaryButton from '@/Components/SecondaryButton';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import usePermission from '@/Hooks/usePermission';
 
 const MySwal = withReactContent(Swal);
 
 export default function RiwayatIndex({ auth, transaksi, providers, jenis_produk, filters }) {
+    const { can } = usePermission();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTrx, setSelectedTrx] = useState(null);
 
@@ -184,12 +186,14 @@ export default function RiwayatIndex({ auth, transaksi, providers, jenis_produk,
                                                     >
                                                         Lihat Detail
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleDelete(item.id)}
-                                                        className="text-sm font-medium text-red-600 hover:text-red-900"
-                                                    >
-                                                        Hapus
-                                                    </button>
+                                                    {can('delete history') && (
+                                                        <button
+                                                            onClick={() => handleDelete(item.id)}
+                                                            className="text-sm font-medium text-red-600 hover:text-red-900"
+                                                        >
+                                                            Hapus
+                                                        </button>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))

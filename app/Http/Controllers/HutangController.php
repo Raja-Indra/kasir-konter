@@ -7,24 +7,38 @@ use App\Models\RiwayatCicilan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Gate;
 
 class HutangController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        Gate::authorize('view debt');
+        
+        $search = $request->input('search');
+
         // Tampilkan hutang yang belum lunas di atas
         $hutangs = Hutang::with('cicilan')
+            ->when($search, function ($query, $search) {
+                $query->where('nama_pelanggan', 'like', "%{$search}%")
+                    ->orWhere('keterangan', 'like', "%{$search}%")
+                    ->orWhere('no_hp', 'like', "%{$search}%");
+            })
             ->orderByRaw("FIELD(status, 'belum_lunas', 'lunas')")
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('Hutang/Index', [
-            'hutangs' => $hutangs
+            'hutangs' => $hutangs,
+            'filters' => $request->only(['search'])
         ]);
     }
 
     public function store(Request $request)
     {
+        Gate::authorize('create debt');
+        
         // Tambah Hutang Baru Manual
         $validated = $request->validate([
             'nama_pelanggan' => 'required|string',
@@ -43,6 +57,8 @@ class HutangController extends Controller
 
     public function cicil(Request $request, Hutang $hutang)
     {
+        Gate::authorize('pay debt');
+        
         // Bayar Cicilan
         $request->validate([
             'nominal' => 'required|numeric|min:1|max:' . $hutang->sisa,
@@ -74,6 +90,8 @@ class HutangController extends Controller
 
     public function destroy(Hutang $hutang)
     {
+        Gate::allowIf(fn($user) => $user->hasRole('owner'));
+        
         $hutang->delete();
         return redirect()->back()->with('success', 'Data dihapus.');
     }

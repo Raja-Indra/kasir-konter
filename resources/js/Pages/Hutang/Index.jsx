@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router, Link } from '@inertiajs/react';
 import Modal from '@/Components/Modal';
@@ -8,13 +8,16 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import usePermission from '@/Hooks/usePermission';
 
 const MySwal = withReactContent(Swal);
 
-export default function HutangIndex({ auth, hutangs }) {
+export default function HutangIndex({ auth, hutangs, filters }) {
+    const { can, hasRole } = usePermission();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [selectedHutang, setSelectedHutang] = useState(null);
+    const [search, setSearch] = useState(filters.search || '');
 
     // State Form Create
     const { data, setData, post, processing, reset, errors } = useForm({
@@ -49,6 +52,24 @@ export default function HutangIndex({ auth, hutangs }) {
                 MySwal.fire('Berhasil', 'Data kasbon tersimpan', 'success');
             }
         });
+    };
+
+    // SEARCH LOGIC
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (search !== (filters.search || '')) {
+                router.get(route('hutang.index'), { search }, {
+                    preserveState: true,
+                    replace: true
+                });
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    const handleSearchChange = (e) => {
+        setSearch(e.target.value);
     };
 
     // LOGIC BAYAR CICILAN
@@ -107,8 +128,35 @@ export default function HutangIndex({ auth, hutangs }) {
                 <div className="max-w-full px-4 mx-auto sm:px-6 lg:px-8">
                     <div className="p-6 bg-white shadow-sm sm:rounded-lg">
 
-                        <div className="flex items-center justify-between p-4 mb-6 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-800 to-blue-500">
-                            <h3 className="text-lg font-bold">Buku Kasbon / Piutang</h3>
+                        <div className="flex flex-col md:flex-row md:items-center justify-between p-4 mb-6 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-800 to-blue-500 gap-4">
+                            <div className="flex items-center gap-3">
+                                <h3 className="text-lg font-bold">Buku Kasbon / Piutang</h3>
+                                <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-semibold bg-blue-700 rounded-full uppercase tracking-wider">
+                                    {hutangs.total} Data
+                                </span>
+                            </div>
+                            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                                {/* Search input placed to the left of the button */}
+                                <div className="relative w-full sm:w-64 text-gray-900">
+                                    <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                                        <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none">
+                                            <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    </span>
+                                    <TextInput
+                                        type="text"
+                                        className="block w-full pl-9 pr-3 py-1.5 border-none rounded-md leading-5 bg-white placeholder-gray-400 focus:ring-2 focus:ring-blue-300 sm:text-sm shadow-inner"
+                                        placeholder="Cari pelanggan..."
+                                        value={search}
+                                        onChange={handleSearchChange}
+                                    />
+                                </div>
+                                {can('create debt') && (
+                                    <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100 whitespace-nowrap w-full sm:w-auto justify-center" onClick={() => setIsCreateModalOpen(true)}>
+                                        + Catat Kasbon
+                                    </PrimaryButton>
+                                )}
+                            </div>
                         </div>
 
                         <div className="overflow-x-auto">
@@ -159,12 +207,14 @@ export default function HutangIndex({ auth, hutangs }) {
                                                 <button onClick={() => handleDetail(item)} className="px-3 py-1 text-xs text-gray-700 bg-gray-200 rounded hover:bg-gray-300">
                                                     Detail
                                                 </button>
-                                                {item.status !== 'lunas' && (
+                                                {item.status !== 'lunas' && can('pay debt') && (
                                                     <button onClick={() => handleBayar(item)} className="px-3 py-1 text-xs text-white bg-blue-600 rounded hover:bg-blue-700">
                                                         Bayar
                                                     </button>
                                                 )}
-                                                <button onClick={() => handleDelete(item.id)} className="text-xs text-red-500 hover:text-red-700">Hapus</button>
+                                                {hasRole('owner') && (
+                                                    <button onClick={() => handleDelete(item.id)} className="text-xs text-red-500 hover:text-red-700">Hapus</button>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}
@@ -175,10 +225,19 @@ export default function HutangIndex({ auth, hutangs }) {
                             </table>
                         </div>
 
-                        {/* Pagination Links (Optional, jika data banyak) */}
-                        <div className="mt-4">
-                           {/* Render pagination links here if needed */}
-                        </div>
+                        {/* Pagination Links */}
+                        {hutangs.links && hutangs.links.length > 3 && (
+                            <div className="mt-6 flex flex-wrap justify-center gap-1">
+                                {hutangs.links.map((link, key) => (
+                                    <Link
+                                        key={key}
+                                        href={link.url || '#'}
+                                        className={`px-4 py-2 text-sm border rounded-md ${link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

@@ -9,10 +9,12 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import usePermission from '@/Hooks/usePermission';
 
 const MySwal = withReactContent(Swal);
 
 export default function ProdukIndex({ auth, products, providers }) {
+    const { can } = usePermission();
     // State Tab (Default ke Digital)
     const [activeTab, setActiveTab] = useState('digital');
     const [searchKeyword, setSearchKeyword] = useState(''); // State Pencarian
@@ -42,9 +44,11 @@ export default function ProdukIndex({ auth, products, providers }) {
         return matchTab && matchSearch;
     });
 
-    const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
+    const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         provider_id: '',
         nama_produk: '',
+        foto: null,
+        remove_foto: false,
         harga_admin_provider: '',
         harga_modal: '',
         harga_jual: '',
@@ -55,6 +59,7 @@ export default function ProdukIndex({ auth, products, providers }) {
         is_digital: true,
         is_tarik_tunai: false,
         is_flexible_price: false,
+        _method: 'post', // Default method
     });
 
     // Reset stok jika pindah ke mode digital di form
@@ -78,7 +83,9 @@ export default function ProdukIndex({ auth, products, providers }) {
         setData(d => ({
             ...d,
             provider_id: providers.length > 0 ? providers[0].id : '',
-            is_digital: activeTab === 'digital'
+            is_digital: activeTab === 'digital',
+            remove_foto: false,
+            _method: 'post'
         }));
 
         setIsModalOpen(true);
@@ -90,6 +97,8 @@ export default function ProdukIndex({ auth, products, providers }) {
         setData({
             provider_id: item.provider_id,
             nama_produk: item.nama_produk,
+            foto: null, // Reset input file saat edit
+            remove_foto: false,
             harga_admin_provider: item.harga_admin_provider || '',
             harga_modal: item.harga_modal,
             harga_jual: item.harga_jual,
@@ -100,6 +109,7 @@ export default function ProdukIndex({ auth, products, providers }) {
             is_digital: item.is_digital ? true : false,
             is_tarik_tunai: item.is_tarik_tunai ? true : false,
             is_flexible_price: item.is_flexible_price ? true : false,
+            _method: 'put' // Paksa method PUT agar support FormData file upload di Laravel
         });
         clearErrors();
         setIsModalOpen(true);
@@ -173,8 +183,9 @@ export default function ProdukIndex({ auth, products, providers }) {
                     },
                 };
 
+                // Form submission
                 if (isEditMode) {
-                    put(route('produk.update', productToEdit.id), options);
+                    post(route('produk.update', productToEdit.id), options);
                 } else {
                     post(route('produk.store'), options);
                 }
@@ -225,7 +236,9 @@ export default function ProdukIndex({ auth, products, providers }) {
                                         onChange={(e) => setSearchKeyword(e.target.value)}
                                     />
                                 </div>
-                                <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={openCreateModal}>+ Tambah Produk</PrimaryButton>
+                                {can('create products') && (
+                                    <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={openCreateModal}>+ Tambah Produk</PrimaryButton>
+                                )}
                             </div>
                         </div>
 
@@ -270,6 +283,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                 <thead className="bg-gray-50">
                                     <tr>
                                         <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">No</th>
+                                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Foto</th>
                                         <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Provider</th>
                                         <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nama Produk</th>
                                         <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Jenis</th>
@@ -281,7 +295,9 @@ export default function ProdukIndex({ auth, products, providers }) {
                                             {activeTab === 'fisik' ? 'Sisa Stok' : 'Status'}
                                         </th>
 
-                                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">Aksi</th>
+                                        { (can('edit products') || can('delete products')) && (
+                                            <th className="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase">Aksi</th>
+                                        )}
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
@@ -289,6 +305,13 @@ export default function ProdukIndex({ auth, products, providers }) {
                                         filteredProducts.map((item, index) => (
                                             <tr key={item.id} className="hover:bg-gray-50">
                                                 <td className="px-6 py-4 text-sm text-gray-500">{index + 1}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-500">
+                                                    {item.foto ? (
+                                                        <img src={`/storage/${item.foto}`} alt={item.nama_produk} className="object-cover w-12 h-12 rounded shadow" />
+                                                    ) : (
+                                                        <span className="text-gray-400 italic">No image</span>
+                                                    )}
+                                                </td>
                                                 <td className="px-6 py-4 text-sm font-medium text-blue-600">
                                                     {item.provider ? item.provider.nama_provider : '-'}
                                                 </td>
@@ -304,11 +327,6 @@ export default function ProdukIndex({ auth, products, providers }) {
                                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${activeTab === 'digital' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}`}>
                                                         {item.jenis}
                                                     </span>
-                                                    {/* {item.is_tarik_tunai && (
-                                                        <span className="ml-2 px-2 inline-flex text-[10px] leading-5 font-bold rounded-full bg-green-100 text-green-800">
-                                                            Tarik Tunai
-                                                        </span>
-                                                    )} */}
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-gray-500">
                                                     Rp {parseFloat(parseFloat(item.harga_modal) + (parseFloat(item.harga_admin_provider) || 0)).toLocaleString('id-ID')}
@@ -329,17 +347,23 @@ export default function ProdukIndex({ auth, products, providers }) {
                                                     )}
                                                 </td>
 
-                                                <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
-                                                    {!item.is_digital && (
-                                                        <button onClick={() => openAddStockModal(item)} className="mr-4 text-green-600 transition hover:text-green-900">Tambah Stok</button>
-                                                    )}
-                                                    <button onClick={() => openEditModal(item)} className="mr-4 text-blue-600 transition hover:text-blue-900">Edit</button>
-                                                    <button onClick={() => handleDelete(item.id)} className="text-red-600 transition hover:text-red-900">Hapus</button>
-                                                </td>
+                                                { (can('edit products') || can('delete products')) && (
+                                                    <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                                                        {!item.is_digital && can('edit products') && (
+                                                            <button onClick={() => openAddStockModal(item)} className="mr-4 text-green-600 transition hover:text-green-900">Tambah Stok</button>
+                                                        )}
+                                                        {can('edit products') && (
+                                                            <button onClick={() => openEditModal(item)} className="mr-4 text-blue-600 transition hover:text-blue-900">Edit</button>
+                                                        )}
+                                                        {can('delete products') && (
+                                                            <button onClick={() => handleDelete(item.id)} className="text-red-600 transition hover:text-red-900">Hapus</button>
+                                                        )}
+                                                    </td>
+                                                )}
                                             </tr>
                                         ))
                                     ) : (
-                                        <tr><td colSpan="8" className="px-6 py-10 italic text-center text-gray-500">
+                                        <tr><td colSpan="9" className="px-6 py-10 italic text-center text-gray-500">
                                             Tidak ada data untuk {activeTab === 'digital' ? 'Produk Digital' : 'Produk Fisik'}.
                                         </td></tr>
                                     )}
@@ -358,6 +382,46 @@ export default function ProdukIndex({ auth, products, providers }) {
                     </h2>
 
                     <div className="grid grid-cols-2 gap-4">
+                        {/* Foto Produk */}
+                        <div className="col-span-2">
+                            <InputLabel htmlFor="foto" value="Foto Produk (Opsional)" />
+                            {isEditMode && productToEdit?.foto && !data.remove_foto && (
+                                <div className="mb-2">
+                                    <span className="block text-xs text-gray-500 mb-1">Foto saat ini:</span>
+                                    <div className="flex items-center gap-4">
+                                        <img src={`/storage/${productToEdit.foto}`} alt="Preview" className="h-20 w-20 object-cover rounded shadow" />
+                                        <button
+                                            type="button"
+                                            onClick={() => setData('remove_foto', true)}
+                                            className="px-3 py-1 text-sm text-red-600 bg-red-100 rounded hover:bg-red-200"
+                                        >
+                                            Hapus Foto
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                            {data.remove_foto && (
+                                <div className="mb-2 p-2 text-sm text-yellow-700 bg-yellow-100 rounded">
+                                    Foto akan dihapus saat disimpan.
+                                    <button
+                                        type="button"
+                                        onClick={() => setData('remove_foto', false)}
+                                        className="ml-2 text-blue-600 underline hover:text-blue-800"
+                                    >
+                                        Batal Hapus
+                                    </button>
+                                </div>
+                            )}
+                            <input
+                                id="foto"
+                                type="file"
+                                accept="image/*"
+                                className="block w-full mt-1 text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-gray-50 focus:outline-none"
+                                onChange={(e) => setData('foto', e.target.files[0])}
+                            />
+                            <InputError message={errors.foto} className="mt-2" />
+                        </div>
+
                         {/* Pilih Provider */}
                         <div className="col-span-2">
                             <InputLabel htmlFor="provider_id" value="Provider" />

@@ -65,14 +65,18 @@ export default function LaporanIndex({ auth, transaksi, summary, filters }) {
                     </div>
 
                     {/* --- SUMMARY CARDS --- */}
-                    <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-4">
                         <div className="p-4 bg-white border border-gray-100 rounded-lg shadow">
                             <p className="text-xs font-bold text-gray-500 uppercase">Total Omzet</p>
                             <p className="text-2xl font-bold text-gray-800">{formatRupiah(summary.total_omzet)}</p>
                         </div>
                         <div className="p-4 bg-white border border-gray-100 rounded-lg shadow">
-                            <p className="text-xs font-bold text-gray-500 uppercase">Total Laba</p>
-                            <p className="text-2xl font-bold text-green-600">{formatRupiah(summary.total_laba)}</p>
+                            <p className="text-xs font-bold text-gray-500 uppercase">Total Laba Bersih</p>
+                            <p className="text-2xl font-bold text-green-600">{formatRupiah(summary.total_laba_bersih)}</p>
+                        </div>
+                        <div className="p-4 bg-white border border-gray-100 rounded-lg shadow">
+                            <p className="text-xs font-bold text-gray-500 uppercase">Total Laba Hutang</p>
+                            <p className="text-2xl font-bold text-orange-500">{formatRupiah(summary.total_laba_hutang)}</p>
                         </div>
                         <div className="p-4 bg-white border border-gray-100 rounded-lg shadow">
                             <p className="text-xs font-bold text-gray-500 uppercase">Jumlah Transaksi</p>

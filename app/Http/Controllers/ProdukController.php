@@ -5,13 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\Produk;
 use App\Models\Provider;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Gate;
 
 class ProdukController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Produk/Index', [ // <-- Folder Produk
+        Gate::authorize('view products');
+        
+        return Inertia::render('Produk/Index', [
             'products' => Produk::with('provider')->latest()->get(),
             'providers' => Provider::select('id', 'nama_provider')->get()
         ]);
@@ -19,13 +23,13 @@ class ProdukController extends Controller
 
     public function store(Request $request)
     {
+        Gate::authorize('create products');
+        
         $validated = $request->validate([
             'provider_id' => 'required|exists:providers,id',
             'nama_produk' => 'required|string|max:255',
-
-            // UBAH DI SINI: Dari 'required' menjadi 'nullable'
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'harga_modal' => 'nullable|numeric',
-
             'harga_jual' => 'required|numeric',
             'stok' => 'required|integer',
             'jenis' => 'required|string',
@@ -36,9 +40,12 @@ class ProdukController extends Controller
             'max_nominal' => 'nullable|numeric|gte:min_nominal',
         ]);
 
-        // Jika harga modal kosong/null, kita set jadi 0 agar aman di kalkulasi
         if (is_null($validated['harga_modal'])) {
             $validated['harga_modal'] = 0;
+        }
+
+        if ($request->hasFile('foto')) {
+            $validated['foto'] = $request->file('foto')->store('produks', 'public');
         }
 
         Produk::create($validated);
@@ -47,14 +54,15 @@ class ProdukController extends Controller
 
     public function update(Request $request, Produk $produk)
     {
+        Gate::authorize('edit products');
+        
         $validated = $request->validate([
             'provider_id' => 'required|exists:providers,id',
             'nama_produk' => 'required|string|max:255',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'remove_foto' => 'nullable|boolean',
             'harga_admin_provider' => 'nullable|numeric',
-
-            // UBAH DI SINI JUGA
             'harga_modal' => 'nullable|numeric',
-
             'harga_jual' => 'required|numeric',
             'stok' => 'required|integer',
             'jenis' => 'required|string',
@@ -69,12 +77,28 @@ class ProdukController extends Controller
             $validated['harga_modal'] = 0;
         }
 
+        if ($request->boolean('remove_foto')) {
+            if ($produk->foto) {
+                Storage::disk('public')->delete($produk->foto);
+            }
+            $validated['foto'] = null;
+        } elseif ($request->hasFile('foto')) {
+            if ($produk->foto) {
+                Storage::disk('public')->delete($produk->foto);
+            }
+            $validated['foto'] = $request->file('foto')->store('produks', 'public');
+        }
+
+        unset($validated['remove_foto']); // Jangan masukkan ke update
+
         $produk->update($validated);
         return redirect()->back();
     }
 
     public function addStock(Request $request, Produk $produk)
     {
+        Gate::authorize('edit products');
+        
         $validated = $request->validate([
             'tambah_stok' => 'required|integer|min:1',
         ]);
@@ -86,6 +110,8 @@ class ProdukController extends Controller
     
     public function togglePin(Produk $produk)
     {
+        Gate::authorize('edit products');
+        
         $produk->update([
             'is_pinned' => !$produk->is_pinned
         ]);
@@ -95,8 +121,16 @@ class ProdukController extends Controller
 
     public function destroy(Produk $produk)
     {
+        Gate::authorize('delete products');
+        
         try {
+            $fotoPath = $produk->foto;
             $produk->delete();
+            
+            if ($fotoPath) {
+                Storage::disk('public')->delete($fotoPath);
+            }
+            
             return redirect()->back();
         } catch (\Illuminate\Database\QueryException $e) {
             if ($e->getCode() == "23000") {

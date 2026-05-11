@@ -10,11 +10,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Gate;
 
 class TransaksiController extends Controller
 {
     public function index()
     {
+        Gate::authorize('view transaction');
+        
         // Kita kirim data produk untuk ditampilkan di katalog kasir
         return Inertia::render('Transaksi/Index', [
             'products' => Produk::query()
@@ -26,6 +29,8 @@ class TransaksiController extends Controller
 
     public function store(Request $request)
     {
+        Gate::authorize('create transaction');
+        
         $request->validate([
             'cart' => 'required|array|min:1',
             'bayar' => 'required|numeric',
@@ -153,6 +158,8 @@ class TransaksiController extends Controller
 
     public function history(Request $request)
     {
+        Gate::authorize('view history');
+        
         $query = Transaksi::with(['user', 'details.produk', 'hutang'])
             ->latest(); // Urutkan created_at desc
 
@@ -183,6 +190,8 @@ class TransaksiController extends Controller
 
     public function print(Transaksi $transaksi)
     {
+        Gate::authorize('view transaction');
+        
         // Load relasi user dan details produk
         $transaksi->load(['user', 'details.produk']);
 
@@ -193,6 +202,8 @@ class TransaksiController extends Controller
 
     public function destroy(Transaksi $transaksi)
     {
+        Gate::authorize('delete history');
+        
         $transaksi->delete();
         return redirect()->back();
     }
