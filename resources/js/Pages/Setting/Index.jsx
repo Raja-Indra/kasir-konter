@@ -20,7 +20,7 @@ export default function SettingIndex({ auth }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         post(route('settings.update'), {
-            onSuccess: () => Swal.fire('Berhasil', 'Pengaturan Toko Disimpan', 'success'),
+            onSuccess: () => Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Pengaturan Toko Disimpan', showConfirmButton: false, timer: 3000, timerProgressBar: true }),
         });
     };
 

@@ -49,7 +49,7 @@ export default function HutangIndex({ auth, hutangs, filters }) {
             onSuccess: () => {
                 setIsCreateModalOpen(false);
                 reset();
-                MySwal.fire('Berhasil', 'Data kasbon tersimpan', 'success');
+                MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Data kasbon tersimpan', showConfirmButton: false, timer: 3000, timerProgressBar: true });
             }
         });
     };
@@ -102,7 +102,7 @@ export default function HutangIndex({ auth, hutangs, filters }) {
             if (nominal > hutang.sisa) return MySwal.fire('Error', 'Nominal melebihi sisa hutang', 'error');
 
             router.post(route('hutang.cicil', hutang.id), { nominal, catatan }, {
-                onSuccess: () => MySwal.fire('Lunas!', 'Pembayaran diterima', 'success')
+                onSuccess: () => MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Pembayaran diterima', showConfirmButton: false, timer: 3000, timerProgressBar: true })
             });
         }
     };
@@ -278,7 +278,7 @@ export default function HutangIndex({ auth, hutangs, filters }) {
             </Modal>
 
             {/* MODAL DETAIL */}
-            <Modal show={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} maxWidth="2xl">
+            <Modal show={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} maxWidth="4xl">
                 {selectedHutang && (
                     <div className="p-6">
                         <div className="flex items-center justify-between pb-4 mb-4 border-b">
@@ -305,33 +305,69 @@ export default function HutangIndex({ auth, hutangs, filters }) {
                             </div>
                         </div>
 
-                        <h3 className="mb-3 font-bold text-md">Riwayat Cicilan / Pembayaran</h3>
-                        {selectedHutang.cicilan && selectedHutang.cicilan.length > 0 ? (
-                            <div className="overflow-x-auto border rounded-lg">
-                                <table className="w-full text-sm text-left">
-                                    <thead className="text-gray-600 bg-gray-100">
-                                        <tr>
-                                            <th className="px-4 py-2">Waktu</th>
-                                            <th className="px-4 py-2">Nominal</th>
-                                            <th className="px-4 py-2">Catatan</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y">
-                                        {selectedHutang.cicilan.map((cicil, idx) => (
-                                            <tr key={idx} className="hover:bg-gray-50">
-                                                <td className="px-4 py-2 text-gray-500 whitespace-nowrap">{formatDateTime(cicil.created_at)}</td>
-                                                <td className="px-4 py-2 font-semibold text-green-600">{formatRupiah(cicil.nominal_bayar)}</td>
-                                                <td className="px-4 py-2 text-gray-600">{cicil.catatan || '-'}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                            {/* Kiri: Riwayat Penambahan Hutang */}
+                            <div>
+                                <h3 className="mb-3 font-bold text-md text-red-700">Riwayat Penambahan Hutang</h3>
+                                {selectedHutang.riwayat_hutang && selectedHutang.riwayat_hutang.length > 0 ? (
+                                    <div className="overflow-x-auto border rounded-lg">
+                                        <table className="w-full text-sm text-left">
+                                            <thead className="text-gray-600 bg-gray-100">
+                                                <tr>
+                                                    <th className="px-4 py-2">Waktu</th>
+                                                    <th className="px-4 py-2">Nominal</th>
+                                                    <th className="px-4 py-2">Keterangan</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y">
+                                                {selectedHutang.riwayat_hutang.map((riwayat, idx) => (
+                                                    <tr key={idx} className="hover:bg-gray-50">
+                                                        <td className="px-4 py-2 text-gray-500 whitespace-nowrap">{formatDateTime(riwayat.created_at)}</td>
+                                                        <td className="px-4 py-2 font-semibold text-red-600">{formatRupiah(riwayat.nominal_hutang)}</td>
+                                                        <td className="px-4 py-2 text-gray-600">{riwayat.keterangan || '-'}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="p-4 text-center border border-gray-200 rounded-lg bg-gray-50">
+                                        <p className="text-sm text-gray-500">Belum ada riwayat penambahan detail.</p>
+                                    </div>
+                                )}
                             </div>
-                        ) : (
-                            <div className="p-4 text-center border border-orange-100 rounded-lg bg-orange-50">
-                                <p className="text-sm text-orange-600">Belum ada riwayat pembayaran/cicilan.</p>
+
+                            {/* Kanan: Riwayat Pembayaran/Cicilan */}
+                            <div>
+                                <h3 className="mb-3 font-bold text-md text-green-700">Riwayat Cicilan / Pembayaran</h3>
+                                {selectedHutang.cicilan && selectedHutang.cicilan.length > 0 ? (
+                                    <div className="overflow-x-auto border rounded-lg">
+                                        <table className="w-full text-sm text-left">
+                                            <thead className="text-gray-600 bg-gray-100">
+                                                <tr>
+                                                    <th className="px-4 py-2">Waktu</th>
+                                                    <th className="px-4 py-2">Nominal</th>
+                                                    <th className="px-4 py-2">Catatan</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y">
+                                                {selectedHutang.cicilan.map((cicil, idx) => (
+                                                    <tr key={idx} className="hover:bg-gray-50">
+                                                        <td className="px-4 py-2 text-gray-500 whitespace-nowrap">{formatDateTime(cicil.created_at)}</td>
+                                                        <td className="px-4 py-2 font-semibold text-green-600">{formatRupiah(cicil.nominal_bayar)}</td>
+                                                        <td className="px-4 py-2 text-gray-600">{cicil.catatan || '-'}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="p-4 text-center border border-orange-100 rounded-lg bg-orange-50">
+                                        <p className="text-sm text-orange-600">Belum ada riwayat pembayaran/cicilan.</p>
+                                    </div>
+                                )}
                             </div>
-                        )}
+                        </div>
 
                         <div className="mt-6 text-right">
                             <SecondaryButton onClick={() => setIsDetailModalOpen(false)}>Tutup</SecondaryButton>

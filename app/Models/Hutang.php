@@ -22,4 +22,9 @@ class Hutang extends Model
     {
         return $this->hasMany(RiwayatCicilan::class)->latest();
     }
+
+    public function riwayatHutang()
+    {
+        return $this->hasMany(RiwayatHutang::class)->oldest();
+    }
 }

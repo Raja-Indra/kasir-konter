@@ -8,7 +8,7 @@ import withReactContent from 'sweetalert2-react-content';
 
 const MySwal = withReactContent(Swal);
 
-export default function TransaksiIndex({ auth, products }) {
+export default function TransaksiIndex({ auth, products, pelangganHutang }) {
     // --- STATE ---
     const { errors } = usePage().props;
     const [keyword, setKeyword] = useState('');
@@ -226,7 +226,17 @@ export default function TransaksiIndex({ auth, products }) {
                         setUmur('');
                         setMetodePembayaran('tunai');
                         setNamaPelanggan('');
-                        MySwal.fire('Berhasil!', 'Transaksi tersimpan & Stok berkurang.', 'success');
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Transaksi berhasil'
+                        });
                     },
                     onError: (errors) => {
                         const firstError = Object.values(errors)[0];
@@ -348,11 +358,6 @@ export default function TransaksiIndex({ auth, products }) {
                                         {product.jenis && (
                                             <p className="mt-1 text-[10px] text-gray-500 uppercase">{product.jenis}</p>
                                         )}
-                                        {product.is_flexible_price && (
-                                            <div className="mt-1 text-[10px] font-medium text-orange-600 bg-orange-50 inline-block px-1.5 py-0.5 rounded border border-orange-100">
-                                                Admin: {formatRupiah(product.harga_jual)}
-                                            </div>
-                                        )}
                                     </div>
 
                                     {/* ... Sisa kode harga dan stok (biarkan sama) ... */}
@@ -367,6 +372,11 @@ export default function TransaksiIndex({ auth, products }) {
                                                 </p>
                                             ) : (
                                                 <p className="text-sm font-bold text-blue-600">{formatRupiah(product.harga_jual)}</p>
+                                            )}
+                                            {product.is_flexible_price && (
+                                                <div className="mt-1 text-[10px] font-medium text-orange-600 bg-orange-50 inline-block px-1.5 py-0.5 rounded border border-orange-100">
+                                                    Admin: {formatRupiah(product.harga_jual)}
+                                                </div>
                                             )}
                                         </div>
                                         {!product.is_digital && (
@@ -463,7 +473,14 @@ export default function TransaksiIndex({ auth, products }) {
                                     placeholder="Nama penghutang..."
                                     value={namaPelanggan}
                                     onChange={(e) => setNamaPelanggan(e.target.value)}
+                                    list="pelanggan-list"
+                                    autoComplete="off"
                                 />
+                                <datalist id="pelanggan-list">
+                                    {pelangganHutang && pelangganHutang.map((nama, index) => (
+                                        <option key={index} value={nama} />
+                                    ))}
+                                </datalist>
                             </div>
                         )}
 

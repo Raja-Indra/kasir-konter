@@ -96,7 +96,7 @@ export default function UserIndex({ auth, users, roles }) {
                 post(routeName, {
                     onSuccess: () => {
                         closeModal();
-                        MySwal.fire('Berhasil!', 'Data user tersimpan.', 'success');
+                        MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Data user tersimpan', showConfirmButton: false, timer: 3000, timerProgressBar: true });
                     }
                 });
             }
@@ -114,7 +114,7 @@ export default function UserIndex({ auth, users, roles }) {
         }).then((result) => {
             if (result.isConfirmed) {
                 router.delete(route('users.destroy', id), {
-                    onSuccess: () => MySwal.fire('Terhapus!', 'User berhasil dihapus.', 'success')
+                    onSuccess: () => MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'User berhasil dihapus', showConfirmButton: false, timer: 3000, timerProgressBar: true })
                 });
             }
         });

@@ -149,7 +149,7 @@ export default function Dashboard({ auth, stats, chart, top_produk, low_stock, l
                         {/* Laba Hutang */}
                         <div className="flex flex-col justify-between h-32 p-5 bg-white border border-gray-100 shadow-sm rounded-xl">
                             <div>
-                                <p className="text-xs font-bold tracking-wider text-gray-400 uppercase">Laba Hutang</p>
+                                <p className="text-xs font-bold tracking-wider text-gray-400 uppercase">Laba Hutang Hari Ini</p>
                                 <h3 className="mt-1 text-2xl font-extrabold text-orange-500">{formatRupiah(stats.laba_hutang_hari_ini)}</h3>
                             </div>
                             <div className="px-2 py-1 text-xs font-bold text-orange-600 rounded-full bg-orange-50 w-fit">
@@ -160,7 +160,7 @@ export default function Dashboard({ auth, stats, chart, top_produk, low_stock, l
                         {/* Transaksi Count */}
                         <div className="flex flex-col justify-between h-32 p-5 bg-white border border-gray-100 shadow-sm rounded-xl">
                             <div>
-                                <p className="text-xs font-bold tracking-wider text-gray-400 uppercase">Jumlah Transaksi</p>
+                                <p className="text-xs font-bold tracking-wider text-gray-400 uppercase">Jumlah Transaksi Hari Ini</p>
                                 <h3 className="mt-1 text-2xl font-extrabold text-gray-900">{stats.transaksi_hari_ini} <span className="text-sm font-medium text-gray-400">Nota</span></h3>
                             </div>
                             <div className="px-2 py-1 text-xs font-bold text-blue-500 rounded-full bg-blue-50 w-fit">

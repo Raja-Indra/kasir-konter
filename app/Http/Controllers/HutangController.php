@@ -18,7 +18,7 @@ class HutangController extends Controller
         $search = $request->input('search');
 
         // Tampilkan hutang yang belum lunas di atas
-        $hutangs = Hutang::with('cicilan')
+        $hutangs = Hutang::with(['cicilan', 'riwayatHutang'])
             ->when($search, function ($query, $search) {
                 $query->where('nama_pelanggan', 'like', "%{$search}%")
                     ->orWhere('keterangan', 'like', "%{$search}%")
@@ -48,10 +48,35 @@ class HutangController extends Controller
             'jatuh_tempo' => 'nullable|date',
         ]);
 
-        $validated['sisa'] = $validated['total_hutang'];
-        $validated['status'] = 'belum_lunas';
+        $existingHutang = Hutang::where('nama_pelanggan', $validated['nama_pelanggan'])
+            ->first();
 
-        Hutang::create($validated);
+        if ($existingHutang) {
+            $existingHutang->update([
+                'total_hutang' => $existingHutang->total_hutang + $validated['total_hutang'],
+                'sisa' => $existingHutang->sisa + $validated['total_hutang'],
+                'keterangan' => $existingHutang->keterangan . ($validated['keterangan'] ? ' | ' . $validated['keterangan'] : ''),
+                'no_hp' => $validated['no_hp'] ?? $existingHutang->no_hp,
+                'jatuh_tempo' => $validated['jatuh_tempo'] ?? $existingHutang->jatuh_tempo,
+                'status' => 'belum_lunas',
+            ]);
+
+            \App\Models\RiwayatHutang::create([
+                'hutang_id' => $existingHutang->id,
+                'nominal_hutang' => $validated['total_hutang'],
+                'keterangan' => $validated['keterangan'] ?? 'Penambahan hutang manual',
+            ]);
+        } else {
+            $validated['sisa'] = $validated['total_hutang'];
+            $validated['status'] = 'belum_lunas';
+            $newHutang = Hutang::create($validated);
+
+            \App\Models\RiwayatHutang::create([
+                'hutang_id' => $newHutang->id,
+                'nominal_hutang' => $validated['total_hutang'],
+                'keterangan' => $validated['keterangan'] ?? 'Hutang awal',
+            ]);
+        }
         return redirect()->back()->with('success', 'Data hutang dicatat.');
     }
 

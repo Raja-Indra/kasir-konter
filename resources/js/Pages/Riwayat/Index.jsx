@@ -76,11 +76,7 @@ export default function RiwayatIndex({ auth, transaksi, providers, jenis_produk,
             if (result.isConfirmed) {
                 router.delete(route('transaksi.destroy', id), {
                     onSuccess: () => {
-                        MySwal.fire(
-                            'Terhapus!',
-                            'Transaksi berhasil dihapus.',
-                            'success'
-                        );
+                        MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Transaksi berhasil dihapus', showConfirmButton: false, timer: 3000, timerProgressBar: true });
                     }
                 });
             }
@@ -173,7 +169,7 @@ export default function RiwayatIndex({ auth, transaksi, providers, jenis_produk,
                                                     +{formatRupiah(item.total_laba)}
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-center">
-                                                    {item.hutang ? (
+                                                    {parseFloat(item.kembalian) < 0 ? (
                                                         <span className="px-2 py-1 text-xs font-bold text-red-700 bg-red-100 rounded-full">Hutang</span>
                                                     ) : (
                                                         <span className="px-2 py-1 text-xs font-bold text-green-700 bg-green-100 rounded-full">Lunas</span>
@@ -278,10 +274,18 @@ export default function RiwayatIndex({ auth, transaksi, providers, jenis_produk,
                                     <span className="text-gray-600">Tunai</span>
                                     <span>{formatRupiah(selectedTrx.bayar)}</span>
                                 </div>
-                                <div className="flex justify-between font-semibold text-blue-600">
-                                    <span>Kembalian</span>
-                                    <span>{formatRupiah(selectedTrx.kembalian)}</span>
-                                </div>
+                                {parseFloat(selectedTrx.kembalian) >= 0 && (
+                                    <div className="flex justify-between font-semibold text-blue-600">
+                                        <span>Kembalian</span>
+                                        <span>{formatRupiah(selectedTrx.kembalian)}</span>
+                                    </div>
+                                )}
+                                {parseFloat(selectedTrx.kembalian) < 0 && (
+                                    <div className="flex justify-between font-bold text-red-600">
+                                        <span>Sisa Hutang</span>
+                                        <span>{formatRupiah(Math.abs(selectedTrx.kembalian))}</span>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="flex items-center justify-between pt-4 mt-6 border-t border-gray-100">

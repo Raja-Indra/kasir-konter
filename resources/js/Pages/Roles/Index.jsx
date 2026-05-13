@@ -105,13 +105,7 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
         const options = {
             onSuccess: () => {
                 setIsModalOpen(false);
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Sukses',
-                    text: 'Data tersimpan',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Data tersimpan', showConfirmButton: false, timer: 3000, timerProgressBar: true });
             }
         };
 
@@ -126,7 +120,11 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
         Swal.fire({
             title: 'Yakin hapus?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya'
         }).then((res) => {
-            if(res.isConfirmed) router.delete(route('roles.destroy', id));
+            if(res.isConfirmed) {
+                router.delete(route('roles.destroy', id), {
+                    onSuccess: () => Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Role dihapus', showConfirmButton: false, timer: 3000, timerProgressBar: true })
+                });
+            }
         });
     };
 

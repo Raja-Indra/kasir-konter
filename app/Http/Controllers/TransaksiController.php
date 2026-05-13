@@ -23,7 +23,8 @@ class TransaksiController extends Controller
             'products' => Produk::query()
                 ->orderBy('is_pinned', 'desc') 
                 ->latest()
-                ->get()
+                ->get(),
+            'pelangganHutang' => \App\Models\Hutang::select('nama_pelanggan')->distinct()->pluck('nama_pelanggan')
         ]);
     }
 
@@ -67,15 +68,41 @@ class TransaksiController extends Controller
                         $namaProdukList = collect($request->cart)->pluck('nama_produk')->implode(', ');
                         $keteranganHutang = 'Hutang: ' . (strlen($namaProdukList) > 200 ? substr($namaProdukList, 0, 200) . '...' : $namaProdukList);
 
-                        \App\Models\Hutang::create([
-                            'transaksi_id' => $transaksi->id,
-                            'nama_pelanggan' => $request->nama_pelanggan,
-                            'keterangan' => $keteranganHutang,
-                            'total_hutang' => $request->total_harga,
-                            'terbayar' => $request->bayar,
-                            'sisa' => $sisaHutang,
-                            'status' => 'belum_lunas',
-                        ]);
+                        $existingHutang = \App\Models\Hutang::where('nama_pelanggan', $request->nama_pelanggan)
+                            ->first();
+
+                        if ($existingHutang) {
+                            $existingHutang->update([
+                                'total_hutang' => $existingHutang->total_hutang + $request->total_harga,
+                                'terbayar' => $existingHutang->terbayar + $request->bayar,
+                                'sisa' => $existingHutang->sisa + $sisaHutang,
+                                'keterangan' => $existingHutang->keterangan . ' | ' . $keteranganHutang,
+                                'status' => 'belum_lunas',
+                                // 'transaksi_id' => $transaksi->id, // Biarkan pakai transaksi awal agar riwayat lama tetap punya acuan, atau update ke yang baru
+                            ]);
+
+                            \App\Models\RiwayatHutang::create([
+                                'hutang_id' => $existingHutang->id,
+                                'nominal_hutang' => $request->total_harga,
+                                'keterangan' => $keteranganHutang,
+                            ]);
+                        } else {
+                            $newHutang = \App\Models\Hutang::create([
+                                'transaksi_id' => $transaksi->id,
+                                'nama_pelanggan' => $request->nama_pelanggan,
+                                'keterangan' => $keteranganHutang,
+                                'total_hutang' => $request->total_harga,
+                                'terbayar' => $request->bayar,
+                                'sisa' => $sisaHutang,
+                                'status' => 'belum_lunas',
+                            ]);
+
+                            \App\Models\RiwayatHutang::create([
+                                'hutang_id' => $newHutang->id,
+                                'nominal_hutang' => $request->total_harga,
+                                'keterangan' => $keteranganHutang,
+                            ]);
+                        }
                     }
                 }
 

@@ -28,7 +28,7 @@ export default function WhatsappSetting({ auth }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         post(route('settings.wa.update'), {
-            onSuccess: () => Swal.fire('Berhasil', 'Token Fonnte Disimpan', 'success'),
+            onSuccess: () => Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Token Fonnte Disimpan', showConfirmButton: false, timer: 3000, timerProgressBar: true }),
             onError: (err) => Swal.fire('Gagal', err.error || 'Terjadi kesalahan', 'error'),
         });
     };
@@ -43,7 +43,7 @@ export default function WhatsappSetting({ auth }) {
         testForm.post(route('settings.wa.test'), {
             preserveScroll: true,
             onSuccess: () => {
-                Swal.fire('Berhasil', 'Pesan percobaan telah dikirim! Silakan cek WhatsApp Anda.', 'success');
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Pesan percobaan telah dikirim!', showConfirmButton: false, timer: 3000, timerProgressBar: true });
                 testForm.reset();
             },
             onError: (err) => {
@@ -56,7 +56,7 @@ export default function WhatsappSetting({ auth }) {
         e.preventDefault();
         alertForm.post(route('settings.wa.alert'), {
             preserveScroll: true,
-            onSuccess: () => Swal.fire('Berhasil', 'Pengaturan Alert Stok Disimpan', 'success'),
+            onSuccess: () => Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Pengaturan Alert Stok Disimpan', showConfirmButton: false, timer: 3000, timerProgressBar: true }),
             onError: (err) => Swal.fire('Gagal', err.error || 'Terjadi kesalahan', 'error'),
         });
     };
@@ -74,7 +74,7 @@ export default function WhatsappSetting({ auth }) {
                     preserveScroll: true,
                     onSuccess: () => {
                         const flashMessage = usePage().props.flash?.success;
-                        Swal.fire('Selesai', flashMessage || 'Alert berhasil dikirim.', 'success');
+                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: flashMessage || 'Alert berhasil dikirim', showConfirmButton: false, timer: 3000, timerProgressBar: true });
                     },
                     onError: (err) => Swal.fire('Gagal', err.error || 'Gagal memproses alert manual', 'error'),
                 });

@@ -188,11 +188,15 @@ export default function ProviderIndex({ auth, providers }) {
                 router.delete(route('providers.destroy', id), {
                     onSuccess: () => {
                         // Tampilkan pesan sukses setelah berhasil dihapus
-                        MySwal.fire(
-                            'Terhapus!',
-                            'Data provider berhasil dihapus.',
-                            'success'
-                        );
+                        MySwal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            icon: 'success',
+                            title: 'Data provider berhasil dihapus'
+                        });
                     }
                 });
             }

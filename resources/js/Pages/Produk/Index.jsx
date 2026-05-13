@@ -206,7 +206,7 @@ export default function ProdukIndex({ auth, products, providers }) {
             if (result.isConfirmed) {
                 router.delete(route('produk.destroy', id), {
                     onSuccess: () => {
-                        MySwal.fire('Terhapus!', 'Produk berhasil dihapus.', 'success');
+                        MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Produk berhasil dihapus', showConfirmButton: false, timer: 3000, timerProgressBar: true });
                     }
                 });
             }
