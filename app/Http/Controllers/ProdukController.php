@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Produk;
 use App\Models\Provider;
+use App\Models\RiwayatSaldoProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 
@@ -17,7 +19,7 @@ class ProdukController extends Controller
         
         return Inertia::render('Produk/Index', [
             'products' => Produk::with('provider')->latest()->get(),
-            'providers' => Provider::select('id', 'nama_provider')->get()
+            'providers' => Provider::select('id', 'nama_provider', 'saldo')->get()
         ]);
     }
 
@@ -93,6 +95,73 @@ class ProdukController extends Controller
 
         $produk->update($validated);
         return redirect()->back();
+    }
+
+    public function injectVoucher(Request $request)
+    {
+        Gate::authorize('create products'); // or 'edit products' depending on policy
+        
+        $validated = $request->validate([
+            'provider_id' => 'required|exists:providers,id',
+            'is_new_produk' => 'required|boolean',
+            'produk_id' => 'required_if:is_new_produk,false|nullable|exists:products,id',
+            
+            // Atribut produk baru
+            'nama_produk' => 'required_if:is_new_produk,true|nullable|string|max:255',
+            'harga_jual' => 'required_if:is_new_produk,true|nullable|numeric',
+            'jenis' => 'required_if:is_new_produk,true|nullable|string',
+            'is_digital' => 'required_if:is_new_produk,true|nullable|boolean',
+            
+            // Atribut inject
+            'qty' => 'required|integer|min:1',
+            'harga_modal_inject' => 'required|numeric|min:0',
+            'harga_kertas_voucher' => 'required|numeric|min:0',
+        ]);
+
+        $provider = Provider::findOrFail($validated['provider_id']);
+        $totalPotongSaldo = $validated['qty'] * $validated['harga_modal_inject'];
+        $hargaModalBaru = $validated['harga_modal_inject'] + $validated['harga_kertas_voucher'];
+
+        if ($provider->saldo < $totalPotongSaldo) {
+            return redirect()->back()->withErrors(['error' => 'Saldo Provider tidak mencukupi untuk melakukan inject. Saldo: Rp ' . number_format($provider->saldo, 0, ',', '.') . ', Dibutuhkan: Rp ' . number_format($totalPotongSaldo, 0, ',', '.')]);
+        }
+
+        DB::beginTransaction();
+        try {
+            if ($validated['is_new_produk']) {
+                $produk = Produk::create([
+                    'provider_id' => $validated['provider_id'],
+                    'nama_produk' => $validated['nama_produk'],
+                    'harga_jual' => $validated['harga_jual'],
+                    'harga_modal' => $hargaModalBaru,
+                    'stok' => $validated['qty'],
+                    'jenis' => $validated['jenis'],
+                    'is_digital' => $validated['is_digital'],
+                    'is_tarik_tunai' => false,
+                    'is_flexible_price' => false,
+                ]);
+            } else {
+                $produk = Produk::findOrFail($validated['produk_id']);
+                $produk->increment('stok', $validated['qty']);
+                $produk->update(['harga_modal' => $hargaModalBaru]);
+            }
+
+            $provider->decrement('saldo', $totalPotongSaldo);
+
+            RiwayatSaldoProvider::create([
+                'provider_id' => $provider->id,
+                'produk_id' => $produk->id,
+                'jenis' => 'keluar',
+                'nominal' => $totalPotongSaldo,
+                'keterangan' => 'Inject ' . $validated['qty'] . ' pcs ' . $produk->nama_produk,
+            ]);
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Inject voucher berhasil. Saldo terpotong Rp ' . number_format($totalPotongSaldo, 0, ',', '.'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan sistem saat melakukan inject: ' . $e->getMessage()]);
+        }
     }
 
     public function addStock(Request $request, Produk $produk)

@@ -36,6 +36,82 @@ export default function ProdukIndex({ auth, products, providers }) {
         clearErrors: clearStockErrors
     } = useForm({ tambah_stok: '' });
 
+    // State Inject Voucher
+    const [isInjectModalOpen, setIsInjectModalOpen] = useState(false);
+    const {
+        data: injectData,
+        setData: setInjectData,
+        post: postInject,
+        processing: injectProcessing,
+        errors: injectErrors,
+        reset: resetInject,
+        clearErrors: clearInjectErrors
+    } = useForm({
+        provider_id: '',
+        is_new_produk: false,
+        produk_id: '',
+        nama_produk: '',
+        harga_jual: '',
+        jenis: '',
+        is_digital: false,
+        qty: '',
+        harga_modal_inject: '',
+        harga_kertas_voucher: ''
+    });
+
+    const openInjectModal = () => {
+        clearInjectErrors();
+        setInjectData({
+            provider_id: providers.length > 0 ? providers[0].id : '',
+            is_new_produk: false,
+            produk_id: '',
+            nama_produk: '',
+            harga_jual: '',
+            jenis: '',
+            is_digital: false,
+            qty: '',
+            harga_modal_inject: '',
+            harga_kertas_voucher: ''
+        });
+        setIsInjectModalOpen(true);
+    };
+
+    const closeInjectModal = () => {
+        setIsInjectModalOpen(false);
+        resetInject();
+    };
+
+    const handleInjectSubmit = (e) => {
+        e.preventDefault();
+        MySwal.fire({
+            title: 'Proses Inject Voucher?',
+            text: `Saldo provider akan terpotong sejumlah Rp ${parseFloat((injectData.qty || 0) * (injectData.harga_modal_inject || 0)).toLocaleString('id-ID')}. Lanjutkan?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Inject',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                postInject(route('produk.inject'), {
+                    onSuccess: () => {
+                        closeInjectModal();
+                        const Toast = Swal.mixin({
+                            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true
+                        });
+                        Toast.fire({ icon: 'success', title: 'Inject Voucher Berhasil!' });
+                    },
+                    onError: (err) => {
+                        if(err.error) {
+                            MySwal.fire('Gagal!', err.error, 'error');
+                        }
+                    }
+                });
+            }
+        });
+    };
+
     // Filter Data Berdasarkan Tab dan Pencarian
     const filteredProducts = products.filter(product => {
         const matchTab = activeTab === 'digital' ? product.is_digital : !product.is_digital;
@@ -237,7 +313,10 @@ export default function ProdukIndex({ auth, products, providers }) {
                                     />
                                 </div>
                                 {can('create products') && (
-                                    <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={openCreateModal}>+ Tambah Produk</PrimaryButton>
+                                    <div className="flex gap-2">
+                                        <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={openCreateModal}>+ Tambah Produk</PrimaryButton>
+                                        <PrimaryButton className="!bg-yellow-400 !text-blue-900 hover:!bg-yellow-500" onClick={openInjectModal}>💉 Inject Voucher</PrimaryButton>
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -673,6 +752,190 @@ export default function ProdukIndex({ auth, products, providers }) {
                         <SecondaryButton onClick={closeAddStockModal}>Batal</SecondaryButton>
                         <PrimaryButton className="ms-3" disabled={stockProcessing}>
                             Tambah Stok
+                        </PrimaryButton>
+                    </div>
+                </form>
+            </Modal>
+
+            {/* MODAL INJECT VOUCHER */}
+            <Modal show={isInjectModalOpen} onClose={closeInjectModal} maxWidth="2xl">
+                <form onSubmit={handleInjectSubmit} className="p-6">
+                    <h2 className="mb-4 text-lg font-medium text-gray-900">
+                        💉 Inject Voucher Kosong
+                    </h2>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Pilih Provider */}
+                        <div className="col-span-2">
+                            <InputLabel htmlFor="inject_provider_id" value="Provider" />
+                            <select
+                                id="inject_provider_id"
+                                className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                value={injectData.provider_id}
+                                onChange={(e) => {
+                                    setInjectData(data => ({
+                                        ...data,
+                                        provider_id: e.target.value,
+                                        produk_id: ''
+                                    }));
+                                }}
+                            >
+                                <option value="">-- Pilih Provider --</option>
+                                {providers.map((prov) => (
+                                    <option key={prov.id} value={prov.id}>{prov.nama_provider}</option>
+                                ))}
+                            </select>
+                            <InputError message={injectErrors.provider_id} className="mt-2" />
+                            
+                            {/* Saldo Info */}
+                            {injectData.provider_id && (
+                                <div className="mt-1 text-sm text-gray-600">
+                                    Sisa Saldo: <span className="font-bold text-blue-600">Rp {parseFloat(providers.find(p => p.id == injectData.provider_id)?.saldo || 0).toLocaleString('id-ID')}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Toggle Jenis Produk */}
+                        <div className="col-span-2 p-3 mt-2 border border-gray-200 rounded bg-gray-50">
+                            <label className="flex items-center cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    className="w-5 h-5 text-blue-600 border-gray-300 rounded shadow-sm focus:ring-blue-500"
+                                    checked={injectData.is_new_produk}
+                                    onChange={(e) => setInjectData('is_new_produk', e.target.checked)}
+                                />
+                                <div className="ms-3">
+                                    <span className="block text-sm font-medium text-gray-900">
+                                        Buat Produk Baru
+                                    </span>
+                                    <span className="block text-xs text-gray-500">
+                                        Centang jika Anda meng-inject jenis voucher yang belum ada di daftar produk.
+                                    </span>
+                                </div>
+                            </label>
+                            <InputError message={injectErrors.is_new_produk} className="mt-2" />
+                        </div>
+
+                        {!injectData.is_new_produk ? (
+                            // Pilih Produk Lama
+                            <div className="col-span-2">
+                                <InputLabel htmlFor="inject_produk_id" value="Pilih Produk" />
+                                <select
+                                    id="inject_produk_id"
+                                    className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    value={injectData.produk_id}
+                                    onChange={(e) => setInjectData('produk_id', e.target.value)}
+                                >
+                                    <option value="">-- Pilih Produk Fisik --</option>
+                                    {products.filter(p => p.provider_id == injectData.provider_id && !p.is_digital && !p.is_flexible_price).map((prod) => (
+                                        <option key={prod.id} value={prod.id}>{prod.nama_produk} (Sisa: {prod.stok})</option>
+                                    ))}
+                                </select>
+                                <InputError message={injectErrors.produk_id} className="mt-2" />
+                            </div>
+                        ) : (
+                            // Input Produk Baru
+                            <>
+                                <div className="col-span-2">
+                                    <InputLabel htmlFor="inject_nama_produk" value="Nama Produk Baru" />
+                                    <TextInput
+                                        id="inject_nama_produk"
+                                        type="text"
+                                        className="block w-full mt-1"
+                                        value={injectData.nama_produk}
+                                        onChange={(e) => setInjectData('nama_produk', e.target.value)}
+                                        placeholder="Contoh: Voucher Fisik Telkomsel 2GB"
+                                    />
+                                    <InputError message={injectErrors.nama_produk} className="mt-2" />
+                                </div>
+                                <div>
+                                    <InputLabel htmlFor="inject_jenis" value="Jenis Produk" />
+                                    <TextInput
+                                        id="inject_jenis"
+                                        type="text"
+                                        className="block w-full mt-1"
+                                        value={injectData.jenis}
+                                        onChange={(e) => setInjectData('jenis', e.target.value)}
+                                        placeholder="Contoh: Voucher"
+                                    />
+                                    <InputError message={injectErrors.jenis} className="mt-2" />
+                                </div>
+                                <div>
+                                    <InputLabel htmlFor="inject_harga_jual" value="Harga Jual (Rp)" />
+                                    <TextInput
+                                        id="inject_harga_jual"
+                                        type="number"
+                                        className="block w-full mt-1"
+                                        value={injectData.harga_jual}
+                                        onChange={(e) => setInjectData('harga_jual', e.target.value)}
+                                        placeholder="Contoh: 15000"
+                                    />
+                                    <InputError message={injectErrors.harga_jual} className="mt-2" />
+                                </div>
+                            </>
+                        )}
+
+                        <div className="col-span-2 mt-4"><hr /></div>
+
+                        {/* Input Inject Details */}
+                        <div>
+                            <InputLabel htmlFor="inject_harga_modal_inject" value="Harga Modal Inject per Pcs (Memotong Saldo)" />
+                            <TextInput
+                                id="inject_harga_modal_inject"
+                                type="number"
+                                className="block w-full mt-1"
+                                value={injectData.harga_modal_inject}
+                                onChange={(e) => setInjectData('harga_modal_inject', e.target.value)}
+                                placeholder="Contoh: 10000"
+                            />
+                            <InputError message={injectErrors.harga_modal_inject} className="mt-2" />
+                        </div>
+                        <div>
+                            <InputLabel htmlFor="inject_harga_kertas_voucher" value="Harga Kertas Kosong per Pcs" />
+                            <TextInput
+                                id="inject_harga_kertas_voucher"
+                                type="number"
+                                className="block w-full mt-1"
+                                value={injectData.harga_kertas_voucher}
+                                onChange={(e) => setInjectData('harga_kertas_voucher', e.target.value)}
+                                placeholder="Contoh: 500"
+                            />
+                            <InputError message={injectErrors.harga_kertas_voucher} className="mt-2" />
+                        </div>
+                        <div className="col-span-2">
+                            <InputLabel htmlFor="inject_qty" value="Jumlah Voucher Kosong (Qty)" />
+                            <TextInput
+                                id="inject_qty"
+                                type="number"
+                                className="block w-full mt-1"
+                                value={injectData.qty}
+                                onChange={(e) => setInjectData('qty', e.target.value)}
+                                placeholder="Contoh: 10"
+                            />
+                            <InputError message={injectErrors.qty} className="mt-2" />
+                        </div>
+                    </div>
+                    
+                    {/* Kalkulasi Summary */}
+                    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex justify-between mb-2">
+                            <span className="text-sm font-medium text-gray-700">Total Potong Saldo:</span>
+                            <span className="font-bold text-red-600">
+                                Rp {parseFloat((injectData.qty || 0) * (injectData.harga_modal_inject || 0)).toLocaleString('id-ID')}
+                            </span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-sm font-medium text-gray-700">Harga Modal Baru Produk:</span>
+                            <span className="font-bold text-green-600">
+                                Rp {parseFloat((parseFloat(injectData.harga_modal_inject) || 0) + (parseFloat(injectData.harga_kertas_voucher) || 0)).toLocaleString('id-ID')}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end mt-6">
+                        <SecondaryButton onClick={closeInjectModal}>Batal</SecondaryButton>
+                        <PrimaryButton className="ms-3 !bg-yellow-500 hover:!bg-yellow-600 text-white" disabled={injectProcessing}>
+                            Inject Sekarang
                         </PrimaryButton>
                     </div>
                 </form>

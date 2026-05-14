@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/providers/{provider}/add-saldo', [ProviderController::class, 'addSaldo'])->name('providers.add_saldo');
     Route::resource('produk', ProdukController::class);
     Route::post('/produk/{produk}/add-stock', [ProdukController::class, 'addStock'])->name('produk.add_stock');
+    Route::post('/produk/inject', [ProdukController::class, 'injectVoucher'])->name('produk.inject');
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
     Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store');
     Route::get('/riwayat-transaksi', [TransaksiController::class, 'history'])->name('riwayat.index');
