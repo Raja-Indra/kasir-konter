@@ -148,11 +148,42 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // 7. DEMOGRAFI UMUR PELANGGAN (Semua Waktu)
+        $ranges = ['< 18', '18-24', '25-34', '35-44', '45-54', '55+', 'Tidak Diketahui'];
+        $demografiUmur = [
+            'labels' => $ranges,
+            'data' => array_fill(0, count($ranges), 0),
+        ];
+
+        $umurData = DB::table('transaksis')
+            ->select(DB::raw("
+                CASE 
+                    WHEN umur_pelanggan IS NULL THEN 'Tidak Diketahui'
+                    WHEN umur_pelanggan < 18 THEN '< 18'
+                    WHEN umur_pelanggan BETWEEN 18 AND 24 THEN '18-24'
+                    WHEN umur_pelanggan BETWEEN 25 AND 34 THEN '25-34'
+                    WHEN umur_pelanggan BETWEEN 35 AND 44 THEN '35-44'
+                    WHEN umur_pelanggan BETWEEN 45 AND 54 THEN '45-54'
+                    ELSE '55+' 
+                END as range_umur,
+                COUNT(*) as total
+            "))
+            ->groupBy('range_umur')
+            ->get();
+
+        foreach ($umurData as $row) {
+            $index = array_search($row->range_umur, $ranges);
+            if ($index !== false) {
+                $demografiUmur['data'][$index] = $row->total;
+            }
+        }
+
         $viewName = $user->can('view dashboard owner') ? 'Dashboard' : 'DashboardAdmin';
 
         return Inertia::render($viewName, [
             'stats' => $stats,
             'chart' => $chartData,
+            'demografi_umur' => $demografiUmur,
             'current_filter' => $filter,
             'top_produk' => $topProduk,
             'low_stock' => $lowStockProducts,

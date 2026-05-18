@@ -20,14 +20,14 @@ export default function Login({ status, canResetPassword }) {
     };
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
+        <div className="flex items-center justify-center w-full min-h-screen p-4 bg-gray-100 dark:bg-gray-900">
             <Head title="Log in" />
 
-            <div className="w-full max-w-6xl bg-white dark:bg-gray-800 shadow-2xl rounded-3xl overflow-hidden flex flex-col lg:flex-row">
-                <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 py-10 lg:px-20 lg:py-12 xl:px-24 xl:py-16 relative">
-                    
-                    <div className="mb-8"> 
-                        <h2 className="text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+            <div className="flex flex-col w-full max-w-6xl overflow-hidden bg-white shadow-2xl dark:bg-gray-800 rounded-3xl lg:flex-row">
+                <div className="relative flex flex-col justify-center w-full px-8 py-10 lg:w-1/2 lg:px-20 lg:py-12 xl:px-24 xl:py-16">
+
+                    <div className="mb-8">
+                        <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 lg:text-4xl dark:text-white">
                             Selamat Datang Kembali!
                         </h2>
                         <p className="mt-3 text-base text-gray-500 dark:text-gray-400">
@@ -36,7 +36,7 @@ export default function Login({ status, canResetPassword }) {
                     </div>
 
                     {status && (
-                        <div className="mb-6 p-4 rounded-lg bg-green-50 text-green-700 text-sm font-medium border border-green-200">
+                        <div className="p-4 mb-6 text-sm font-medium text-green-700 border border-green-200 rounded-lg bg-green-50">
                             {status}
                         </div>
                     )}
@@ -50,7 +50,7 @@ export default function Login({ status, canResetPassword }) {
                                 type="email"
                                 name="email"
                                 value={data.email}
-                                className="mt-2 block w-full px-4 py-3 rounded-xl border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                className="block w-full px-4 py-3 mt-2 border-gray-300 rounded-xl focus:border-indigo-500 focus:ring-indigo-500"
                                 autoComplete="username"
                                 isFocused={true}
                                 placeholder="nama@email.com"
@@ -67,7 +67,7 @@ export default function Login({ status, canResetPassword }) {
                                 type="password"
                                 name="password"
                                 value={data.password}
-                                className="mt-2 block w-full px-4 py-3 rounded-xl border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                className="block w-full px-4 py-3 mt-2 border-gray-300 rounded-xl focus:border-indigo-500 focus:ring-indigo-500"
                                 autoComplete="current-password"
                                 placeholder="••••••••"
                                 onChange={(e) => setData('password', e.target.value)}
@@ -82,9 +82,9 @@ export default function Login({ status, canResetPassword }) {
                                     name="remember"
                                     checked={data.remember}
                                     onChange={(e) => setData('remember', e.target.checked)}
-                                    className="w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                                    className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                                 />
-                                <span className="ms-2 text-sm text-gray-600 dark:text-gray-400 select-none">
+                                <span className="text-sm text-gray-600 select-none ms-2 dark:text-gray-400">
                                     Ingat saya
                                 </span>
                             </label>
@@ -92,7 +92,7 @@ export default function Login({ status, canResetPassword }) {
                             {canResetPassword && (
                                 <Link
                                     href={route('password.request')}
-                                    className="text-sm font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 transition"
+                                    className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-500 dark:text-indigo-400"
                                 >
                                     Lupa password?
                                 </Link>
@@ -101,8 +101,8 @@ export default function Login({ status, canResetPassword }) {
 
                         {/* Tombol Login */}
                         <div className="pt-4">
-                            <PrimaryButton 
-                                className="w-full justify-center py-4 text-base font-bold rounded-xl shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 transform hover:-translate-y-0.5" 
+                            <PrimaryButton
+                                className="w-full justify-center py-4 text-base font-bold rounded-xl shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 transform hover:-translate-y-0.5"
                                 disabled={processing}
                             >
                                 Masuk ke Dashboard
@@ -110,16 +110,16 @@ export default function Login({ status, canResetPassword }) {
                         </div>
                     </form>
 
-                    <p className="mt-8 text-center text-sm text-gray-500">
-                        Belum punya akun? <span className="text-indigo-600 font-semibold cursor-pointer">Hubungi Admin</span>
+                    <p className="mt-8 text-sm text-center text-gray-500">
+                        Belum punya akun? <span className="font-semibold text-indigo-600 cursor-pointer">Hubungi Admin</span>
                     </p>
                 </div>
 
                 {/* --- SISI KANAN: AREA VISUAL --- */}
-                <div className="hidden lg:flex w-1/2 relative bg-gray-900 items-center justify-center overflow-hidden">
-                    <img 
-                        src="/img/login.jpg" 
-                        alt="Abstract Login Background" 
+                <div className="relative items-center justify-center hidden w-1/2 overflow-hidden bg-gray-900 lg:flex">
+                    <img
+                        src="/img/login.png"
+                        alt="Abstract Login Background"
                         className="absolute inset-0 w-full h-full opacity-90"
                     />
                 </div>
