@@ -6,19 +6,20 @@ import {
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend,
   Filler,
 } from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import { Line, Bar } from 'react-chartjs-2';
 
 // Registrasi ChartJS
 ChartJS.register(
-  CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler
+  CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler
 );
 
-export default function Dashboard({ auth, stats, chart, top_produk, low_stock, low_balance, recent_transactions, current_filter }) {
+export default function Dashboard({ auth, stats, chart, demografi_umur, top_produk, low_stock, low_balance, recent_transactions, current_filter }) {
 
     // Format Rupiah Helper
     const formatRupiah = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
@@ -243,6 +244,55 @@ export default function Dashboard({ auth, stats, chart, top_produk, low_stock, l
                             </div>
                         </div>
 
+                    </div>
+
+                    {/* --- GRAFIK DEMOGRAFI UMUR --- */}
+                    <div className="mb-8 p-6 bg-white border border-gray-100 shadow-sm rounded-xl">
+                        <div className="mb-4 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-800">📊 Demografi Umur Pelanggan</h3>
+                                <p className="text-sm text-gray-500">Distribusi usia pelanggan berdasarkan transaksi keseluruhan.</p>
+                            </div>
+                        </div>
+                        <div className="relative w-full h-80">
+                            <Bar options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { 
+                                    legend: { display: false },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        titleFont: { size: 13 },
+                                        bodyFont: { size: 13 },
+                                        padding: 10,
+                                        cornerRadius: 8,
+                                        displayColors: false,
+                                    }
+                                },
+                                scales: { 
+                                    y: { 
+                                        beginAtZero: true, 
+                                        ticks: { stepSize: 1 },
+                                        grid: { color: '#e5e7eb', display: true },
+                                        border: { dash: [4, 4] }
+                                    },
+                                    x: {
+                                        grid: { display: false }
+                                    }
+                                }
+                            }} data={{
+                                labels: demografi_umur?.labels || [],
+                                datasets: [{
+                                    label: 'Jumlah Pelanggan',
+                                    data: demografi_umur?.data || [],
+                                    backgroundColor: 'rgba(37, 99, 235, 0.85)',
+                                    borderColor: 'rgb(37, 99, 235)',
+                                    borderWidth: 1,
+                                    borderRadius: 6,
+                                    barPercentage: 0.5,
+                                }]
+                            }} />
+                        </div>
                     </div>
 
                     {/* --- ALERTS & RECENT TRANSACTIONS --- */}

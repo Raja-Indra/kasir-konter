@@ -57,7 +57,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                             <img
                                 src={shop_settings?.logo_toko ? `/storage/${shop_settings.logo_toko}` : logoIndra}
                                 alt="Logo"
-                                className="object-contain w-auto h-32 transition-all brightness-0 invert"
+                                className="object-contain w-auto h-32 transition-all"
                                 onError={(e) => { e.target.style.display = 'none'; }}
                             />
                         ) : (
@@ -65,7 +65,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                         )}
                     </Link>
                 </div>
-
                 <div className={`mb-4 text-xs font-bold tracking-wider text-blue-300 uppercase transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 hidden'}`}>
                     Menu Utama
                 </div>
@@ -109,7 +108,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                     <svg xmlns="http://www.w3.org/2000/svg" className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === 'transaksi' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                                 )}
                             </button>
-                            
+
                             <ul className={`ml-8 mt-1 space-y-1 overflow-hidden transition-all duration-300 ${activeDropdown === 'transaksi' && isOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0 hidden'}`}>
                                 {can('view history') && (
                                     <li><Link href={route('riwayat.index')} className={`${subLinkClass} ${route().current('riwayat.*') ? activeSubLinkClass : ''}`}>Riwayat Transaksi</Link></li>
@@ -135,7 +134,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                     <svg xmlns="http://www.w3.org/2000/svg" className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === 'master' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                                 )}
                             </button>
-                            
+
                             <ul className={`ml-8 mt-1 space-y-1 overflow-hidden transition-all duration-300 ${activeDropdown === 'master' && isOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0 hidden'}`}>
                                 {can('view products') && (
                                     <li><Link href={route('produk.index')} className={`${subLinkClass} ${route().current('produk.*') ? activeSubLinkClass : ''}`}>Produk</Link></li>
@@ -173,7 +172,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                     <svg xmlns="http://www.w3.org/2000/svg" className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === 'konfigurasi' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                                 )}
                             </button>
-                            
+
                             <ul className={`ml-8 mt-1 space-y-1 overflow-hidden transition-all duration-300 ${activeDropdown === 'konfigurasi' && isOpen ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0 hidden'}`}>
                                 {can('view users') && (
                                     <li><Link href={route('users.index')} className={`${subLinkClass} ${route().current('users.*') ? activeSubLinkClass : ''}`}>Manajemen User</Link></li>
