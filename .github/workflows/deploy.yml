@@ -1,0 +1,29 @@
+name: Deploy Website via FTP
+
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
+  web-deploy:
+    name: Deploying to Shared Hosting
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get latest code
+      uses: actions/checkout@v4
+    
+    - name: Sync files via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ftp.batuah.id  # Jika tidak bisa, gunakan alamat IP hosting Anda
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./
+        server-dir: domains/indracell.batuah.id/public_html/
+        # Mengabaikan file yang tidak perlu di-upload ke server hosting
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/tests/**
