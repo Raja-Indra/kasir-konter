@@ -25,6 +25,15 @@ export default function WhatsappSetting({ auth }) {
         alert_stok_no_hp: shop_settings.alert_stok_no_hp || '',
     });
 
+    const laporanForm = useForm({
+        laporan_wa_aktif: shop_settings.laporan_wa_aktif === '1',
+        laporan_wa_no_hp: shop_settings.laporan_wa_no_hp || '',
+        laporan_wa_jam: shop_settings.laporan_wa_jam || '23:50',
+        laporan_wa_harian_aktif: shop_settings.laporan_wa_harian_aktif === '1',
+        laporan_wa_mingguan_aktif: shop_settings.laporan_wa_mingguan_aktif === '1',
+        laporan_wa_bulanan_aktif: shop_settings.laporan_wa_bulanan_aktif === '1',
+    });
+
     const handleSubmit = (e) => {
         e.preventDefault();
         post(route('settings.wa.update'), {
@@ -58,6 +67,36 @@ export default function WhatsappSetting({ auth }) {
             preserveScroll: true,
             onSuccess: () => Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Pengaturan Alert Stok Disimpan', showConfirmButton: false, timer: 3000, timerProgressBar: true }),
             onError: (err) => Swal.fire('Gagal', err.error || 'Terjadi kesalahan', 'error'),
+        });
+    };
+
+    const handleLaporanSubmit = (e) => {
+        e.preventDefault();
+        laporanForm.post(route('settings.wa.laporan'), {
+            preserveScroll: true,
+            onSuccess: () => Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Pengaturan Laporan WA Disimpan', showConfirmButton: false, timer: 3000, timerProgressBar: true }),
+            onError: (err) => Swal.fire('Gagal', err.error || 'Terjadi kesalahan', 'error'),
+        });
+    };
+
+    const handleManualLaporan = (periode) => {
+        Swal.fire({
+            title: `Kirim Laporan ${periode}?`,
+            text: "Laporan PDF akan dibuat dan dikirim ke nomor WhatsApp yang diatur.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Kirim',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                laporanForm.post(route('settings.wa.laporan.manual', { periode }), {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        const flashMessage = usePage().props.flash?.success;
+                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: flashMessage || 'Laporan berhasil dikirim', showConfirmButton: false, timer: 3000, timerProgressBar: true });
+                    },
+                    onError: (err) => Swal.fire('Gagal', err.error || 'Gagal mengirim laporan', 'error'),
+                });
+            }
         });
     };
 
@@ -150,84 +189,196 @@ export default function WhatsappSetting({ auth }) {
                         </div>
 
                         {/* PENGATURAN ALERT STOK & SALDO */}
-                        <div className="bg-white p-6 shadow-sm sm:rounded-lg md:col-span-2 border border-orange-200">
-                            <div className="flex items-center justify-between border-b pb-2 mb-6">
-                                <h2 className="text-lg font-bold text-gray-900 flex items-center">
-                                    <span className="mr-2">⚠️</span> Notifikasi Stok & Saldo Menipis (WhatsApp)
-                                </h2>
-                                <div className="flex items-center space-x-2">
-                                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${alertForm.data.alert_stok_aktif ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                                        {alertForm.data.alert_stok_aktif ? 'AKTIF' : 'NONAKTIF'}
-                                    </span>
-                                </div>
-                            </div>
-
+                        <div className={`bg-white shadow-sm sm:rounded-lg md:col-span-2 border ${alertForm.data.alert_stok_aktif ? 'border-orange-200' : 'border-gray-200'}`}>
                             <form onSubmit={handleAlertSubmit}>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                    <div>
-                                        <label className="flex items-center cursor-pointer mb-4">
+                                <div className={`flex items-center justify-between p-6 ${alertForm.data.alert_stok_aktif ? 'border-b pb-4' : ''}`}>
+                                    <h2 className="text-lg font-bold text-gray-900 flex items-center">
+                                        <span className="mr-2">⚠️</span> Notifikasi Stok & Saldo Menipis (WhatsApp)
+                                    </h2>
+                                    <div className="flex items-center space-x-3">
+                                        <span className={`text-sm font-medium ${alertForm.data.alert_stok_aktif ? 'text-green-600' : 'text-gray-500'}`}>
+                                            {alertForm.data.alert_stok_aktif ? 'ON' : 'OFF'}
+                                        </span>
+                                        <label className="relative inline-flex items-center cursor-pointer">
                                             <input
                                                 type="checkbox"
-                                                className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                                                className="sr-only peer"
                                                 checked={alertForm.data.alert_stok_aktif}
                                                 onChange={(e) => alertForm.setData('alert_stok_aktif', e.target.checked)}
                                             />
-                                            <span className="ml-2 font-medium text-gray-700">Aktifkan Notifikasi Stok & Saldo Menipis</span>
+                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
                                         </label>
-
-                                        <InputLabel value="Nomor HP Tujuan (Admin)" />
-                                        <TextInput
-                                            type="text"
-                                            className="w-full mt-1 mb-2"
-                                            placeholder="08..."
-                                            value={alertForm.data.alert_stok_no_hp}
-                                            onChange={(e) => alertForm.setData('alert_stok_no_hp', e.target.value)}
-                                        />
-                                        <p className="text-xs text-gray-500">
-                                            Nomor WhatsApp yang akan menerima alert saat stok barang habis (sisa ≤ 5) atau saldo provider menipis (≤ Rp 50.000).
-                                        </p>
-                                    </div>
-                                    
-                                    <div className="bg-gray-50 p-4 rounded-lg border">
-                                        <InputLabel value="Mode Pengiriman" />
-                                        <select
-                                            className="w-full mt-1 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mb-4"
-                                            value={alertForm.data.alert_stok_mode}
-                                            onChange={(e) => alertForm.setData('alert_stok_mode', e.target.value)}
-                                        >
-                                            <option value="manual">Kirim Manual</option>
-                                            <option value="otomatis">Kirim Otomatis (Terjadwal)</option>
-                                        </select>
-
-                                        {alertForm.data.alert_stok_mode === 'otomatis' && (
-                                            <div>
-                                                <InputLabel value="Jam Pengiriman Otomatis (Setiap Hari)" />
-                                                <TextInput
-                                                    type="time"
-                                                    className="w-full mt-1"
-                                                    value={alertForm.data.alert_stok_jam}
-                                                    onChange={(e) => alertForm.setData('alert_stok_jam', e.target.value)}
-                                                />
-                                                <p className="text-xs text-gray-500 mt-2 text-justify">
-                                                    Sistem akan mengecek stok dan saldo setiap jam ini, dan jika ada barang atau saldo yang menipis, pesan akan otomatis terkirim.
-                                                </p>
-                                            </div>
-                                        )}
-                                        {alertForm.data.alert_stok_mode === 'manual' && (
-                                            <p className="text-xs text-gray-500 mt-2 text-justify">
-                                                Pilih "Kirim Manual" jika Anda ingin memicu pengiriman alert secara langsung melalui tombol di bawah ini.
-                                            </p>
-                                        )}
                                     </div>
                                 </div>
 
-                                <div className="flex justify-between items-center border-t pt-4">
-                                    <SecondaryButton type="button" onClick={handleManualAlert} disabled={alertForm.processing} className="border-orange-500 text-orange-600 hover:bg-orange-50">
-                                        🚀 Kirim Alert Sekarang
-                                    </SecondaryButton>
+                                {alertForm.data.alert_stok_aktif && (
+                                    <div className="p-6 pt-2">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                            <div>
+                                                <InputLabel value="Nomor HP Tujuan (Admin/Owner)" />
+                                                <TextInput
+                                                    type="text"
+                                                    className="w-full mt-1 mb-2"
+                                                    placeholder="08..."
+                                                    value={alertForm.data.alert_stok_no_hp}
+                                                    onChange={(e) => alertForm.setData('alert_stok_no_hp', e.target.value)}
+                                                />
+                                                <p className="text-xs text-gray-500">
+                                                    Nomor WhatsApp yang akan menerima alert saat stok barang menipis (sisa ≤ 3) atau saldo provider menipis (≤ Rp 50.000).
+                                                </p>
+                                            </div>
+                                            
+                                            <div className="bg-gray-50 p-4 rounded-lg border">
+                                                <InputLabel value="Mode Pengiriman" />
+                                                <select
+                                                    className="w-full mt-1 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mb-4"
+                                                    value={alertForm.data.alert_stok_mode}
+                                                    onChange={(e) => alertForm.setData('alert_stok_mode', e.target.value)}
+                                                >
+                                                    <option value="manual">Kirim Manual</option>
+                                                    <option value="otomatis">Kirim Otomatis (Terjadwal)</option>
+                                                </select>
+
+                                                {alertForm.data.alert_stok_mode === 'otomatis' && (
+                                                    <div>
+                                                        <InputLabel value="Jam Pengiriman Otomatis (Setiap Hari)" />
+                                                        <TextInput
+                                                            type="time"
+                                                            className="w-full mt-1"
+                                                            value={alertForm.data.alert_stok_jam}
+                                                            onChange={(e) => alertForm.setData('alert_stok_jam', e.target.value)}
+                                                        />
+                                                        <p className="text-xs text-gray-500 mt-2 text-justify">
+                                                            Sistem akan mengecek stok dan saldo setiap jam ini, dan jika ada barang atau saldo yang menipis, pesan akan otomatis terkirim.
+                                                        </p>
+                                                    </div>
+                                                )}
+                                                {alertForm.data.alert_stok_mode === 'manual' && (
+                                                    <p className="text-xs text-gray-500 mt-2 text-justify">
+                                                        Pilih "Kirim Manual" jika Anda ingin memicu pengiriman alert secara langsung melalui tombol di bawah ini.
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className={`flex items-center px-6 pb-6 ${alertForm.data.alert_stok_aktif ? 'justify-between pt-4 border-t' : 'justify-end'}`}>
+                                    {alertForm.data.alert_stok_aktif && (
+                                        <SecondaryButton type="button" onClick={handleManualAlert} disabled={alertForm.processing} className="border-orange-500 text-orange-600 hover:bg-orange-50">
+                                            🚀 Kirim Alert Sekarang
+                                        </SecondaryButton>
+                                    )}
 
                                     <PrimaryButton type="submit" disabled={alertForm.processing}>
                                         Simpan Pengaturan
+                                    </PrimaryButton>
+                                </div>
+                            </form>
+                        </div>
+                        {/* PENGATURAN LAPORAN PENJUALAN (WHATSAPP) */}
+                        <div className={`bg-white shadow-sm sm:rounded-lg md:col-span-2 border ${laporanForm.data.laporan_wa_aktif ? 'border-blue-200' : 'border-gray-200'}`}>
+                            <form onSubmit={handleLaporanSubmit}>
+                                <div className={`flex items-center justify-between p-6 ${laporanForm.data.laporan_wa_aktif ? 'border-b pb-4' : ''}`}>
+                                    <h2 className="text-lg font-bold text-gray-900 flex items-center">
+                                        <span className="mr-2">📄</span> Pengaturan Laporan Penjualan (WhatsApp)
+                                    </h2>
+                                    <div className="flex items-center space-x-3">
+                                        <span className={`text-sm font-medium ${laporanForm.data.laporan_wa_aktif ? 'text-blue-600' : 'text-gray-500'}`}>
+                                            {laporanForm.data.laporan_wa_aktif ? 'ON' : 'OFF'}
+                                        </span>
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                className="sr-only peer"
+                                                checked={laporanForm.data.laporan_wa_aktif}
+                                                onChange={(e) => laporanForm.setData('laporan_wa_aktif', e.target.checked)}
+                                            />
+                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {laporanForm.data.laporan_wa_aktif && (
+                                    <div className="p-6 pt-2">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                            <div>
+                                                <InputLabel value="Nomor HP Tujuan (Admin / Owner)" />
+                                                <TextInput
+                                                    type="text"
+                                                    className="w-full mt-1 mb-2"
+                                                    placeholder="08..."
+                                                    value={laporanForm.data.laporan_wa_no_hp}
+                                                    onChange={(e) => laporanForm.setData('laporan_wa_no_hp', e.target.value)}
+                                                />
+                                                <p className="text-xs text-gray-500 mb-4">
+                                                    Nomor WhatsApp yang akan menerima laporan penjualan dalam bentuk PDF.
+                                                </p>
+
+                                                <InputLabel value="Jam Pengiriman Laporan" />
+                                                <TextInput
+                                                    type="time"
+                                                    className="w-full mt-1 mb-6"
+                                                    value={laporanForm.data.laporan_wa_jam}
+                                                    onChange={(e) => laporanForm.setData('laporan_wa_jam', e.target.value)}
+                                                />
+
+                                                <div className="space-y-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                                    <label className="flex items-center cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                                                            checked={laporanForm.data.laporan_wa_harian_aktif}
+                                                            onChange={(e) => laporanForm.setData('laporan_wa_harian_aktif', e.target.checked)}
+                                                        />
+                                                        <span className="ml-2 font-medium text-gray-700">Kirim Laporan Harian ({laporanForm.data.laporan_wa_jam})</span>
+                                                    </label>
+
+                                                    <label className="flex items-center cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                                                            checked={laporanForm.data.laporan_wa_mingguan_aktif}
+                                                            onChange={(e) => laporanForm.setData('laporan_wa_mingguan_aktif', e.target.checked)}
+                                                        />
+                                                        <span className="ml-2 font-medium text-gray-700">Kirim Laporan Mingguan (Minggu {laporanForm.data.laporan_wa_jam})</span>
+                                                    </label>
+
+                                                    <label className="flex items-center cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                                                            checked={laporanForm.data.laporan_wa_bulanan_aktif}
+                                                            onChange={(e) => laporanForm.setData('laporan_wa_bulanan_aktif', e.target.checked)}
+                                                        />
+                                                        <span className="ml-2 font-medium text-gray-700">Kirim Laporan Bulanan (Akhir Bulan {laporanForm.data.laporan_wa_jam})</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="bg-white p-4 rounded-lg border border-dashed border-gray-300 flex flex-col justify-center items-center">
+                                                <p className="text-sm text-gray-600 mb-4 text-center">
+                                                    Anda juga dapat mengirimkan laporan secara manual (sekarang) untuk menguji format PDF yang akan dikirimkan.
+                                                </p>
+                                                <div className="flex flex-col w-full space-y-2">
+                                                    <SecondaryButton type="button" onClick={() => handleManualLaporan('harian')} disabled={laporanForm.processing} className="w-full justify-center text-blue-600 border-blue-500 hover:bg-blue-50">
+                                                        Kirim Manual: Harian (Hari Ini)
+                                                    </SecondaryButton>
+                                                    <SecondaryButton type="button" onClick={() => handleManualLaporan('mingguan')} disabled={laporanForm.processing} className="w-full justify-center text-indigo-600 border-indigo-500 hover:bg-indigo-50">
+                                                        Kirim Manual: Mingguan (Minggu Ini)
+                                                    </SecondaryButton>
+                                                    <SecondaryButton type="button" onClick={() => handleManualLaporan('bulanan')} disabled={laporanForm.processing} className="w-full justify-center text-purple-600 border-purple-500 hover:bg-purple-50">
+                                                        Kirim Manual: Bulanan (Bulan Ini)
+                                                    </SecondaryButton>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className={`flex items-center px-6 pb-6 ${laporanForm.data.laporan_wa_aktif ? 'justify-end pt-4 border-t' : 'justify-end'}`}>
+                                    <PrimaryButton type="submit" disabled={laporanForm.processing}>
+                                        Simpan Pengaturan Laporan
                                     </PrimaryButton>
                                 </div>
                             </form>

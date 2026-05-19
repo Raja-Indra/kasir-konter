@@ -66,6 +66,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/wa/test', [SettingController::class, 'testWa'])->name('settings.wa.test');
     Route::post('/settings/wa/alert', [SettingController::class, 'updateAlertSetting'])->name('settings.wa.alert');
     Route::post('/settings/wa/alert/manual', [SettingController::class, 'sendManualAlert'])->name('settings.wa.alert.manual');
+    Route::post('/settings/wa/laporan', [SettingController::class, 'updateLaporanWaSetting'])->name('settings.wa.laporan');
+    Route::post('/settings/wa/laporan/manual/{periode}', [SettingController::class, 'sendManualLaporan'])->name('settings.wa.laporan.manual');
     Route::resource('roles', RoleController::class)->except(['create', 'edit', 'show']);
 });
 

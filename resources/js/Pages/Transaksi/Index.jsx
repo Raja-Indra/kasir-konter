@@ -379,9 +379,13 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                                                 </div>
                                             )}
                                         </div>
-                                        {!product.is_digital && (
+                                        {!product.is_digital ? (
                                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${product.stok <= 5 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
                                                 Stok: {product.stok}
+                                            </span>
+                                        ) : (
+                                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${product.provider && product.provider.saldo <= 50000 ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`} title={product.provider ? product.provider.nama_provider : ''}>
+                                                Saldo: {product.provider ? formatRupiah(product.provider.saldo) : 'Rp 0'}
                                             </span>
                                         )}
                                     </div>

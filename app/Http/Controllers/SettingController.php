@@ -137,4 +137,65 @@ class SettingController extends Controller
             return redirect()->back()->withErrors(['error' => 'Gagal mengirim Alert: ' . $exitCode]);
         }
     }
+
+    public function updateLaporanWaSetting(Request $request)
+    {
+        Gate::authorize('manage settings');
+        $data = $request->validate([
+            'laporan_wa_aktif' => 'nullable|boolean',
+            'laporan_wa_no_hp' => 'nullable|string',
+            'laporan_wa_jam' => 'nullable|string',
+            'laporan_wa_harian_aktif' => 'nullable|boolean',
+            'laporan_wa_mingguan_aktif' => 'nullable|boolean',
+            'laporan_wa_bulanan_aktif' => 'nullable|boolean',
+        ]);
+
+        $keys = [
+            'laporan_wa_aktif',
+            'laporan_wa_no_hp', 
+            'laporan_wa_jam',
+            'laporan_wa_harian_aktif', 
+            'laporan_wa_mingguan_aktif', 
+            'laporan_wa_bulanan_aktif'
+        ];
+        
+        foreach ($keys as $key) {
+            if (array_key_exists($key, $data)) {
+                $val = is_bool($data[$key]) ? ($data[$key] ? '1' : '0') : $data[$key];
+                Setting::updateOrCreate(['key' => $key], ['value' => $val]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Pengaturan Laporan WA berhasil disimpan!');
+    }
+
+    public function sendManualLaporan($periode)
+    {
+        Gate::authorize('manage settings');
+        
+        if (!in_array($periode, ['harian', 'mingguan', 'bulanan'])) {
+            return redirect()->back()->withErrors(['error' => 'Periode tidak valid.']);
+        }
+
+        // Map periode to command argument
+        $commandPeriod = match($periode) {
+            'harian' => 'daily',
+            'mingguan' => 'weekly',
+            'bulanan' => 'monthly',
+        };
+
+        // Panggil command artisan dengan argument forced=true agar mengabaikan setting aktif/tidak
+        \Illuminate\Support\Facades\Artisan::call('app:send-laporan-wa', [
+            'periode' => $commandPeriod,
+            '--force' => true,
+        ]);
+        
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        
+        if (str_contains($output, 'berhasil dikirim')) {
+            return redirect()->back()->with('success', 'Laporan PDF berhasil dikirim ke WhatsApp!');
+        } else {
+            return redirect()->back()->withErrors(['error' => 'Gagal mengirim Laporan: ' . $output]);
+        }
+    }
 }
