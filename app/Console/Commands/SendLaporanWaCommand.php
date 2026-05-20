@@ -9,6 +9,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class SendLaporanWaCommand extends Command
 {
@@ -34,10 +35,15 @@ class SendLaporanWaCommand extends Command
         $periode = $this->argument('periode');
         $force = $this->option('force');
 
+        Log::info("=== Memulai Eksekusi Laporan WA ($periode) ===");
+        Log::info("Force mode: " . ($force ? 'TRUE' : 'FALSE'));
+
         $isMasterActive = Setting::where('key', 'laporan_wa_aktif')->value('value') === '1';
 
         if (!$isMasterActive && !$force) {
-            $this->info("Fitur Laporan WA secara umum sedang dimatikan. Mengabaikan pengiriman.");
+            $msg = "Fitur Laporan WA secara umum sedang dimatikan. Mengabaikan pengiriman.";
+            $this->info($msg);
+            Log::warning("Laporan WA Dibatalkan: Fitur utama (laporan_wa_aktif) adalah OFF.");
             return 0;
         }
 
@@ -51,13 +57,16 @@ class SendLaporanWaCommand extends Command
 
         if (!$settingKey) {
             $this->error('Periode tidak valid. Gunakan: daily, weekly, monthly.');
+            Log::error("Laporan WA Gagal: Periode yang diberikan ($periode) tidak valid.");
             return 1;
         }
 
         $isActive = Setting::where('key', $settingKey)->value('value') === '1';
 
         if (!$isActive && !$force) {
-            $this->info("Pengaturan laporan $periode sedang tidak aktif. Mengabaikan pengiriman.");
+            $msg = "Pengaturan laporan $periode sedang tidak aktif. Mengabaikan pengiriman.";
+            $this->info($msg);
+            Log::warning("Laporan WA Dibatalkan: Fitur periode ($settingKey) adalah OFF.");
             return 0;
         }
 
@@ -65,7 +74,9 @@ class SendLaporanWaCommand extends Command
         $noHp = Setting::where('key', 'laporan_wa_no_hp')->value('value');
 
         if (!$token || !$noHp) {
-            $this->error('Token Fonnte atau Nomor HP Tujuan Laporan belum diatur.');
+            $msg = 'Token Fonnte atau Nomor HP Tujuan Laporan belum diatur.';
+            $this->error($msg);
+            Log::error("Laporan WA Gagal: Token Fonnte atau No HP Kosong.");
             return 1;
         }
 
@@ -92,6 +103,8 @@ class SendLaporanWaCommand extends Command
                 break;
         }
 
+        Log::info("Mengumpulkan transaksi untuk periode: $periodeText");
+
         // Ambil Data Transaksi
         $transaksi = Transaksi::with(['user', 'hutang'])
             ->whereDate('created_at', '>=', $startDate->toDateString())
@@ -104,8 +117,9 @@ class SendLaporanWaCommand extends Command
         $totalLabaHutang = $transaksi->filter(fn($t) => $t->hutang)->sum('total_laba');
 
         if ($transaksi->isEmpty() && !$force) {
-            $this->info("Tidak ada transaksi pada periode $periodeText. Mengabaikan pengiriman.");
-            // Boleh juga tetap kirim kalau kosong, tapi lebih baik tidak spam.
+            $msg = "Tidak ada transaksi pada periode $periodeText. Mengabaikan pengiriman.";
+            $this->info($msg);
+            Log::info("Laporan WA Dibatalkan: " . $msg);
             return 0;
         }
 
@@ -122,7 +136,15 @@ class SendLaporanWaCommand extends Command
         }
 
         $pdfPath = storage_path('app/public/temp/' . $filename);
-        $pdf->save($pdfPath);
+        
+        try {
+            $pdf->save($pdfPath);
+            Log::info("File PDF sementara berhasil dibuat: $pdfPath");
+        } catch (\Exception $e) {
+            Log::error("Gagal membuat/menyimpan file PDF: " . $e->getMessage());
+            $this->error("Gagal menyimpan PDF.");
+            return 1;
+        }
 
         // Susun Pesan
         $pesan = "📊 *Laporan Penjualan $periodeText* 📊\n\n";
@@ -134,6 +156,8 @@ class SendLaporanWaCommand extends Command
 
         // Beri jeda 5 detik agar tidak berbenturan dengan command notifikasi stok (Fonnte rate limit prevention)
         sleep(5);
+
+        Log::info("Mencoba mengirim request HTTP ke API Fonnte...");
 
         try {
             $response = Http::withHeaders([
@@ -150,23 +174,25 @@ class SendLaporanWaCommand extends Command
             // Hapus file temp setelah proses request selesai
             if (file_exists($pdfPath)) {
                 unlink($pdfPath);
+                Log::info("File PDF sementara telah dihapus.");
             }
 
             if ($response->successful()) {
                 $resData = $response->json();
                 if (isset($resData['status']) && $resData['status'] == true) {
                     $this->info('Laporan PDF berhasil dikirim ke WhatsApp.');
+                    Log::info("Sukses! Laporan WA berhasil dikirim ke Fonnte.");
                     return 0;
                 }
                 $errorMsg = 'Gagal mengirim dari Fonnte: ' . ($resData['reason'] ?? 'Unknown error');
                 $this->error($errorMsg);
-                \Illuminate\Support\Facades\Log::error('SendLaporanWaCommand API Error: ' . $errorMsg, ['response' => $resData]);
+                Log::error('SendLaporanWaCommand API Error: ' . $errorMsg, ['response' => $resData]);
                 return 1;
             }
 
             $errorMsg = 'Gagal terhubung ke Fonnte API. Status: ' . $response->status();
             $this->error($errorMsg);
-            \Illuminate\Support\Facades\Log::error('SendLaporanWaCommand HTTP Error: ' . $errorMsg, ['body' => $response->body()]);
+            Log::error('SendLaporanWaCommand HTTP Error: ' . $errorMsg, ['body' => $response->body()]);
             return 1;
         } catch (\Exception $e) {
             // Pastikan file temp terhapus meski terjadi exception
@@ -174,7 +200,7 @@ class SendLaporanWaCommand extends Command
                 unlink($pdfPath);
             }
             $this->error('Kesalahan sistem saat mengirim laporan: ' . $e->getMessage());
-            \Illuminate\Support\Facades\Log::error('SendLaporanWaCommand Exception: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('SendLaporanWaCommand Exception: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return 1;
         }
     }
