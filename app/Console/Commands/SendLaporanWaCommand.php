@@ -116,12 +116,12 @@ class SendLaporanWaCommand extends Command
         $pdf = Pdf::loadView('pdf.laporan_penjualan', compact('transaksi', 'startDate', 'endDate', 'totalOmzet', 'totalLabaBersih', 'totalLabaHutang', 'startDateStr', 'endDateStr'));
         $pdf->setPaper('a4', 'portrait');
 
-        // Pastikan folder temp ada
-        if (!Storage::disk('local')->exists('temp')) {
-            Storage::disk('local')->makeDirectory('temp');
+        // Pastikan folder temp ada di disk public
+        if (!Storage::disk('public')->exists('temp')) {
+            Storage::disk('public')->makeDirectory('temp');
         }
 
-        $pdfPath = storage_path('app/private/temp/' . $filename);
+        $pdfPath = storage_path('app/public/temp/' . $filename);
         $pdf->save($pdfPath);
 
         // Susun Pesan
@@ -147,7 +147,7 @@ class SendLaporanWaCommand extends Command
                 'message' => $pesan,
             ]);
 
-            // Hapus file temp setelah dikirim
+            // Hapus file temp setelah proses request selesai
             if (file_exists($pdfPath)) {
                 unlink($pdfPath);
             }
@@ -169,6 +169,7 @@ class SendLaporanWaCommand extends Command
             \Illuminate\Support\Facades\Log::error('SendLaporanWaCommand HTTP Error: ' . $errorMsg, ['body' => $response->body()]);
             return 1;
         } catch (\Exception $e) {
+            // Pastikan file temp terhapus meski terjadi exception
             if (isset($pdfPath) && file_exists($pdfPath)) {
                 unlink($pdfPath);
             }
