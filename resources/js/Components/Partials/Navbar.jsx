@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import Dropdown from '@/Components/Dropdown';
 import { Link } from '@inertiajs/react';
 
-export default function Navbar({ user }) {
-    const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-
+export default function Navbar({ user, toggleSidebar, isSidebarOpen }) {
     // --- STATE FULLSCREEN ---
     const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -36,19 +34,19 @@ export default function Navbar({ user }) {
                     {/* Kiri: Judul Halaman / Hamburger (Mobile) */}
                     <div className="flex items-center">
                         <button
-                            onClick={() => setShowingNavigationDropdown((previousState) => !previousState)}
+                            onClick={toggleSidebar}
                             className="inline-flex items-center justify-center p-2 text-white transition duration-150 ease-in-out rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600 md:hidden"
                         >
                             <svg className="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                 <path
-                                    className={!showingNavigationDropdown ? 'inline-flex' : 'hidden'}
+                                    className={!isSidebarOpen ? 'inline-flex' : 'hidden'}
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                     strokeWidth="2"
                                     d="M4 6h16M4 12h16M4 18h16"
                                 />
                                 <path
-                                    className={showingNavigationDropdown ? 'inline-flex' : 'hidden'}
+                                    className={isSidebarOpen ? 'inline-flex' : 'hidden'}
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                     strokeWidth="2"
