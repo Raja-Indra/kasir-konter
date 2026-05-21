@@ -188,8 +188,8 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
                         <div className="p-6 bg-white border border-gray-100 shadow-sm lg:col-span-2 rounded-xl">
                             <div className="flex flex-col items-start justify-between mb-4 sm:flex-row sm:items-center">
                                 <h3 className="text-lg font-bold text-gray-800">Grafik Omzet {getFilterLabel()}</h3>
-                                <select 
-                                    className="mt-2 sm:mt-0 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2"
+                                <select
+                                    className="block p-2 mt-2 text-sm text-gray-900 border border-gray-300 rounded-lg sm:mt-0 bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                                     value={current_filter || 'minggu_ini'}
                                     onChange={handleFilterChange}
                                 >
@@ -222,7 +222,7 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
                                                     <p className="text-sm font-semibold text-gray-800 truncate max-w-[150px] sm:max-w-[250px] md:max-w-[300px]">
                                                         {item.produk ? item.produk.nama_produk : 'Produk Dihapus'}
                                                         {item.produk?.is_flexible_price && (item.produk?.min_nominal || item.produk?.max_nominal) && (
-                                                            <span className="font-normal text-xs text-gray-500 ml-1">
+                                                            <span className="ml-1 text-xs font-normal text-gray-500">
                                                                 Rp. {item.produk?.min_nominal ? parseFloat(item.produk.min_nominal).toLocaleString('id-ID') : '0'} - Rp. {item.produk?.max_nominal ? parseFloat(item.produk.max_nominal).toLocaleString('id-ID') : '∞'}
                                                             </span>
                                                         )}
@@ -247,10 +247,10 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
                     </div>
 
                     {/* --- GRAFIK DEMOGRAFI UMUR --- */}
-                    <div className="mb-8 p-6 bg-white border border-gray-100 shadow-sm rounded-xl">
-                        <div className="mb-4 flex items-center justify-between">
+                    <div className="p-6 mb-8 bg-white border border-gray-100 shadow-sm rounded-xl">
+                        <div className="flex items-center justify-between mb-4">
                             <div>
-                                <h3 className="text-lg font-bold text-gray-800">📊 Demografi Umur Pelanggan</h3>
+                                <h3 className="text-lg font-bold text-gray-800">📊 Grafik Umur Pelanggan</h3>
                                 <p className="text-sm text-gray-500">Distribusi usia pelanggan berdasarkan transaksi keseluruhan.</p>
                             </div>
                         </div>
@@ -258,7 +258,7 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
                             <Bar options={{
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                plugins: { 
+                                plugins: {
                                     legend: { display: false },
                                     tooltip: {
                                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -269,9 +269,9 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
                                         displayColors: false,
                                     }
                                 },
-                                scales: { 
-                                    y: { 
-                                        beginAtZero: true, 
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
                                         ticks: { stepSize: 1 },
                                         grid: { color: '#e5e7eb', display: true },
                                         border: { dash: [4, 4] }
@@ -297,7 +297,7 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
 
                     {/* --- ALERTS & RECENT TRANSACTIONS --- */}
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                        
+
                         {/* Transaksi Terakhir (2/3 layar) */}
                         <div className="p-6 bg-white border border-gray-100 shadow-sm lg:col-span-2 rounded-xl">
                             <div className="flex items-center justify-between mb-4">
@@ -354,7 +354,7 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="p-3 text-sm text-center text-green-700 bg-green-50 rounded-lg">
+                                        <div className="p-3 text-sm text-center text-green-700 rounded-lg bg-green-50">
                                             Semua saldo provider aman 👍
                                         </div>
                                     )}
@@ -379,7 +379,7 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="p-3 text-sm text-center text-green-700 bg-green-50 rounded-lg">
+                                        <div className="p-3 text-sm text-center text-green-700 rounded-lg bg-green-50">
                                             Stok barang fisik aman 👍
                                         </div>
                                     )}
