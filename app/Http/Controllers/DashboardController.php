@@ -55,11 +55,14 @@ class DashboardController extends Controller
         // 1. STATISTIK HARI INI
         $stats = [
             'omzet_hari_ini' => Transaksi::whereDate('created_at', $today)->sum('total_harga'),
-            'laba_bersih_hari_ini' => Transaksi::whereDate('created_at', $today)->doesntHave('hutang')->sum('total_laba'),
-            'laba_hutang_hari_ini' => Transaksi::whereDate('created_at', $today)->has('hutang')->sum('total_laba'),
             'transaksi_hari_ini' => Transaksi::whereDate('created_at', $today)->count(),
             'total_sisa_hutang' => \App\Models\Hutang::sum('sisa'), // Total uang nyangkut di pelanggan
         ];
+
+        if ($user->can('view dashboard owner')) {
+            $stats['laba_bersih_hari_ini'] = Transaksi::whereDate('created_at', $today)->doesntHave('hutang')->sum('total_laba');
+            $stats['laba_hutang_hari_ini'] = Transaksi::whereDate('created_at', $today)->has('hutang')->sum('total_laba');
+        }
 
         // 2. GRAFIK OMZET BERDASARKAN FILTER
         $chartData = ['labels' => [], 'data' => []];

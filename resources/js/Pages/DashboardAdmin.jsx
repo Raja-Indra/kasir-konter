@@ -19,7 +19,7 @@ ChartJS.register(
   CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler
 );
 
-export default function Dashboard({ auth, stats, chart, demografi_umur, top_produk, low_stock, low_balance, recent_transactions, current_filter }) {
+export default function DashboardAdmin({ auth, stats, chart, demografi_umur, top_produk, low_stock, low_balance, recent_transactions, current_filter }) {
 
     // Format Rupiah Helper
     const formatRupiah = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
@@ -103,7 +103,7 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
 
     return (
         <AuthenticatedLayout user={auth.user}>
-            <Head title="Dashboard" />
+            <Head title="Dashboard Admin" />
 
             <div className="py-6">
                 <div className="max-w-full px-4 mx-auto sm:px-6 lg:px-8">
@@ -124,7 +124,7 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
                     </div>
 
                     {/* --- KARTU STATISTIK --- */}
-                    <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-2 lg:grid-cols-5">
+                    <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-3 lg:grid-cols-3">
                         {/* Omzet */}
                         <div className="flex flex-col justify-between h-32 p-5 bg-white border border-gray-100 shadow-sm rounded-xl">
                             <div>
@@ -133,28 +133,6 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
                             </div>
                             <div className="px-2 py-1 text-xs font-bold text-green-500 rounded-full bg-green-50 w-fit">
                                 💰 Penjualan Kotor
-                            </div>
-                        </div>
-
-                        {/* Laba Bersih */}
-                        <div className="flex flex-col justify-between h-32 p-5 bg-white border border-gray-100 shadow-sm rounded-xl">
-                            <div>
-                                <p className="text-xs font-bold tracking-wider text-gray-400 uppercase">Laba Bersih Hari Ini</p>
-                                <h3 className="mt-1 text-2xl font-extrabold text-green-600">+{formatRupiah(stats.laba_bersih_hari_ini)}</h3>
-                            </div>
-                            <div className="px-2 py-1 text-xs font-bold text-blue-500 rounded-full bg-blue-50 w-fit">
-                                🚀 Laba (Tunai)
-                            </div>
-                        </div>
-
-                        {/* Laba Hutang */}
-                        <div className="flex flex-col justify-between h-32 p-5 bg-white border border-gray-100 shadow-sm rounded-xl">
-                            <div>
-                                <p className="text-xs font-bold tracking-wider text-gray-400 uppercase">Laba Hutang Hari Ini</p>
-                                <h3 className="mt-1 text-2xl font-extrabold text-orange-500">{formatRupiah(stats.laba_hutang_hari_ini)}</h3>
-                            </div>
-                            <div className="px-2 py-1 text-xs font-bold text-orange-600 rounded-full bg-orange-50 w-fit">
-                                ⏳ Tertahan
                             </div>
                         </div>
 
