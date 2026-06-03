@@ -355,6 +355,9 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                                             )}
                                         </div>
                                         <h3 className="text-sm font-bold leading-tight text-gray-800 line-clamp-2">{product.nama_produk}</h3>
+                                        {product.provider && (
+                                            <p className="mt-1 text-[10px] font-semibold text-blue-600 uppercase">{product.provider.nama_provider}</p>
+                                        )}
                                         {product.jenis && (
                                             <p className="mt-1 text-[10px] text-gray-500 uppercase">{product.jenis}</p>
                                         )}
