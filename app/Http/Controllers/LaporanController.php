@@ -22,7 +22,7 @@ class LaporanController extends Controller
         $endDate = $request->input('end_date', Carbon::today()->toDateString());
 
         // Query Data
-        $transaksi = Transaksi::with('user')
+        $transaksi = Transaksi::with(['user', 'details.produk', 'hutang'])
             ->whereDate('created_at', '>=', $startDate)
             ->whereDate('created_at', '<=', $endDate)
             ->latest()

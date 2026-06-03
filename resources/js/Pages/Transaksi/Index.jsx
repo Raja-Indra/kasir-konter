@@ -481,10 +481,15 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                                     autoComplete="off"
                                 />
                                 <datalist id="pelanggan-list">
-                                    {pelangganHutang && pelangganHutang.map((nama, index) => (
-                                        <option key={index} value={nama} />
+                                    {pelangganHutang && pelangganHutang.map((p, index) => (
+                                        <option key={index} value={p.nama_pelanggan} />
                                     ))}
                                 </datalist>
+                                {namaPelanggan && pelangganHutang?.find(p => p.nama_pelanggan.toLowerCase() === namaPelanggan.trim().toLowerCase()) && (
+                                    <p className="mt-1 text-xs font-semibold text-orange-600">
+                                        Sisa Hutang Sebelumnya: {formatRupiah(pelangganHutang.find(p => p.nama_pelanggan.toLowerCase() === namaPelanggan.trim().toLowerCase()).sisa)}
+                                    </p>
+                                )}
                             </div>
                         )}
 
@@ -494,11 +499,12 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                                     {metodePembayaran === 'hutang' ? 'Bayar / DP (Rp)' : 'Bayar (Rp)'}
                                 </label>
                                 <TextInput
-                                    type="number"
+                                    type="text"
+                                    inputMode="numeric"
                                     className={`w-full h-10 font-mono text-lg font-bold text-right ${hasTarikTunai ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
                                     placeholder="0"
                                     value={hasTarikTunai ? totalHarga : bayar}
-                                    onChange={(e) => setBayar(e.target.value)}
+                                    onChange={(e) => setBayar(e.target.value.replace(/[^0-9]/g, ''))}
                                     disabled={hasTarikTunai}
                                 />
                             </div>
@@ -517,7 +523,7 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                         {/* Kembalian Info */}
                         <div className={`flex justify-between items-center px-3 py-1.5 rounded-lg mb-3 transition-colors ${kembalian >= 0 ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
                             <span className={`text-xs font-bold uppercase ${kembalian >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                                {metodePembayaran === 'hutang' && kembalian < 0 ? 'Sisa Hutang' : (kembalian >= 0 ? 'Kembalian' : 'Kurang')}
+                                {metodePembayaran === 'hutang' && kembalian < 0 ? 'Hutang' : (kembalian >= 0 ? 'Kembalian' : 'Kurang')}
                             </span>
                             <span className={`font-bold font-mono text-sm ${kembalian >= 0 ? 'text-green-700' : 'text-red-700'}`}>
                                 {formatRupiah(Math.abs(kembalian))}

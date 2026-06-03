@@ -25,7 +25,7 @@ class TransaksiController extends Controller
                 ->orderBy('is_pinned', 'desc') 
                 ->latest()
                 ->get(),
-            'pelangganHutang' => \App\Models\Hutang::select('nama_pelanggan')->distinct()->pluck('nama_pelanggan')
+            'pelangganHutang' => \App\Models\Hutang::where('sisa', '>', 0)->select('nama_pelanggan', 'sisa')->get()
         ]);
     }
 

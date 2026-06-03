@@ -93,6 +93,7 @@ export default function LaporanIndex({ auth, transaksi, summary, filters }) {
                                         <th className="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">Tanggal</th>
                                         <th className="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">No Nota</th>
                                         <th className="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">Kasir</th>
+                                        <th className="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">Produk</th>
                                         <th className="px-6 py-3 text-xs font-medium text-right text-gray-500 uppercase">Total</th>
                                         <th className="px-6 py-3 text-xs font-medium text-right text-green-600 uppercase">Laba</th>
                                     </tr>
@@ -110,6 +111,9 @@ export default function LaporanIndex({ auth, transaksi, summary, filters }) {
                                                 <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                                     {item.user?.name}
                                                 </td>
+                                                <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title={item.details?.map(d => d.produk?.nama_produk).join(', ')}>
+                                                    {item.details?.map(d => d.produk?.nama_produk).join(', ')}
+                                                </td>
                                                 <td className="px-6 py-4 text-sm font-bold text-right text-gray-900 whitespace-nowrap">
                                                     {formatRupiah(item.total_harga)}
                                                 </td>
@@ -120,7 +124,7 @@ export default function LaporanIndex({ auth, transaksi, summary, filters }) {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan="5" className="px-6 py-10 text-center text-gray-500">
+                                            <td colSpan="6" className="px-6 py-10 text-center text-gray-500">
                                                 Tidak ada data transaksi pada periode ini.
                                             </td>
                                         </tr>

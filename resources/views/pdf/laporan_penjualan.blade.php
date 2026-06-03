@@ -64,21 +64,27 @@
         </tbody>
         <tfoot>
             <tr class="bg-gray">
-                <td colspan="4" class="font-bold text-right" style="font-weight: bold;">TOTAL OMZET</td>
+                <td colspan="5" class="font-bold text-right" style="font-weight: bold;">TOTAL OMZET</td>
                 <td class="font-bold text-right" style="font-weight: bold;" colspan="2">Rp {{ number_format($totalOmzet, 0, ',', '.') }}</td>
             </tr>
             <tr class="bg-gray">
-                <td colspan="4" class="font-bold text-right" style="font-weight: bold;">TOTAL LABA BERSIH</td>
+                <td colspan="5" class="font-bold text-right" style="font-weight: bold;">TOTAL LABA BERSIH</td>
                 <td class="font-bold text-right" style="font-weight: bold;" colspan="2">Rp {{ number_format($totalLabaBersih, 0, ',', '.') }}</td>
             </tr>
             <tr class="bg-gray">
-                <td colspan="4" class="font-bold text-right" style="font-weight: bold;">TOTAL LABA HUTANG</td>
+                <td colspan="5" class="font-bold text-right" style="font-weight: bold;">TOTAL LABA HUTANG</td>
                 <td class="font-bold text-right" style="font-weight: bold; color: #d97706;" colspan="2">Rp {{ number_format($totalLabaHutang, 0, ',', '.') }}</td>
             </tr>
             <tr class="bg-gray">
-                <td colspan="4" class="font-bold text-right" style="font-weight: bold;">TOTAL KESELURUHAN LABA</td>
+                <td colspan="5" class="font-bold text-right" style="font-weight: bold;">TOTAL KESELURUHAN LABA</td>
                 <td class="font-bold text-right" style="font-weight: bold;" colspan="2">Rp {{ number_format($totalLabaBersih + $totalLabaHutang, 0, ',', '.') }}</td>
             </tr>
+        </tfoot>
+    </table>
+
+</body>
+</html>
+tr>
         </tfoot>
     </table>
 
