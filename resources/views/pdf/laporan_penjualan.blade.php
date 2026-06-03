@@ -34,9 +34,10 @@
         <thead>
             <tr>
                 <th style="width: 5%">No</th>
-                <th style="width: 20%">Tanggal</th>
-                <th style="width: 20%">No Nota</th>
+                <th style="width: 15%">Tanggal</th>
+                <th style="width: 15%">No Nota</th>
                 <th style="width: 15%">Kasir</th>
+                <th style="width: 25%">Produk</th>
                 <th class="text-right">Total Belanja</th>
                 <th class="text-right">Laba</th>
             </tr>
@@ -53,12 +54,13 @@
                     @endif
                 </td>
                 <td>{{ $item->user->name ?? '-' }}</td>
+                <td>{{ $item->details->map(function($detail) { return $detail->produk ? $detail->produk->nama_produk : ''; })->filter()->implode(', ') }}</td>
                 <td class="text-right">Rp {{ number_format($item->total_harga, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($item->total_laba, 0, ',', '.') }}</td>
             </tr>
             @empty
             <tr>
-                <td colspan="6" class="text-center">Tidak ada data transaksi pada periode ini.</td>
+                <td colspan="7" class="text-center">Tidak ada data transaksi pada periode ini.</td>
             </tr>
             @endforelse
         </tbody>
@@ -79,12 +81,6 @@
                 <td colspan="5" class="font-bold text-right" style="font-weight: bold;">TOTAL KESELURUHAN LABA</td>
                 <td class="font-bold text-right" style="font-weight: bold;" colspan="2">Rp {{ number_format($totalLabaBersih + $totalLabaHutang, 0, ',', '.') }}</td>
             </tr>
-        </tfoot>
-    </table>
-
-</body>
-</html>
-tr>
         </tfoot>
     </table>
 
