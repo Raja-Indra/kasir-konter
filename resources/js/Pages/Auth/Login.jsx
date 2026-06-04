@@ -118,7 +118,7 @@ export default function Login({ status, canResetPassword }) {
                 {/* --- SISI KANAN: AREA VISUAL --- */}
                 <div className="relative items-center justify-center hidden w-1/2 overflow-hidden bg-gray-900 lg:flex">
                     <img
-                        src="/img/login.png"
+                        src="/img/login.jpg"
                         alt="Abstract Login Background"
                         className="absolute inset-0 w-full h-full opacity-90"
                     />
