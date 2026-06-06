@@ -317,13 +317,13 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                                     key={product.id}
                                     onClick={() => addToCart(product)}
                                     className={`
-                                        bg-white p-3 rounded-xl shadow-sm cursor-pointer transition transform active:scale-95 border border-transparent hover:border-blue-500 relative overflow-hidden group h-full flex flex-col justify-between
+                                        bg-white rounded-xl shadow-sm cursor-pointer transition transform active:scale-95 border border-transparent hover:border-blue-500 relative overflow-hidden group h-full flex flex-col
                                         ${product.stok <= 0 && !product.is_digital ? 'opacity-60 pointer-events-none grayscale' : ''}
                                         ${product.is_pinned ? 'ring-2 ring-yellow-400 bg-yellow-50' : ''}
                                     `} // ^ Tambahkan highlight kuning tipis jika dipin
                                 >
                                     {/* --- BADGE KANAN (TIPE) --- */}
-                                    <span className={`absolute top-0 right-0 px-2 py-1 text-[10px] font-bold uppercase rounded-bl-lg ${product.is_digital ? 'bg-blue-500 text-white' : 'bg-orange-500 text-white'}`}>
+                                    <span className={`absolute top-0 right-0 px-2 py-1 text-[10px] font-bold uppercase rounded-bl-lg z-10 shadow-sm ${product.is_digital ? 'bg-blue-500 text-white' : 'bg-orange-500 text-white'}`}>
                                         {product.is_digital ? 'Digital' : 'Fisik'}
                                     </span>
 
@@ -331,66 +331,76 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                                     <button
                                         onClick={(e) => handlePin(e, product)}
                                         className={`
-                                            absolute top-0 left-0 p-1.5 rounded-br-lg transition-colors z-20
+                                            absolute top-0 left-0 p-1.5 rounded-br-lg transition-colors z-20 shadow-sm
                                             ${product.is_pinned
                                                 ? 'bg-yellow-400 text-white hover:bg-yellow-500'
-                                                : 'bg-gray-200 text-gray-400 hover:bg-gray-300 hover:text-gray-600'}
+                                                : 'bg-white/80 backdrop-blur-sm text-gray-400 hover:bg-white hover:text-gray-600'}
                                         `}
                                         title={product.is_pinned ? "Lepas Pin" : "Pin Produk"}
                                     >
                                         {/* Icon Pin */}
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                                             <path fillRule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clipRule="evenodd" />
                                         </svg>
                                     </button>
 
-                                    <div className="mt-6 mb-2"> {/* Margin top diperbesar dikit biar ga nabrak pin */}
-                                        <div className="flex flex-col items-center justify-center h-24 mb-2 overflow-hidden bg-gray-100 rounded-lg">
-                                            {product.foto ? (
-                                                <img src={`/storage/${product.foto}`} alt={product.nama_produk} className="object-cover w-full h-full" />
-                                            ) : (
-                                                <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
-                                            )}
-                                        </div>
-                                        <h3 className="text-sm font-bold leading-tight text-gray-800 line-clamp-2">{product.nama_produk}</h3>
-                                        {product.provider && (
-                                            <p className="mt-1 text-[10px] font-semibold text-blue-600 uppercase">{product.provider.nama_provider}</p>
-                                        )}
-                                        {product.jenis && (
-                                            <p className="mt-1 text-[10px] text-gray-500 uppercase">{product.jenis}</p>
+                                    {/* --- FOTO PRODUK (ASPECT SQUARE) --- */}
+                                    <div className="w-full aspect-square bg-gray-50 flex items-center justify-center overflow-hidden">
+                                        {product.foto ? (
+                                            <img src={`/storage/${product.foto}`} alt={product.nama_produk} loading="lazy" className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300" />
+                                        ) : (
+                                            <svg className="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
                                         )}
                                     </div>
 
-                                    {/* ... Sisa kode harga dan stok (biarkan sama) ... */}
-                                    <div className="flex items-end justify-between pt-2 mt-auto border-t">
+                                    {/* --- DETAIL PRODUK --- */}
+                                    <div className="p-3 flex flex-col flex-1 justify-between">
                                         <div>
-                                            <p className="text-[10px] text-gray-500">
-                                                {product.is_flexible_price ? 'Range Nominal' : 'Harga'}
-                                            </p>
-                                            {product.is_flexible_price && (product.min_nominal || product.max_nominal) ? (
-                                                <p className="text-xs font-bold text-blue-600">
-                                                    {product.min_nominal ? `Rp${parseFloat(product.min_nominal).toLocaleString('id-ID')}` : '0'} - {product.max_nominal ? `Rp${parseFloat(product.max_nominal).toLocaleString('id-ID')}` : '∞'}
+                                            <h3 className="text-sm font-semibold leading-snug text-gray-800 line-clamp-2">{product.nama_produk}</h3>
+                                            <div className="flex flex-wrap gap-1 mt-1.5">
+                                                {product.provider && (
+                                                    <span className="text-[9px] font-bold text-blue-600 uppercase bg-blue-50 px-1.5 py-0.5 rounded">{product.provider.nama_provider}</span>
+                                                )}
+                                                {product.jenis && (
+                                                    <span className="text-[9px] text-gray-500 uppercase bg-gray-100 px-1.5 py-0.5 rounded">{product.jenis}</span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-end justify-between pt-2 mt-3 border-t border-dashed border-gray-200">
+                                            <div>
+                                                <p className="text-[10px] text-gray-500 mb-0.5">
+                                                    {product.is_flexible_price ? 'Range Nominal' : 'Harga'}
                                                 </p>
+                                                {product.is_flexible_price && (product.min_nominal || product.max_nominal) ? (
+                                                    <p className="text-sm font-bold text-orange-600">
+                                                        {product.min_nominal ? `Rp${parseFloat(product.min_nominal).toLocaleString('id-ID')}` : '0'} - {product.max_nominal ? `Rp${parseFloat(product.max_nominal).toLocaleString('id-ID')}` : '∞'}
+                                                    </p>
+                                                ) : (
+                                                    <p className="text-sm font-bold text-orange-600">{formatRupiah(product.harga_jual)}</p>
+                                                )}
+                                                {product.is_flexible_price && (
+                                                    <div className="mt-1 text-[9px] font-medium text-orange-600 bg-orange-50 inline-block px-1.5 py-0.5 rounded border border-orange-100">
+                                                        Admin: {formatRupiah(product.harga_jual)}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {!product.is_digital ? (
+                                                <div className="text-right">
+                                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${product.stok <= 5 ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}>
+                                                        Sisa: {product.stok}
+                                                    </span>
+                                                </div>
                                             ) : (
-                                                <p className="text-sm font-bold text-blue-600">{formatRupiah(product.harga_jual)}</p>
-                                            )}
-                                            {product.is_flexible_price && (
-                                                <div className="mt-1 text-[10px] font-medium text-orange-600 bg-orange-50 inline-block px-1.5 py-0.5 rounded border border-orange-100">
-                                                    Admin: {formatRupiah(product.harga_jual)}
+                                                <div className="text-right">
+                                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${product.provider && product.provider.saldo <= 50000 ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-blue-50 text-blue-600 border border-blue-100'}`} title={product.provider ? product.provider.nama_provider : ''}>
+                                                        Saldo: {product.provider ? formatRupiah(product.provider.saldo) : 'Rp 0'}
+                                                    </span>
                                                 </div>
                                             )}
                                         </div>
-                                        {!product.is_digital ? (
-                                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${product.stok <= 5 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
-                                                Stok: {product.stok}
-                                            </span>
-                                        ) : (
-                                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${product.provider && product.provider.saldo <= 50000 ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`} title={product.provider ? product.provider.nama_provider : ''}>
-                                                Saldo: {product.provider ? formatRupiah(product.provider.saldo) : 'Rp 0'}
-                                            </span>
-                                        )}
                                     </div>
                                 </div>
                             ))}

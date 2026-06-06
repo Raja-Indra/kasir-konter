@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import Modal from '@/Components/Modal';
@@ -10,6 +10,8 @@ import SecondaryButton from '@/Components/SecondaryButton';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import usePermission from '@/Hooks/usePermission';
+import Cropper from 'react-easy-crop';
+import getCroppedImg from '../../utils/cropImage';
 
 const MySwal = withReactContent(Swal);
 
@@ -137,6 +139,46 @@ export default function ProdukIndex({ auth, products, providers }) {
         is_flexible_price: false,
         _method: 'post', // Default method
     });
+
+    // Cropper State
+    const [imageSrc, setImageSrc] = useState(null);
+    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+    const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+
+    const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+        setCroppedAreaPixels(croppedAreaPixels);
+    }, []);
+
+    const showCroppedImage = useCallback(async () => {
+        try {
+            const croppedImageFile = await getCroppedImg(
+                imageSrc,
+                croppedAreaPixels,
+                0
+            );
+            setData('foto', croppedImageFile);
+            setIsCropModalOpen(false);
+            setImageSrc(null);
+        } catch (e) {
+            console.error(e);
+        }
+    }, [imageSrc, croppedAreaPixels]);
+
+    const handleFileChange = (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.addEventListener('load', () => {
+                setImageSrc(reader.result);
+                setIsCropModalOpen(true);
+            });
+            // Reset input file value so the same file can be selected again if canceled
+            e.target.value = null;
+        }
+    };
 
     // Reset stok jika pindah ke mode digital di form
     useEffect(() => {
@@ -454,7 +496,9 @@ export default function ProdukIndex({ auth, products, providers }) {
             </div>
 
             {/* MODAL FORM */}
-            <Modal show={isModalOpen} onClose={closeModal}>
+            <Modal show={isModalOpen} onClose={() => {
+                if (!isCropModalOpen) closeModal();
+            }}>
                 <form onSubmit={handleSubmit} className="p-6">
                     <h2 className="mb-4 text-lg font-medium text-gray-900">
                         {isEditMode ? 'Edit Produk' : `Tambah Produk ${activeTab === 'digital' ? 'Digital' : 'Fisik'}`}
@@ -469,13 +513,25 @@ export default function ProdukIndex({ auth, products, providers }) {
                                     <span className="block text-xs text-gray-500 mb-1">Foto saat ini:</span>
                                     <div className="flex items-center gap-4">
                                         <img src={`/storage/${productToEdit.foto}`} alt="Preview" className="h-20 w-20 object-cover rounded shadow" />
-                                        <button
-                                            type="button"
-                                            onClick={() => setData('remove_foto', true)}
-                                            className="px-3 py-1 text-sm text-red-600 bg-red-100 rounded hover:bg-red-200"
-                                        >
-                                            Hapus Foto
-                                        </button>
+                                        <div className="flex flex-col gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setImageSrc(`/storage/${productToEdit.foto}`);
+                                                    setIsCropModalOpen(true);
+                                                }}
+                                                className="px-3 py-1 text-sm text-blue-600 bg-blue-100 rounded hover:bg-blue-200"
+                                            >
+                                                Edit Foto
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setData('remove_foto', true)}
+                                                className="px-3 py-1 text-sm text-red-600 bg-red-100 rounded hover:bg-red-200"
+                                            >
+                                                Hapus Foto
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -491,12 +547,18 @@ export default function ProdukIndex({ auth, products, providers }) {
                                     </button>
                                 </div>
                             )}
+                            {data.foto && typeof data.foto !== 'string' && (
+                                <div className="mb-2">
+                                    <span className="block text-xs text-gray-500 mb-1">Foto Baru (Akan diupload):</span>
+                                    <img src={URL.createObjectURL(data.foto)} alt="New Preview" className="h-20 w-20 object-cover rounded shadow" />
+                                </div>
+                            )}
                             <input
                                 id="foto"
                                 type="file"
                                 accept="image/*"
                                 className="block w-full mt-1 text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-gray-50 focus:outline-none"
-                                onChange={(e) => setData('foto', e.target.files[0])}
+                                onChange={handleFileChange}
                             />
                             <InputError message={errors.foto} className="mt-2" />
                         </div>
@@ -939,6 +1001,58 @@ export default function ProdukIndex({ auth, products, providers }) {
                         </PrimaryButton>
                     </div>
                 </form>
+            </Modal>
+
+            {/* Modal Crop Gambar */}
+            <Modal show={isCropModalOpen} onClose={() => setIsCropModalOpen(false)}>
+                <div className="p-6">
+                    <h2 className="text-lg font-medium text-gray-900 mb-4">Crop Gambar</h2>
+                    <div className="relative w-full h-[400px] bg-black rounded-lg overflow-hidden">
+                        {imageSrc && (
+                            <Cropper
+                                image={imageSrc}
+                                crop={crop}
+                                zoom={zoom}
+                                minZoom={0.1}
+                                restrictPosition={false}
+                                aspect={1} // Square aspect ratio
+                                onCropChange={setCrop}
+                                onZoomChange={setZoom}
+                                onCropComplete={onCropComplete}
+                            />
+                        )}
+                    </div>
+                    <div className="mt-4 flex items-center gap-4">
+                        <label className="text-sm text-gray-600 w-16">Zoom</label>
+                        <input
+                            type="range"
+                            value={zoom}
+                            min={0.1}
+                            max={3}
+                            step={0.1}
+                            aria-labelledby="Zoom"
+                            onChange={(e) => {
+                                setZoom(e.target.value);
+                            }}
+                            className="w-full"
+                        />
+                    </div>
+                    <div className="mt-6 flex justify-end gap-3">
+                        <SecondaryButton type="button" onClick={(e) => {
+                            e.preventDefault();
+                            setIsCropModalOpen(false);
+                            setImageSrc(null);
+                        }}>
+                            Batal
+                        </SecondaryButton>
+                        <PrimaryButton type="button" onClick={(e) => {
+                            e.preventDefault();
+                            showCroppedImage();
+                        }}>
+                            Potong & Simpan
+                        </PrimaryButton>
+                    </div>
+                </div>
             </Modal>
         </AuthenticatedLayout>
     );

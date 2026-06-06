@@ -89,6 +89,10 @@ class ProdukController extends Controller
                 Storage::disk('public')->delete($produk->foto);
             }
             $validated['foto'] = $request->file('foto')->store('produks', 'public');
+        } else {
+            // Jika tidak ada request remove_foto dan tidak ada file baru yang diunggah,
+            // hapus field 'foto' dari array validasi agar path lama di DB tidak tertimpa menjadi null
+            unset($validated['foto']);
         }
 
         unset($validated['remove_foto']); // Jangan masukkan ke update
