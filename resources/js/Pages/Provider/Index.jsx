@@ -85,9 +85,10 @@ export default function ProviderIndex({ auth, providers }) {
 
     const handleAddSaldoSubmit = (e) => {
         e.preventDefault();
+        const formatRupiah = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
         MySwal.fire({
             title: 'Tambah Saldo?',
-            text: `Tambah saldo untuk ${providerToAddSaldo.nama_provider}?`,
+            text: `Tambah saldo sejumlah ${formatRupiah(saldoData.tambah_saldo)} untuk ${providerToAddSaldo.nama_provider}?`,
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',

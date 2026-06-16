@@ -116,7 +116,14 @@ export default function ProdukIndex({ auth, products, providers }) {
 
     // Filter Data Berdasarkan Tab dan Pencarian
     const filteredProducts = products.filter(product => {
-        const matchTab = activeTab === 'digital' ? product.is_digital : !product.is_digital;
+        let matchTab = false;
+        if (activeTab === 'arsip') {
+            matchTab = product.is_archived;
+        } else {
+            if (product.is_archived) return false;
+            matchTab = activeTab === 'digital' ? product.is_digital : !product.is_digital;
+        }
+
         const matchSearch = product.nama_produk.toLowerCase().includes(searchKeyword.toLowerCase()) || 
                             (product.provider && product.provider.nama_provider.toLowerCase().includes(searchKeyword.toLowerCase()));
         return matchTab && matchSearch;
@@ -254,7 +261,7 @@ export default function ProdukIndex({ auth, products, providers }) {
         e.preventDefault();
         MySwal.fire({
             title: 'Tambah Stok?',
-            text: `Tambahkan stok untuk ${productToAddStock.nama_produk}?`,
+            text: `Tambahkan stok sebanyak ${stockData.tambah_stok} untuk ${productToAddStock.nama_produk}?`,
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
@@ -331,6 +338,30 @@ export default function ProdukIndex({ auth, products, providers }) {
         });
     };
 
+    const handleArchive = (product) => {
+        const actionText = product.is_archived ? 'mengembalikan' : 'mengarsipkan';
+        const confirmBtnColor = product.is_archived ? '#3085d6' : '#d33';
+        MySwal.fire({
+            title: `${product.is_archived ? 'Kembalikan' : 'Arsipkan'} Produk?`,
+            text: `Produk yang diarsipkan tidak akan muncul di kasir. Anda yakin ingin ${actionText} produk ini?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: confirmBtnColor,
+            cancelButtonColor: '#aaa',
+            confirmButtonText: `Ya, ${product.is_archived ? 'kembalikan' : 'arsipkan'}!`,
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.put(route('produk.archive', product.id), {}, {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: `Produk berhasil ${product.is_archived ? 'dikembalikan' : 'diarsipkan'}`, showConfirmButton: false, timer: 3000, timerProgressBar: true });
+                    }
+                });
+            }
+        });
+    };
+
     return (
         <AuthenticatedLayout user={auth.user}>
             <Head title="Produk" />
@@ -377,7 +408,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                 >
                                     📱 Produk Digital
                                     <span className="ml-2 bg-blue-100 text-blue-600 py-0.5 px-2.5 rounded-full text-xs">
-                                        {products.filter(p => p.is_digital).length}
+                                        {products.filter(p => p.is_digital && !p.is_archived).length}
                                     </span>
                                 </button>
 
@@ -392,7 +423,22 @@ export default function ProdukIndex({ auth, products, providers }) {
                                 >
                                     📦 Produk Fisik
                                     <span className="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2.5 rounded-full text-xs">
-                                        {products.filter(p => !p.is_digital).length}
+                                        {products.filter(p => !p.is_digital && !p.is_archived).length}
+                                    </span>
+                                </button>
+
+                                <button
+                                    onClick={() => setActiveTab('arsip')}
+                                    className={`
+                                        whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200
+                                        ${activeTab === 'arsip'
+                                            ? 'border-blue-500 text-blue-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                                    `}
+                                >
+                                    🗄️ Arsip
+                                    <span className="ml-2 bg-orange-100 text-orange-600 py-0.5 px-2.5 rounded-full text-xs">
+                                        {products.filter(p => p.is_archived).length}
                                     </span>
                                 </button>
                             </nav>
@@ -413,7 +459,7 @@ export default function ProdukIndex({ auth, products, providers }) {
 
                                         {/* Kolom Stok Dinamis (Hanya muncul jika tab Fisik, atau label lain jika Digital) */}
                                         <th className="px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">
-                                            {activeTab === 'fisik' ? 'Sisa Stok' : 'Status'}
+                                            {activeTab === 'digital' ? 'Status' : (activeTab === 'fisik' ? 'Sisa Stok' : 'Status / Stok')}
                                         </th>
 
                                         { (can('edit products') || can('delete products')) && (
@@ -437,7 +483,12 @@ export default function ProdukIndex({ auth, products, providers }) {
                                                     {item.provider ? item.provider.nama_provider : '-'}
                                                 </td>
                                                 <td className="px-6 py-4 text-sm font-bold text-gray-900">
-                                                    <div>{item.nama_produk}</div>
+                                                    <div className="flex items-center space-x-2">
+                                                        <span>{item.nama_produk}</span>
+                                                        {item.is_archived && (
+                                                            <span className="px-2 py-0.5 text-xs font-semibold text-white bg-orange-500 rounded-full">Diarsipkan</span>
+                                                        )}
+                                                    </div>
                                                     {item.is_flexible_price && (item.min_nominal || item.max_nominal) && (
                                                         <div className="mt-1 text-[11px] font-normal text-blue-600 bg-blue-50 inline-block px-1.5 py-0.5 rounded border border-blue-100">
                                                             Range: {item.min_nominal ? `Rp ${parseFloat(item.min_nominal).toLocaleString('id-ID')}` : '0'} - {item.max_nominal ? `Rp ${parseFloat(item.max_nominal).toLocaleString('id-ID')}` : '∞'}
@@ -445,7 +496,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                                     )}
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-gray-500">
-                                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${activeTab === 'digital' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}`}>
+                                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.is_digital ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}`}>
                                                         {item.jenis}
                                                     </span>
                                                 </td>
@@ -455,7 +506,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                                 <td className="px-6 py-4 text-sm font-bold text-green-600">Rp {parseFloat(item.harga_jual).toLocaleString('id-ID')}</td>
 
                                                 <td className="px-6 py-4 text-sm text-center">
-                                                    {activeTab === 'digital' ? (
+                                                    {item.is_digital ? (
                                                         <span className="px-2 py-1 text-xs font-bold text-green-600 uppercase border border-green-200 rounded bg-green-50">
                                                             Ready
                                                         </span>
@@ -476,6 +527,11 @@ export default function ProdukIndex({ auth, products, providers }) {
                                                         {can('edit products') && (
                                                             <button onClick={() => openEditModal(item)} className="mr-4 text-blue-600 transition hover:text-blue-900">Edit</button>
                                                         )}
+                                                        {can('edit products') && (
+                                                            <button onClick={() => handleArchive(item)} className={`mr-4 transition ${item.is_archived ? 'text-green-600 hover:text-green-900' : 'text-orange-600 hover:text-orange-900'}`}>
+                                                                {item.is_archived ? 'Kembalikan' : 'Arsipkan'}
+                                                            </button>
+                                                        )}
                                                         {can('delete products') && (
                                                             <button onClick={() => handleDelete(item.id)} className="text-red-600 transition hover:text-red-900">Hapus</button>
                                                         )}
@@ -485,7 +541,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                         ))
                                     ) : (
                                         <tr><td colSpan="9" className="px-6 py-10 italic text-center text-gray-500">
-                                            Tidak ada data untuk {activeTab === 'digital' ? 'Produk Digital' : 'Produk Fisik'}.
+                                            Tidak ada data untuk {activeTab === 'arsip' ? 'Arsip' : (activeTab === 'digital' ? 'Produk Digital' : 'Produk Fisik')}.
                                         </td></tr>
                                     )}
                                 </tbody>
@@ -501,7 +557,7 @@ export default function ProdukIndex({ auth, products, providers }) {
             }}>
                 <form onSubmit={handleSubmit} className="p-6">
                     <h2 className="mb-4 text-lg font-medium text-gray-900">
-                        {isEditMode ? 'Edit Produk' : `Tambah Produk ${activeTab === 'digital' ? 'Digital' : 'Fisik'}`}
+                        {isEditMode ? 'Edit Produk' : `Tambah Produk ${activeTab === 'arsip' ? '' : (activeTab === 'digital' ? 'Digital' : 'Fisik')}`}
                     </h2>
 
                     <div className="grid grid-cols-2 gap-4">

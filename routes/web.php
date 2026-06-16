@@ -57,6 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/hutang/{hutang}/cicil', [HutangController::class, 'cicil'])->name('hutang.cicil'); // Route khusus bayar
     Route::delete('/hutang/{hutang}', [HutangController::class, 'destroy'])->name('hutang.destroy');
     Route::put('/produk/{produk}/pin', [ProdukController::class, 'togglePin'])->name('produk.pin');
+    Route::put('/produk/{produk}/archive', [ProdukController::class, 'toggleArchive'])->name('produk.archive');
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/export', [LaporanController::class, 'exportPdf'])->name('laporan.export');
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');

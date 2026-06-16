@@ -189,6 +189,16 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
     const hasTarikTunai = cart.some(item => item.is_tarik_tunai);
     const kembalian = hasTarikTunai ? 0 : ((parseFloat(bayar) || 0) - totalHarga);
 
+    let hutangSebelumnya = 0;
+    if (metodePembayaran === 'hutang' && namaPelanggan && pelangganHutang) {
+        const pelanggan = pelangganHutang.find(p => p.nama_pelanggan.toLowerCase() === namaPelanggan.trim().toLowerCase());
+        if (pelanggan) {
+            hutangSebelumnya = parseFloat(pelanggan.sisa) || 0;
+        }
+    }
+    const hutangBaru = metodePembayaran === 'hutang' && kembalian < 0 ? Math.abs(kembalian) : 0;
+    const estimasiTotalHutang = hutangSebelumnya + hutangBaru;
+
     // --- LOGIC 5: Submit Transaksi ---
     const handleCheckout = () => {
         if (cart.length === 0) return MySwal.fire('Keranjang Kosong', 'Pilih produk dulu', 'warning');
@@ -536,10 +546,10 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                         {/* Kembalian Info */}
                         <div className={`flex justify-between items-center px-3 py-1.5 rounded-lg mb-3 transition-colors ${kembalian >= 0 ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
                             <span className={`text-xs font-bold uppercase ${kembalian >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                                {metodePembayaran === 'hutang' && kembalian < 0 ? 'Hutang' : (kembalian >= 0 ? 'Kembalian' : 'Kurang')}
+                                {metodePembayaran === 'hutang' && kembalian < 0 ? 'Estimasi Total Hutang' : (kembalian >= 0 ? 'Kembalian' : 'Kurang')}
                             </span>
                             <span className={`font-bold font-mono text-sm ${kembalian >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                                {formatRupiah(Math.abs(kembalian))}
+                                {metodePembayaran === 'hutang' && kembalian < 0 ? formatRupiah(estimasiTotalHutang) : formatRupiah(Math.abs(kembalian))}
                             </span>
                         </div>
 

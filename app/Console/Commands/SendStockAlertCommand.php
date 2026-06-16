@@ -39,6 +39,7 @@ class SendStockAlertCommand extends Command
 
         // Ambil produk fisik yang stoknya <= 5 (Wait, earlier it was <= 2, let's keep <= 2 or maybe <= 5? Dashboard uses <= 5. Let's use <= 5 to match dashboard or just keep 2. The previous code had <= 2, I will keep <= 5 to make it more proactive but wait, I will use <= 5 as that is the standard "menipis" in dashboard).
         $produkMenipis = Produk::where('is_digital', false)
+            ->where('is_archived', false)
             ->where('stok', '<=', 2)
             ->orderBy('stok', 'asc')
             ->get();

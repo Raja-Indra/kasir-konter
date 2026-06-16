@@ -134,6 +134,7 @@ class DashboardController extends Controller
 
         // 4. PERINGATAN STOK TIPIS (Produk Fisik <= 5)
         $lowStockProducts = Produk::where('is_digital', false)
+            ->where('is_archived', false)
             ->where('stok', '<=', 5)
             ->orderBy('stok', 'asc')
             ->limit(5)

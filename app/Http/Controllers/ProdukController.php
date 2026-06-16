@@ -192,6 +192,18 @@ class ProdukController extends Controller
         return redirect()->back()->with('success', 'Status pin produk diperbarui.');
     }
 
+    public function toggleArchive(Produk $produk)
+    {
+        Gate::authorize('edit products');
+        
+        $produk->update([
+            'is_archived' => !$produk->is_archived
+        ]);
+
+        $status = $produk->is_archived ? 'diarsipkan' : 'dikembalikan';
+        return redirect()->back()->with('success', "Produk berhasil $status.");
+    }
+
     public function destroy(Produk $produk)
     {
         Gate::authorize('delete products');

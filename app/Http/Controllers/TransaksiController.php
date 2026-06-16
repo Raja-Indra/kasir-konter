@@ -21,11 +21,12 @@ class TransaksiController extends Controller
         // Kita kirim data produk untuk ditampilkan di katalog kasir
         return Inertia::render('Transaksi/Index', [
             'products' => Produk::query()
+                ->where('is_archived', false)
                 ->with('provider:id,nama_provider,saldo')
                 ->orderBy('is_pinned', 'desc') 
                 ->latest()
                 ->get(),
-            'pelangganHutang' => \App\Models\Hutang::where('sisa', '>', 0)->select('nama_pelanggan', 'sisa')->get()
+            'pelangganHutang' => \App\Models\Hutang::select('nama_pelanggan', 'sisa')->get()
         ]);
     }
 

@@ -34,7 +34,8 @@ class Produk extends Model
         'is_flexible_price',
         'min_nominal',
         'max_nominal',
-        'is_pinned'
+        'is_pinned',
+        'is_archived'
     ];
 
     protected $casts = [
@@ -42,6 +43,7 @@ class Produk extends Model
         'is_tarik_tunai' => 'boolean',
         'is_flexible_price' => 'boolean',
         'is_pinned' => 'boolean',
+        'is_archived' => 'boolean',
         'harga_admin_provider' => 'decimal:2',
         'harga_modal' => 'decimal:2',
         'harga_jual' => 'decimal:2',
