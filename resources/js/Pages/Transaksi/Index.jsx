@@ -12,6 +12,7 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
     // --- STATE ---
     const { errors } = usePage().props;
     const [keyword, setKeyword] = useState('');
+    const [isCartOpen, setIsCartOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('all'); // 'all', 'fisik', 'digital'
     const [cart, setCart] = useState([]);
     const [bayar, setBayar] = useState('');
@@ -236,6 +237,7 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                         setUmur('');
                         setMetodePembayaran('tunai');
                         setNamaPelanggan('');
+                        setIsCartOpen(false); // Tutup keranjang di mobile setelah sukses
                         const Toast = Swal.mixin({
                             toast: true,
                             position: 'top-end',
@@ -423,16 +425,47 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                     </div>
                 </div>
 
+                {/* --- FLOATING BUTTON (MOBILE ONLY) --- */}
+                {!isCartOpen && cart.length > 0 && (
+                    <div className="fixed left-4 right-4 bottom-20 z-[100] lg:hidden">
+                        <button
+                            onClick={() => setIsCartOpen(true)}
+                            className="flex items-center justify-between w-full px-4 py-3 text-white transition bg-blue-600 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-xl hover:bg-blue-700 active:scale-[0.98]"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-white/20">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                </div>
+                                <div className="text-left">
+                                    <p className="text-xs font-medium text-blue-100">{cart.length} Produk</p>
+                                    <p className="text-sm font-bold">{formatRupiah(totalHarga)}</p>
+                                </div>
+                            </div>
+                            <span className="px-4 py-2 text-sm font-bold text-blue-600 bg-white shadow-sm rounded-lg">Bayar</span>
+                        </button>
+                    </div>
+                )}
+
                 {/* --- KANAN: KERANJANG (30%) --- */}
                 {/* flex-col h-full memastikan dia mengisi tinggi penuh */}
-                <div className="w-full lg:w-[400px] bg-white border-l border-gray-200 flex flex-col h-full shadow-xl z-20">
+                <div className={`
+                    ${isCartOpen ? 'absolute inset-0 z-50 flex flex-col h-full bg-white' : 'hidden'} 
+                    lg:relative lg:flex lg:w-[400px] 
+                    bg-white lg:border-l lg:border-gray-200 flex-col h-full shadow-xl lg:z-20
+                `}>
 
                     {/* 1. Header Keranjang (Fixed) */}
-                    <div className="flex items-center justify-between flex-shrink-0 p-4 text-white bg-gradient-to-r from-blue-800 to-blue-500 shadow-md">
+                    <div className="flex items-center justify-between flex-shrink-0 p-4 text-white shadow-md bg-gradient-to-r from-blue-800 to-blue-500">
                         <h2 className="flex items-center text-lg font-bold">
                             <span>🛒 Keranjang</span>
                         </h2>
-                        <span className="px-2 py-1 text-xs font-bold text-blue-800 bg-white rounded-full">{cart.length} Item</span>
+                        <div className="flex items-center gap-2">
+                            <span className="px-2 py-1 text-xs font-bold text-blue-800 bg-white shadow-sm rounded-full">{cart.length} Item</span>
+                            {/* Tombol Tutup Khusus Mobile */}
+                            <button onClick={() => setIsCartOpen(false)} className="p-1 transition rounded-full lg:hidden bg-white/20 hover:bg-white/30">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
                     </div>
 
                     {/* 2. List Item (Flexible & Scrollable) */}
