@@ -1094,15 +1094,13 @@ export default function ProdukIndex({ auth, products, providers }) {
                         />
                     </div>
                     <div className="mt-6 flex justify-end gap-3">
-                        <SecondaryButton type="button" onClick={(e) => {
-                            e.preventDefault();
+                        <SecondaryButton type="button" onClick={() => {
                             setIsCropModalOpen(false);
                             setImageSrc(null);
                         }}>
                             Batal
                         </SecondaryButton>
-                        <PrimaryButton type="button" onClick={(e) => {
-                            e.preventDefault();
+                        <PrimaryButton type="button" onClick={() => {
                             showCroppedImage();
                         }}>
                             Potong & Simpan
