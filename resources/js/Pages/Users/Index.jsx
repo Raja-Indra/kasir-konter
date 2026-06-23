@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import Modal from '@/Components/Modal';
@@ -10,6 +10,8 @@ import SecondaryButton from '@/Components/SecondaryButton';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import usePermission from '@/Hooks/usePermission';
+import Cropper from 'react-easy-crop';
+import getCroppedImg from '../../utils/cropImage';
 
 const MySwal = withReactContent(Swal);
 
@@ -19,6 +21,12 @@ export default function UserIndex({ auth, users, roles }) {
     const [isEditMode, setIsEditMode] = useState(false);
     const [userToEdit, setUserToEdit] = useState(null);
     const [previewImage, setPreviewImage] = useState(null); 
+
+    const [imageSrc, setImageSrc] = useState(null);
+    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+    const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         name: '',
@@ -32,11 +40,36 @@ export default function UserIndex({ auth, users, roles }) {
         _method: 'POST' 
     });
 
+    const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+        setCroppedAreaPixels(croppedAreaPixels);
+    }, []);
+
+    const showCroppedImage = useCallback(async () => {
+        try {
+            const croppedImageFile = await getCroppedImg(
+                imageSrc,
+                croppedAreaPixels,
+                0
+            );
+            setData('foto', croppedImageFile);
+            setPreviewImage(URL.createObjectURL(croppedImageFile));
+            setIsCropModalOpen(false);
+            setImageSrc(null);
+        } catch (e) {
+            console.error(e);
+        }
+    }, [imageSrc, croppedAreaPixels]);
+
     const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setData('foto', file);
-            setPreviewImage(URL.createObjectURL(file)); 
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.addEventListener('load', () => {
+                setImageSrc(reader.result);
+                setIsCropModalOpen(true);
+            });
+            e.target.value = null;
         }
     };
 
@@ -221,7 +254,9 @@ export default function UserIndex({ auth, users, roles }) {
             </div>
 
             {/* MODAL FORM */}
-            <Modal show={isModalOpen} onClose={closeModal}>
+            <Modal show={isModalOpen} onClose={() => {
+                if (!isCropModalOpen) closeModal();
+            }}>
                 <form onSubmit={handleSubmit} className="p-6">
                     <h2 className="mb-4 text-lg font-medium text-gray-900">
                         {isEditMode ? 'Edit User' : 'Tambah User Baru'}
@@ -335,6 +370,55 @@ export default function UserIndex({ auth, users, roles }) {
                         <PrimaryButton className="ms-3" disabled={processing}>Simpan</PrimaryButton>
                     </div>
                 </form>
+            </Modal>
+
+            {/* Modal Cropper */}
+            <Modal show={isCropModalOpen} onClose={() => setIsCropModalOpen(false)}>
+                <div className="p-6">
+                    <h2 className="text-lg font-medium text-gray-900 mb-4">Sesuaikan Foto Profil</h2>
+                    <div className="relative w-full h-64 bg-gray-900 rounded-lg overflow-hidden">
+                        {imageSrc && (
+                            <Cropper
+                                image={imageSrc}
+                                crop={crop}
+                                zoom={zoom}
+                                aspect={1}
+                                cropShape="round"
+                                showGrid={false}
+                                onCropChange={setCrop}
+                                onZoomChange={setZoom}
+                                onCropComplete={onCropComplete}
+                            />
+                        )}
+                    </div>
+                    <div className="mt-4 flex items-center gap-4">
+                        <span className="text-sm text-gray-600">Zoom:</span>
+                        <input
+                            type="range"
+                            min={1}
+                            max={3}
+                            step={0.1}
+                            value={zoom}
+                            onChange={(e) => setZoom(e.target.value)}
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                        />
+                    </div>
+                    <div className="mt-6 flex justify-end gap-3">
+                        <button
+                            type="button"
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                            onClick={() => {
+                                setIsCropModalOpen(false);
+                                setImageSrc(null);
+                            }}
+                        >
+                            Batal
+                        </button>
+                        <PrimaryButton type="button" onClick={showCroppedImage} className="bg-blue-600 hover:bg-blue-700">
+                            Terapkan
+                        </PrimaryButton>
+                    </div>
+                </div>
             </Modal>
         </AuthenticatedLayout>
     );

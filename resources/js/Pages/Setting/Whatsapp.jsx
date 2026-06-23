@@ -133,7 +133,7 @@ export default function WhatsappSetting({ auth }) {
                         {/* FORM TOKEN */}
                         <div className="bg-white p-6 shadow-sm sm:rounded-lg">
                             <h2 className="text-lg font-bold text-gray-900 mb-6 border-b pb-2 flex items-center">
-                                <span className="mr-2">💬</span> Pengaturan API Fonnte
+                                <span className="mr-2"></span> Pengaturan API Fonnte
                             </h2>
 
                             <form onSubmit={handleSubmit}>
@@ -160,7 +160,7 @@ export default function WhatsappSetting({ auth }) {
                         {/* FORM TEST */}
                         <div className="bg-white p-6 shadow-sm sm:rounded-lg">
                             <h2 className="text-lg font-bold text-gray-900 mb-6 border-b pb-2 flex items-center">
-                                <span className="mr-2">🧪</span> Test Kirim Pesan
+                                <span className="mr-2"></span> Test Kirim Pesan
                             </h2>
 
                             <p className="text-sm text-gray-600 mb-4">
@@ -193,7 +193,7 @@ export default function WhatsappSetting({ auth }) {
                             <form onSubmit={handleAlertSubmit}>
                                 <div className={`flex items-center justify-between p-6 ${alertForm.data.alert_stok_aktif ? 'border-b pb-4' : ''}`}>
                                     <h2 className="text-lg font-bold text-gray-900 flex items-center">
-                                        <span className="mr-2">⚠️</span> Notifikasi Stok & Saldo Menipis (WhatsApp)
+                                        <span className="mr-2"></span> Notifikasi Stok & Saldo Menipis (WhatsApp)
                                     </h2>
                                     <div className="flex items-center space-x-3">
                                         <span className={`text-sm font-medium ${alertForm.data.alert_stok_aktif ? 'text-green-600' : 'text-gray-500'}`}>
@@ -266,7 +266,7 @@ export default function WhatsappSetting({ auth }) {
                                 <div className={`flex items-center px-6 pb-6 ${alertForm.data.alert_stok_aktif ? 'justify-between pt-4 border-t' : 'justify-end'}`}>
                                     {alertForm.data.alert_stok_aktif && (
                                         <SecondaryButton type="button" onClick={handleManualAlert} disabled={alertForm.processing} className="border-orange-500 text-orange-600 hover:bg-orange-50">
-                                            🚀 Kirim Alert Sekarang
+                                            Kirim Alert Sekarang
                                         </SecondaryButton>
                                     )}
 
@@ -281,7 +281,7 @@ export default function WhatsappSetting({ auth }) {
                             <form onSubmit={handleLaporanSubmit}>
                                 <div className={`flex items-center justify-between p-6 ${laporanForm.data.laporan_wa_aktif ? 'border-b pb-4' : ''}`}>
                                     <h2 className="text-lg font-bold text-gray-900 flex items-center">
-                                        <span className="mr-2">📄</span> Pengaturan Laporan Penjualan (WhatsApp)
+                                        <span className="mr-2"></span> Pengaturan Laporan Penjualan (WhatsApp)
                                     </h2>
                                     <div className="flex items-center space-x-3">
                                         <span className={`text-sm font-medium ${laporanForm.data.laporan_wa_aktif ? 'text-blue-600' : 'text-gray-500'}`}>

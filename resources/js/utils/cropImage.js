@@ -71,9 +71,9 @@ export default async function getCroppedImg(imageSrc, pixelCrop, rotation = 0) {
     finalCanvas.width = finalWidth;
     finalCanvas.height = finalHeight;
     
-    // Fill with white background to handle zoomed-out images nicely
-    finalCtx.fillStyle = '#ffffff';
-    finalCtx.fillRect(0, 0, finalWidth, finalHeight);
+    // Transparent background is kept by default. 
+    // We no longer fill with white so PNG/WebP transparency is preserved.
+    finalCtx.clearRect(0, 0, finalWidth, finalHeight);
     
     finalCtx.drawImage(canvas, 0, 0, finalWidth, finalHeight);
 

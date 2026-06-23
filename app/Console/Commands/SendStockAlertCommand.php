@@ -45,7 +45,8 @@ class SendStockAlertCommand extends Command
             ->get();
 
         // Ambil saldo provider yang <= 50000
-        $providerMenipis = Provider::where('saldo', '<=', 50000)
+        $providerMenipis = Provider::where('is_digital', true)
+            ->where('saldo', '<=', 50000)
             ->orderBy('saldo', 'asc')
             ->get();
 
@@ -55,7 +56,7 @@ class SendStockAlertCommand extends Command
         }
 
         // Susun Pesan
-        $pesan = "⚠️ *Peringatan Stok & Saldo Menipis* ⚠️\n\n";
+        $pesan = "*Peringatan Stok & Saldo Menipis*\n\n";
 
         if ($produkMenipis->isNotEmpty()) {
             $pesan .= "Berikut adalah daftar produk yang stoknya sudah sedikit (≤ 2):\n";

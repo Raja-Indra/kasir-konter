@@ -110,15 +110,15 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
 
                     <div className="flex flex-col items-start justify-between mb-6 md:flex-row md:items-center">
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-800">Halo, {auth.user.name} 👋</h2>
+                            <h2 className="text-2xl font-bold text-gray-800">Halo, {auth.user.name}</h2>
                             <p className="text-sm text-gray-500">Inilah performa usaha Anda hari ini.</p>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
                             <Link href={route('transaksi.index')} className="px-4 py-2 text-sm font-semibold text-white transition bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700">
-                                🛒 Buka Kasir
+                                Buka Kasir
                             </Link>
                             <Link href={route('produk.index')} className="px-4 py-2 text-sm font-semibold text-blue-700 transition bg-blue-100 rounded-lg hover:bg-blue-200">
-                                📦 Tambah Produk
+                                Tambah Produk
                             </Link>
                         </div>
                     </div>
@@ -209,7 +209,7 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
 
                         {/* Top Produk (1/3 layar) */}
                         <div className="p-6 bg-white border border-gray-100 shadow-sm rounded-xl">
-                            <h3 className="mb-4 text-lg font-bold text-gray-800">🏆 Produk Terlaris (Bulan Ini)</h3>
+                            <h3 className="mb-4 text-lg font-bold text-gray-800">Produk Terlaris (Bulan Ini)</h3>
                             <div className="space-y-4">
                                 {top_produk.length > 0 ? (
                                     top_produk.map((item, index) => (
@@ -250,7 +250,7 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
                     <div className="p-6 mb-8 bg-white border border-gray-100 shadow-sm rounded-xl">
                         <div className="flex items-center justify-between mb-4">
                             <div>
-                                <h3 className="text-lg font-bold text-gray-800">📊 Grafik Umur Pelanggan</h3>
+                                <h3 className="text-lg font-bold text-gray-800">Grafik Umur Pelanggan</h3>
                                 <p className="text-sm text-gray-500">Distribusi usia pelanggan berdasarkan transaksi keseluruhan.</p>
                             </div>
                         </div>
@@ -301,7 +301,7 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
                         {/* Transaksi Terakhir (2/3 layar) */}
                         <div className="p-6 bg-white border border-gray-100 shadow-sm lg:col-span-2 rounded-xl">
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-bold text-gray-800">🧾 Transaksi Hari Ini</h3>
+                                <h3 className="text-lg font-bold text-gray-800">Transaksi Hari Ini</h3>
                                 <Link href={route('riwayat.index')} className="text-sm font-medium text-blue-600 hover:underline">Lihat Semua</Link>
                             </div>
                             <div className="overflow-x-auto">
@@ -339,7 +339,7 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
                             {/* Peringatan Saldo */}
                             <div className="p-6 bg-white border border-red-100 shadow-sm rounded-xl">
                                 <h3 className="flex items-center mb-4 text-lg font-bold text-gray-800">
-                                    <span className="mr-2 text-xl">⚠️</span> Saldo Provider Menipis
+                                    <span className="mr-2 text-xl"></span> Saldo Provider Menipis
                                 </h3>
                                 <div className="space-y-3">
                                     {low_balance.length > 0 ? (
@@ -355,7 +355,7 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
                                         ))
                                     ) : (
                                         <div className="p-3 text-sm text-center text-green-700 rounded-lg bg-green-50">
-                                            Semua saldo provider aman 👍
+                                            Semua saldo provider aman
                                         </div>
                                     )}
                                 </div>
@@ -364,7 +364,7 @@ export default function Dashboard({ auth, stats, chart, demografi_umur, top_prod
                             {/* Peringatan Stok Fisik */}
                             <div className="p-6 bg-white border border-orange-100 shadow-sm rounded-xl">
                                 <h3 className="flex items-center mb-4 text-lg font-bold text-gray-800">
-                                    <span className="mr-2 text-xl">📦</span> Stok Barang Tipis
+                                    <span className="mr-2 text-xl"></span> Stok Barang Tipis
                                 </h3>
                                 <div className="space-y-3">
                                     {low_stock.length > 0 ? (

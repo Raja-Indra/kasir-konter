@@ -141,7 +141,8 @@ class DashboardController extends Controller
             ->get();
 
         // 5. PERINGATAN SALDO PROVIDER MENIPIS (<= 50000)
-        $lowBalanceProviders = Provider::where('saldo', '<=', 50000)
+        $lowBalanceProviders = Provider::where('is_digital', true)
+            ->where('saldo', '<=', 50000)
             ->orderBy('saldo', 'asc')
             ->get();
 

@@ -7,6 +7,7 @@ import TextInput from '@/Components/TextInput';
 import InputError from '@/Components/InputError';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
+import Checkbox from '@/Components/Checkbox';
 // Import SweetAlert2
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
@@ -330,16 +331,17 @@ export default function ProviderIndex({ auth, providers }) {
                     </div>
 
                     <div className="mb-4">
-                        <InputLabel htmlFor="is_digital" value="Jenis Provider" />
-                        <select
-                            id="is_digital"
-                            className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            value={data.is_digital ? 'true' : 'false'}
-                            onChange={(e) => setData('is_digital', e.target.value === 'true')}
-                        >
-                            <option value="true">Provider Digital (Pulsa, Token, dll)</option>
-                            <option value="false">Gudang Fisik (Aksesoris, Perdana, dll)</option>
-                        </select>
+                        <label className="flex items-center">
+                            <Checkbox
+                                name="is_digital"
+                                checked={data.is_digital}
+                                onChange={(e) => setData('is_digital', e.target.checked)}
+                            />
+                            <span className="ms-2 text-sm text-gray-600">Provider Digital (Pulsa, Token, dll)</span>
+                        </label>
+                        <p className="mt-1 text-xs text-gray-500">
+                            Hapus centang jika ini adalah Gudang Fisik (Aksesoris, Perdana, dll).
+                        </p>
                         <InputError message={errors.is_digital} className="mt-2" />
                     </div>
 

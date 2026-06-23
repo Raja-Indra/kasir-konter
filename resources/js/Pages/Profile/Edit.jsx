@@ -1,33 +1,35 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
-import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 
 export default function Edit({ auth, mustVerifyEmail, status }) {
     return (
-        <AuthenticatedLayout
-            user={auth.user}
-            header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Profile</h2>}
-        >
+        <AuthenticatedLayout user={auth.user}>
             <Head title="Profile" />
 
-            <div className="py-12">
-                <div className="mx-auto space-y-6 max-w-7xl sm:px-6 lg:px-8">
-                    <div className="p-4 bg-white shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
-                        <UpdateProfileInformationForm
-                            mustVerifyEmail={mustVerifyEmail}
-                            status={status}
-                            className="max-w-xl"
-                        />
+            <div className="py-6">
+                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+                    {/* Header Profile Professional */}
+                    <div className="p-6 bg-gradient-to-r from-blue-800 to-blue-500 rounded-lg shadow-md flex items-center justify-between text-white">
+                        <div>
+                            <h2 className="text-2xl font-bold">Pengaturan Profil</h2>
+                            <p className="text-blue-100 text-sm mt-1">Kelola informasi pribadi dan pengaturan keamanan akun Anda.</p>
+                        </div>
                     </div>
 
-                    <div className="p-4 bg-white shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
-                        <UpdatePasswordForm className="max-w-xl" />
-                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="p-6 bg-white shadow-sm sm:rounded-lg border border-gray-100">
+                            <UpdateProfileInformationForm
+                                mustVerifyEmail={mustVerifyEmail}
+                                status={status}
+                                className="w-full"
+                            />
+                        </div>
 
-                    <div className="p-4 bg-white shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
-                        <DeleteUserForm className="max-w-xl" />
+                        <div className="p-6 bg-white shadow-sm sm:rounded-lg border border-gray-100">
+                            <UpdatePasswordForm className="w-full" />
+                        </div>
                     </div>
                 </div>
             </div>

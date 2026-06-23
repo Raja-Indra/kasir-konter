@@ -388,7 +388,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                 {can('create products') && (
                                     <div className="flex gap-2">
                                         <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={openCreateModal}>+ Tambah Produk</PrimaryButton>
-                                        <PrimaryButton className="!bg-yellow-400 !text-blue-900 hover:!bg-yellow-500" onClick={openInjectModal}>💉 Inject Voucher</PrimaryButton>
+                                        <PrimaryButton className="!bg-yellow-400 !text-blue-900 hover:!bg-yellow-500" onClick={openInjectModal}>Inject Voucher</PrimaryButton>
                                     </div>
                                 )}
                             </div>
@@ -406,7 +406,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
                                     `}
                                 >
-                                    📱 Produk Digital
+                                    Produk Digital
                                     <span className="ml-2 bg-blue-100 text-blue-600 py-0.5 px-2.5 rounded-full text-xs">
                                         {products.filter(p => p.is_digital && !p.is_archived).length}
                                     </span>
@@ -421,7 +421,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
                                     `}
                                 >
-                                    📦 Produk Fisik
+                                    Produk Fisik
                                     <span className="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2.5 rounded-full text-xs">
                                         {products.filter(p => !p.is_digital && !p.is_archived).length}
                                     </span>
@@ -436,7 +436,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
                                     `}
                                 >
-                                    🗄️ Arsip
+                                    Arsip
                                     <span className="ml-2 bg-orange-100 text-orange-600 py-0.5 px-2.5 rounded-full text-xs">
                                         {products.filter(p => p.is_archived).length}
                                     </span>
@@ -879,7 +879,7 @@ export default function ProdukIndex({ auth, products, providers }) {
             <Modal show={isInjectModalOpen} onClose={closeInjectModal} maxWidth="2xl">
                 <form onSubmit={handleInjectSubmit} className="p-6">
                     <h2 className="mb-4 text-lg font-medium text-gray-900">
-                        💉 Inject Voucher Kosong
+                        Inject Voucher Kosong
                     </h2>
 
                     <div className="grid grid-cols-2 gap-4">

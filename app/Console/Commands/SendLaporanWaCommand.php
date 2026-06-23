@@ -147,7 +147,7 @@ class SendLaporanWaCommand extends Command
         }
 
         // Susun Pesan
-        $pesan = "📊 *Laporan Penjualan $periodeText* 📊\n\n";
+        $pesan = "*Laporan Penjualan $periodeText*\n\n";
         $pesan .= "Total Transaksi: *" . $transaksi->count() . "*\n";
         $pesan .= "Total Omzet: *Rp " . number_format($totalOmzet, 0, ',', '.') . "*\n";
         $pesan .= "Laba Bersih: *Rp " . number_format($totalLabaBersih, 0, ',', '.') . "*\n";

@@ -20,15 +20,15 @@ export default function DashboardKasir({ auth, stats, recent_transactions }) {
                     
                     <div className="flex flex-col items-start justify-between mb-6 md:flex-row md:items-center">
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-800">Halo, {auth.user.name} 👋</h2>
+                            <h2 className="text-2xl font-bold text-gray-800">Halo, {auth.user.name}</h2>
                             <p className="text-sm text-gray-500">Selamat bekerja, semoga harimu lancar!</p>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
                             <Link href={route('transaksi.index')} className="px-5 py-3 text-sm font-semibold text-white transition bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700">
-                                🛒 Buka Kasir
+                                Buka Kasir
                             </Link>
                             <Link href={route('hutang.index')} className="px-5 py-3 text-sm font-semibold text-red-700 transition bg-red-100 rounded-lg hover:bg-red-200">
-                                📒 Catat Bon
+                                Catat Bon
                             </Link>
                         </div>
                     </div>

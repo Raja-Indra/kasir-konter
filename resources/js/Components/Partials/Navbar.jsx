@@ -90,6 +90,15 @@ export default function Navbar({ user, toggleSidebar, isSidebarOpen }) {
                                 <Dropdown.Trigger>
                                     <span className="inline-flex rounded-md">
                                         <button className="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-white transition duration-150 ease-in-out bg-transparent border border-transparent rounded-md hover:text-blue-100 focus:outline-none">
+                                            {user.foto ? (
+                                                <img className="h-8 w-8 rounded-full object-cover mr-2 border border-blue-300" src={`/storage/${user.foto}`} alt="Avatar" />
+                                            ) : (
+                                                <div className="h-8 w-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center mr-2 border border-blue-300">
+                                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                    </svg>
+                                                </div>
+                                            )}
                                             {user.name}
                                             <svg className="ms-2 -me-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
