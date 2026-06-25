@@ -45,11 +45,24 @@ export default function HutangIndex({ auth, hutangs, filters }) {
 
     const handleCreate = (e) => {
         e.preventDefault();
-        post(route('hutang.store'), {
-            onSuccess: () => {
-                setIsCreateModalOpen(false);
-                reset();
-                MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Data kasbon tersimpan', showConfirmButton: false, timer: 3000, timerProgressBar: true });
+        MySwal.fire({
+            title: 'Simpan Data?',
+            text: 'Yakin ingin mencatat kasbon baru ini?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Simpan',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                post(route('hutang.store'), {
+                    onSuccess: () => {
+                        setIsCreateModalOpen(false);
+                        reset();
+                        MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Data kasbon tersimpan', showConfirmButton: false, timer: 3000, timerProgressBar: true });
+                    }
+                });
             }
         });
     };
@@ -80,12 +93,26 @@ export default function HutangIndex({ auth, hutangs, filters }) {
                 <div class="text-left text-sm mb-4">
                     <p>Sisa Hutang: <b>${formatRupiah(hutang.sisa)}</b></p>
                 </div>
-                <input id="swal-nominal" type="number" class="swal2-input" placeholder="Nominal Bayar">
+                <input id="swal-nominal" type="number" class="swal2-input" placeholder="Nominal Bayar" autofocus>
                 <input id="swal-catatan" class="swal2-input" placeholder="Catatan (Opsional)">
             `,
             focusConfirm: false,
             showCancelButton: true,
             confirmButtonText: 'Bayar',
+            didOpen: () => {
+                const nominalInput = document.getElementById('swal-nominal');
+                const catatanInput = document.getElementById('swal-catatan');
+                
+                const handleEnter = (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        MySwal.clickConfirm();
+                    }
+                };
+
+                if (nominalInput) nominalInput.addEventListener('keydown', handleEnter);
+                if (catatanInput) catatanInput.addEventListener('keydown', handleEnter);
+            },
             preConfirm: () => {
                 return [
                     document.getElementById('swal-nominal').value,
@@ -101,8 +128,21 @@ export default function HutangIndex({ auth, hutangs, filters }) {
             if (!nominal || nominal <= 0) return MySwal.fire('Error', 'Nominal tidak valid', 'error');
             if (nominal > hutang.sisa) return MySwal.fire('Error', 'Nominal melebihi sisa hutang', 'error');
 
-            router.post(route('hutang.cicil', hutang.id), { nominal, catatan }, {
-                onSuccess: () => MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Pembayaran diterima', showConfirmButton: false, timer: 3000, timerProgressBar: true })
+            MySwal.fire({
+                title: 'Konfirmasi Pembayaran',
+                text: `Anda akan mencatat pembayaran sebesar ${formatRupiah(nominal)} untuk ${hutang.nama_pelanggan}. Lanjutkan?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Proses',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    router.post(route('hutang.cicil', hutang.id), { nominal, catatan }, {
+                        onSuccess: () => MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Pembayaran diterima', showConfirmButton: false, timer: 3000, timerProgressBar: true })
+                    });
+                }
             });
         }
     };

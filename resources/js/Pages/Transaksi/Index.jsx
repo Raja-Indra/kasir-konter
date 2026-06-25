@@ -74,6 +74,17 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                 focusConfirm: false,
                 showCancelButton: true,
                 confirmButtonText: 'Lanjut',
+                didOpen: () => {
+                    const input = document.getElementById('swal-nominal');
+                    if (input) {
+                        input.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                MySwal.clickConfirm();
+                            }
+                        });
+                    }
+                },
                 preConfirm: () => {
                     return document.getElementById('swal-nominal').value
                 }
@@ -143,6 +154,7 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                     harga_modal: finalModal,
                     harga_jual: finalJual
                 }]);
+                setTimeout(() => document.getElementById('input-bayar')?.focus(), 150);
                 return;
             }
 
@@ -163,6 +175,7 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                 harga_jual: finalJual
             }]);
         }
+        setTimeout(() => document.getElementById('input-bayar')?.focus(), 150);
     };
 
     // --- LOGIC 3: Update Qty di Keranjang ---
@@ -535,6 +548,12 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                                     onChange={(e) => setNamaPelanggan(e.target.value)}
                                     list="pelanggan-list"
                                     autoComplete="off"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleCheckout();
+                                        }
+                                    }}
                                 />
                                 <datalist id="pelanggan-list">
                                     {pelangganHutang && pelangganHutang.map((p, index) => (
@@ -555,6 +574,7 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                                     {metodePembayaran === 'hutang' ? 'Bayar / DP (Rp)' : 'Bayar (Rp)'}
                                 </label>
                                 <TextInput
+                                    id="input-bayar"
                                     type="text"
                                     inputMode="numeric"
                                     className={`w-full h-10 font-mono text-lg font-bold text-right ${hasTarikTunai ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
@@ -562,6 +582,12 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                                     value={hasTarikTunai ? totalHarga : bayar}
                                     onChange={(e) => setBayar(e.target.value.replace(/[^0-9]/g, ''))}
                                     disabled={hasTarikTunai}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleCheckout();
+                                        }
+                                    }}
                                 />
                             </div>
                             <div className="col-span-4">
@@ -572,6 +598,12 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                                     placeholder="-"
                                     value={umur}
                                     onChange={(e) => setUmur(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleCheckout();
+                                        }
+                                    }}
                                 />
                             </div>
                         </div>
