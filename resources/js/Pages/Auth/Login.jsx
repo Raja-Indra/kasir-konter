@@ -110,9 +110,7 @@ export default function Login({ status, canResetPassword }) {
                         </div>
                     </form>
 
-                    <p className="mt-8 text-sm text-center text-gray-500">
-                        Belum punya akun? <span className="font-semibold text-indigo-600 cursor-pointer">Hubungi Admin</span>
-                    </p>
+                   
                 </div>
 
                 {/* --- SISI KANAN: AREA VISUAL --- */}
