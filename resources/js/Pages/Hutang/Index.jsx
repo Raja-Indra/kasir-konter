@@ -28,6 +28,18 @@ export default function HutangIndex({ auth, hutangs, filters }) {
         jatuh_tempo: ''
     });
 
+    const formatInputRupiah = (value) => {
+        if (!value && value !== 0) return '';
+        const numberString = value.toString().replace(/[^0-9]/g, '');
+        if (!numberString) return '';
+        return parseInt(numberString, 10).toLocaleString('id-ID');
+    };
+
+    const parseInputRupiah = (value) => {
+        if (!value && value !== 0) return '';
+        return value.toString().replace(/[^0-9]/g, '');
+    };
+
     // Helper Rupiah
     const formatRupiah = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
 
@@ -93,7 +105,7 @@ export default function HutangIndex({ auth, hutangs, filters }) {
                 <div class="text-left text-sm mb-4">
                     <p>Sisa Hutang: <b>${formatRupiah(hutang.sisa)}</b></p>
                 </div>
-                <input id="swal-nominal" type="number" class="swal2-input" placeholder="Nominal Bayar" autofocus>
+                <input id="swal-nominal" type="text" inputmode="numeric" class="swal2-input" placeholder="Nominal Bayar" autofocus>
                 <input id="swal-catatan" class="swal2-input" placeholder="Catatan (Opsional)">
             `,
             focusConfirm: false,
@@ -110,12 +122,21 @@ export default function HutangIndex({ auth, hutangs, filters }) {
                     }
                 };
 
-                if (nominalInput) nominalInput.addEventListener('keydown', handleEnter);
+                const formatSwalInput = (e) => {
+                    let val = e.target.value.replace(/[^0-9]/g, '');
+                    if(val) e.target.value = parseInt(val, 10).toLocaleString('id-ID');
+                    else e.target.value = '';
+                };
+
+                if (nominalInput) {
+                    nominalInput.addEventListener('input', formatSwalInput);
+                    nominalInput.addEventListener('keydown', handleEnter);
+                }
                 if (catatanInput) catatanInput.addEventListener('keydown', handleEnter);
             },
             preConfirm: () => {
                 return [
-                    document.getElementById('swal-nominal').value,
+                    document.getElementById('swal-nominal').value.replace(/[^0-9]/g, ''),
                     document.getElementById('swal-catatan').value
                 ]
             }
@@ -209,7 +230,7 @@ export default function HutangIndex({ auth, hutangs, filters }) {
                                         <th className="px-4 py-3 text-right">Terbayar</th>
                                         <th className="px-4 py-3 text-right">Sisa</th>
                                         <th className="px-4 py-3 text-center">Status</th>
-                                        <th className="px-4 py-3 text-center">Aksi</th>
+                                        <th className="px-4 py-3 text-right">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
@@ -243,17 +264,17 @@ export default function HutangIndex({ auth, hutangs, filters }) {
                                                     <span className="px-2 py-1 text-xs font-bold text-red-800 bg-red-100 rounded-full">BELUM LUNAS</span>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-3 space-x-2 text-center whitespace-nowrap">
-                                                <button onClick={() => handleDetail(item)} className="px-3 py-1 text-xs text-gray-700 bg-gray-200 rounded hover:bg-gray-300">
+                                            <td className="px-4 py-3 text-sm font-medium text-right whitespace-nowrap">
+                                                <button onClick={() => handleDetail(item)} className="mr-4 text-gray-600 transition hover:text-gray-900">
                                                     Detail
                                                 </button>
                                                 {item.status !== 'lunas' && can('pay debt') && (
-                                                    <button onClick={() => handleBayar(item)} className="px-3 py-1 text-xs text-white bg-blue-600 rounded hover:bg-blue-700">
+                                                    <button onClick={() => handleBayar(item)} className="mr-4 text-blue-600 transition hover:text-blue-900">
                                                         Bayar
                                                     </button>
                                                 )}
                                                 {hasRole('owner') && (
-                                                    <button onClick={() => handleDelete(item.id)} className="text-xs text-red-500 hover:text-red-700">Hapus</button>
+                                                    <button onClick={() => handleDelete(item.id)} className="text-red-600 transition hover:text-red-900">Hapus</button>
                                                 )}
                                             </td>
                                         </tr>
@@ -294,7 +315,7 @@ export default function HutangIndex({ auth, hutangs, filters }) {
                         </div>
                         <div>
                             <InputLabel value="Nominal Hutang (Rp)" />
-                            <TextInput type="number" className="w-full mt-1" value={data.total_hutang} onChange={e => setData('total_hutang', e.target.value)} required />
+                            <TextInput type="text" inputMode="numeric" className="w-full mt-1" placeholder="Contoh: 50.000" value={formatInputRupiah(data.total_hutang)} onChange={e => setData('total_hutang', parseInputRupiah(e.target.value))} required />
                         </div>
                         <div>
                             <InputLabel value="Keterangan (Opsional)" />

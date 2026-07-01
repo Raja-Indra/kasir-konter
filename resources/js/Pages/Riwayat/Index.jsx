@@ -16,17 +16,26 @@ export default function RiwayatIndex({ auth, transaksi, providers, jenis_produk,
 
     const [filterProvider, setFilterProvider] = useState(filters?.provider_id || '');
     const [filterJenis, setFilterJenis] = useState(filters?.jenis || '');
+    const [startDate, setStartDate] = useState(filters?.start_date || '');
+    const [endDate, setEndDate] = useState(filters?.end_date || '');
+    const [perPage, setPerPage] = useState(filters?.per_page || '50');
 
     const handleFilter = () => {
         router.get(route('riwayat.index'), {
             provider_id: filterProvider,
-            jenis: filterJenis
+            jenis: filterJenis,
+            start_date: startDate,
+            end_date: endDate,
+            per_page: perPage
         }, { preserveState: true });
     };
 
     const handleResetFilter = () => {
         setFilterProvider('');
         setFilterJenis('');
+        setStartDate('');
+        setEndDate('');
+        setPerPage('50');
         router.get(route('riwayat.index'), {}, { preserveState: true });
     };
 
@@ -91,12 +100,34 @@ export default function RiwayatIndex({ auth, transaksi, providers, jenis_produk,
                 <div className="max-w-full px-4 mx-auto sm:px-6 lg:px-8">
                     <div className="p-6 bg-white shadow-sm sm:rounded-lg">
 
-                        <div className="flex items-center justify-between p-4 mb-6 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-800 to-blue-500">
+                        <div className="flex flex-col justify-between gap-4 p-4 mb-6 text-white rounded-lg shadow-md sm:flex-row sm:items-center bg-gradient-to-r from-blue-800 to-blue-500">
                             <h3 className="text-lg font-bold">Riwayat Transaksi</h3>
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm">Tampilkan:</span>
+                                <select
+                                    className="py-2 pl-3 pr-8 text-sm text-gray-900 bg-white border-none rounded-md shadow-inner focus:ring-blue-300 focus:border-blue-300"
+                                    value={perPage}
+                                    onChange={(e) => {
+                                        setPerPage(e.target.value);
+                                        router.get(route('riwayat.index'), {
+                                            provider_id: filterProvider,
+                                            jenis: filterJenis,
+                                            start_date: startDate,
+                                            end_date: endDate,
+                                            per_page: e.target.value
+                                        }, { preserveState: true });
+                                    }}
+                                >
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                            </div>
                         </div>
 
                         {/* FILTER TRANSAKSI */}
-                        <div className="flex flex-col md:flex-row gap-4 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <div className="flex flex-col flex-wrap gap-4 p-4 mb-6 border border-gray-200 rounded-lg md:flex-row bg-gray-50">
                             <div className="flex-1">
                                 <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">Filter Provider</label>
                                 <select
@@ -110,8 +141,8 @@ export default function RiwayatIndex({ auth, transaksi, providers, jenis_produk,
                                     ))}
                                 </select>
                             </div>
-                            <div className="flex-1">
-                                <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">Filter Jenis Produk</label>
+                            <div className="flex-1 min-w-[150px]">
+                                <label className="block mb-1 text-xs font-bold tracking-wider text-gray-700 uppercase">Filter Jenis Produk</label>
                                 <select
                                     className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                     value={filterJenis}
@@ -123,7 +154,25 @@ export default function RiwayatIndex({ auth, transaksi, providers, jenis_produk,
                                     ))}
                                 </select>
                             </div>
-                            <div className="flex items-end space-x-2">
+                            <div className="flex-1 min-w-[150px]">
+                                <label className="block mb-1 text-xs font-bold tracking-wider text-gray-700 uppercase">Dari Tanggal</label>
+                                <input
+                                    type="date"
+                                    className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                />
+                            </div>
+                            <div className="flex-1 min-w-[150px]">
+                                <label className="block mb-1 text-xs font-bold tracking-wider text-gray-700 uppercase">Sampai Tanggal</label>
+                                <input
+                                    type="date"
+                                    className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                />
+                            </div>
+                            <div className="flex items-end space-x-2 w-full md:w-auto">
                                 <button
                                     onClick={handleFilter}
                                     className="px-4 py-2 text-sm font-bold bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 transition"
@@ -203,12 +252,12 @@ export default function RiwayatIndex({ auth, transaksi, providers, jenis_produk,
                         </div>
 
                         {/* PAGINATION */}
-                        <div className="flex justify-end mt-4">
-                            {transaksi.links.map((link, index) => (
+                        <div className="flex justify-center mt-6">
+                            {transaksi.links && transaksi.links.length > 3 && transaksi.links.map((link, index) => (
                                 <Link
                                     key={index}
                                     href={link.url || '#'}
-                                    className={`px-3 py-1 border rounded mx-1 text-sm ${
+                                    className={`px-4 py-2 border mx-1 text-sm rounded-md ${
                                         link.active
                                             ? 'bg-blue-600 text-white border-blue-600'
                                             : 'bg-white text-gray-700 hover:bg-gray-50'

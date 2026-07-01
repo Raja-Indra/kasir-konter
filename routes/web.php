@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/wa/laporan', [SettingController::class, 'updateLaporanWaSetting'])->name('settings.wa.laporan');
     Route::post('/settings/wa/laporan/manual/{periode}', [SettingController::class, 'sendManualLaporan'])->name('settings.wa.laporan.manual');
     Route::resource('roles', RoleController::class)->except(['create', 'edit', 'show']);
+    Route::resource('kategori', \App\Http\Controllers\KategoriController::class)->except(['create', 'edit', 'show']);
 });
 
 require __DIR__.'/auth.php';

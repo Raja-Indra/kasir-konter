@@ -81,7 +81,14 @@ class ProviderController extends Controller
     {
         Gate::authorize('delete providers');
         
-        $provider->delete();
-        return redirect()->back();
+        try {
+            $provider->delete();
+            return redirect()->back();
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() == "23000") {
+                return redirect()->back()->withErrors(['error' => 'Provider tidak dapat dihapus karena sedang digunakan oleh satu atau beberapa produk.']);
+            }
+            return redirect()->back()->withErrors(['error' => 'Gagal menghapus provider.']);
+        }
     }
 }

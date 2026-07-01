@@ -19,6 +19,7 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
     const [umur, setUmur] = useState('');
     const [metodePembayaran, setMetodePembayaran] = useState('tunai'); // 'tunai' atau 'hutang'
     const [namaPelanggan, setNamaPelanggan] = useState('');
+    const [noHpPelanggan, setNoHpPelanggan] = useState('');
 
     // --- HELPER: Format Rupiah ---
     const formatRupiah = (number) => {
@@ -27,6 +28,13 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
             currency: 'IDR',
             minimumFractionDigits: 0
         }).format(number);
+    };
+
+    const formatInputRupiah = (value) => {
+        if (!value && value !== 0) return '';
+        const numberString = value.toString().replace(/[^0-9]/g, '');
+        if (!numberString) return '';
+        return parseInt(numberString, 10).toLocaleString('id-ID');
     };
 
     // --- LOGIC 1: Filter Produk (Search & Tab) ---
@@ -240,9 +248,10 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                     cart: cart,
                     total_harga: totalHarga,
                     bayar: bayarNominal,
-                    umur_pelanggan: umur,
-                    metode_pembayaran: metodePembayaran,
-                    nama_pelanggan: namaPelanggan
+                    nama_pelanggan: metodePembayaran === 'hutang' ? namaPelanggan : null,
+                    no_hp_pelanggan: noHpPelanggan,
+                    umur_pelanggan: umur ? parseInt(umur) : null,
+                    metode_pembayaran: metodePembayaran
                 }, {
                     onSuccess: () => {
                         setCart([]);
@@ -250,6 +259,7 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                         setUmur('');
                         setMetodePembayaran('tunai');
                         setNamaPelanggan('');
+                        setNoHpPelanggan('');
                         setIsCartOpen(false); // Tutup keranjang di mobile setelah sukses
                         const Toast = Swal.mixin({
                             toast: true,
@@ -538,34 +548,62 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
 
                         {/* Input Area */}
                         {metodePembayaran === 'hutang' && (
-                            <div className="mb-3">
-                                <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Nama Pelanggan (Wajib)</label>
-                                <TextInput
-                                    type="text"
-                                    className="w-full h-10 text-sm"
-                                    placeholder="Nama penghutang..."
-                                    value={namaPelanggan}
-                                    onChange={(e) => setNamaPelanggan(e.target.value)}
-                                    list="pelanggan-list"
-                                    autoComplete="off"
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            handleCheckout();
-                                        }
-                                    }}
-                                />
-                                <datalist id="pelanggan-list">
-                                    {pelangganHutang && pelangganHutang.map((p, index) => (
-                                        <option key={index} value={p.nama_pelanggan} />
-                                    ))}
-                                </datalist>
-                                {namaPelanggan && pelangganHutang?.find(p => p.nama_pelanggan.toLowerCase() === namaPelanggan.trim().toLowerCase()) && (
-                                    <p className="mt-1 text-xs font-semibold text-orange-600">
-                                        Sisa Hutang Sebelumnya: {formatRupiah(pelangganHutang.find(p => p.nama_pelanggan.toLowerCase() === namaPelanggan.trim().toLowerCase()).sisa)}
-                                    </p>
-                                )}
-                            </div>
+                            <>
+                                <div className="mb-3">
+                                    <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Nama Pelanggan (Wajib)</label>
+                                    <TextInput
+                                        type="text"
+                                        className="w-full h-10 text-sm"
+                                        placeholder="Nama penghutang..."
+                                        value={namaPelanggan}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setNamaPelanggan(val);
+                                            const found = pelangganHutang?.find(p => p.nama_pelanggan.toLowerCase() === val.trim().toLowerCase());
+                                            if (found && found.no_hp) {
+                                                setNoHpPelanggan(found.no_hp);
+                                            } else {
+                                                if(!found) setNoHpPelanggan(''); // Optionally clear if not found, but it might clear user input if they just typoed. Let's not clear it automatically unless we want to. Wait, better not to clear.
+                                            }
+                                        }}
+                                        list="pelanggan-list"
+                                        autoComplete="off"
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                handleCheckout();
+                                            }
+                                        }}
+                                    />
+                                    <datalist id="pelanggan-list">
+                                        {pelangganHutang && pelangganHutang.map((p, index) => (
+                                            <option key={index} value={p.nama_pelanggan} />
+                                        ))}
+                                    </datalist>
+                                    {namaPelanggan && pelangganHutang?.find(p => p.nama_pelanggan.toLowerCase() === namaPelanggan.trim().toLowerCase()) && (
+                                        <p className="mt-1 text-xs font-semibold text-orange-600">
+                                            Sisa Hutang Sebelumnya: {formatRupiah(pelangganHutang.find(p => p.nama_pelanggan.toLowerCase() === namaPelanggan.trim().toLowerCase()).sisa)}
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="mb-3">
+                                    <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">No. HP Pelanggan (Opsional)</label>
+                                    <TextInput
+                                        type="text"
+                                        inputMode="numeric"
+                                        className="w-full h-10 text-sm"
+                                        placeholder="08..."
+                                        value={noHpPelanggan}
+                                        onChange={(e) => setNoHpPelanggan(e.target.value.replace(/[^0-9]/g, ''))}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                handleCheckout();
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </>
                         )}
 
                         <div className="grid grid-cols-12 gap-2 mb-3">
@@ -573,15 +611,15 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                                 <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
                                     {metodePembayaran === 'hutang' ? 'Bayar / DP (Rp)' : 'Bayar (Rp)'}
                                 </label>
-                                <TextInput
-                                    id="input-bayar"
-                                    type="text"
-                                    inputMode="numeric"
-                                    className={`w-full h-10 font-mono text-lg font-bold text-right ${hasTarikTunai ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
-                                    placeholder="0"
-                                    value={hasTarikTunai ? totalHarga : bayar}
-                                    onChange={(e) => setBayar(e.target.value.replace(/[^0-9]/g, ''))}
-                                    disabled={hasTarikTunai}
+                                    <TextInput
+                                        id="input-bayar"
+                                        type="text"
+                                        inputMode="numeric"
+                                        className={`w-full h-10 font-mono text-lg font-bold text-right ${hasTarikTunai ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
+                                        placeholder="0"
+                                        value={hasTarikTunai ? formatInputRupiah(totalHarga) : formatInputRupiah(bayar)}
+                                        onChange={(e) => setBayar(e.target.value.replace(/[^0-9]/g, ''))}
+                                        disabled={hasTarikTunai}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
                                             e.preventDefault();
@@ -593,11 +631,12 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                             <div className="col-span-4">
                                 <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Umur</label>
                                 <TextInput
-                                    type="number"
+                                    type="text"
+                                    inputMode="numeric"
                                     className="w-full h-10 text-center"
                                     placeholder="-"
                                     value={umur}
-                                    onChange={(e) => setUmur(e.target.value)}
+                                    onChange={(e) => setUmur(e.target.value.replace(/[^0-9]/g, ''))}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
                                             e.preventDefault();

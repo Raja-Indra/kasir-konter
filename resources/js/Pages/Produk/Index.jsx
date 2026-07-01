@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router, Link } from '@inertiajs/react';
 import Modal from '@/Components/Modal';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
@@ -15,11 +15,48 @@ import getCroppedImg from '../../utils/cropImage';
 
 const MySwal = withReactContent(Swal);
 
-export default function ProdukIndex({ auth, products, providers }) {
+export default function ProdukIndex({ auth, products, all_products, providers, kategoris, filters, counts }) {
     const { can } = usePermission();
     // State Tab (Default ke Digital)
-    const [activeTab, setActiveTab] = useState('digital');
-    const [searchKeyword, setSearchKeyword] = useState(''); // State Pencarian
+    const [activeTab, setActiveTab] = useState(filters?.tab || 'digital');
+    const [searchKeyword, setSearchKeyword] = useState(filters?.search || ''); // State Pencarian
+    const [perPage, setPerPage] = useState(filters?.per_page || 10);
+
+    const preventInvalidNumberInput = (e) => {
+        if (['-', '+', 'e', 'E', '.', ','].includes(e.key)) {
+            e.preventDefault();
+        }
+    };
+
+    const formatRupiah = (value) => {
+        if (!value && value !== 0) return '';
+        const numberString = value.toString().replace(/[^0-9]/g, '');
+        if (!numberString) return '';
+        return parseInt(numberString, 10).toLocaleString('id-ID');
+    };
+
+    const parseRupiah = (value) => {
+        if (!value && value !== 0) return '';
+        return value.toString().replace(/[^0-9]/g, '');
+    };
+
+    const isMounted = useRef(false);
+
+    useEffect(() => {
+        if (!isMounted.current) {
+            isMounted.current = true;
+            return;
+        }
+
+        const timeout = setTimeout(() => {
+            router.get(
+                route('produk.index'),
+                { tab: activeTab, search: searchKeyword, per_page: perPage },
+                { preserveState: true, replace: true, preserveScroll: true }
+            );
+        }, 300);
+        return () => clearTimeout(timeout);
+    }, [activeTab, searchKeyword, perPage]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
@@ -114,20 +151,7 @@ export default function ProdukIndex({ auth, products, providers }) {
         });
     };
 
-    // Filter Data Berdasarkan Tab dan Pencarian
-    const filteredProducts = products.filter(product => {
-        let matchTab = false;
-        if (activeTab === 'arsip') {
-            matchTab = product.is_archived;
-        } else {
-            if (product.is_archived) return false;
-            matchTab = activeTab === 'digital' ? product.is_digital : !product.is_digital;
-        }
-
-        const matchSearch = product.nama_produk.toLowerCase().includes(searchKeyword.toLowerCase()) || 
-                            (product.provider && product.provider.nama_provider.toLowerCase().includes(searchKeyword.toLowerCase()));
-        return matchTab && matchSearch;
-    });
+    // Filter Data Berdasarkan Tab dan Pencarian ditangani di backend (Controller)
 
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         provider_id: '',
@@ -330,8 +354,17 @@ export default function ProdukIndex({ auth, products, providers }) {
         }).then((result) => {
             if (result.isConfirmed) {
                 router.delete(route('produk.destroy', id), {
+                    preserveScroll: true,
                     onSuccess: () => {
                         MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Produk berhasil dihapus', showConfirmButton: false, timer: 3000, timerProgressBar: true });
+                    },
+                    onError: (errors) => {
+                        MySwal.fire({
+                            title: 'Gagal Menghapus!',
+                            text: errors.error || 'Terjadi kesalahan saat menghapus data.',
+                            icon: 'error',
+                            confirmButtonColor: '#3085d6'
+                        });
                     }
                 });
             }
@@ -373,6 +406,19 @@ export default function ProdukIndex({ auth, products, providers }) {
                         <div className="flex flex-col justify-between gap-4 p-4 mb-6 text-white rounded-lg shadow-md sm:flex-row sm:items-center bg-gradient-to-r from-blue-800 to-blue-500">
                             <h3 className="text-lg font-bold">Daftar Produk</h3>
                             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm">Tampilkan:</span>
+                                    <select
+                                        className="py-2 pl-3 pr-8 text-sm text-gray-900 bg-white border-none rounded-md shadow-inner focus:ring-blue-300 focus:border-blue-300"
+                                        value={perPage}
+                                        onChange={(e) => setPerPage(e.target.value)}
+                                    >
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                </div>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                         <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -408,7 +454,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                 >
                                     Produk Digital
                                     <span className="ml-2 bg-blue-100 text-blue-600 py-0.5 px-2.5 rounded-full text-xs">
-                                        {products.filter(p => p.is_digital && !p.is_archived).length}
+                                        {counts?.digital || 0}
                                     </span>
                                 </button>
 
@@ -423,7 +469,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                 >
                                     Produk Fisik
                                     <span className="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2.5 rounded-full text-xs">
-                                        {products.filter(p => !p.is_digital && !p.is_archived).length}
+                                        {counts?.fisik || 0}
                                     </span>
                                 </button>
 
@@ -438,7 +484,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                 >
                                     Arsip
                                     <span className="ml-2 bg-orange-100 text-orange-600 py-0.5 px-2.5 rounded-full text-xs">
-                                        {products.filter(p => p.is_archived).length}
+                                        {counts?.arsip || 0}
                                     </span>
                                 </button>
                             </nav>
@@ -468,10 +514,10 @@ export default function ProdukIndex({ auth, products, providers }) {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {filteredProducts.length > 0 ? (
-                                        filteredProducts.map((item, index) => (
+                                    {products.data && products.data.length > 0 ? (
+                                        products.data.map((item, index) => (
                                             <tr key={item.id} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 text-sm text-gray-500">{index + 1}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-500">{(products.current_page - 1) * products.per_page + index + 1}</td>
                                                 <td className="px-6 py-4 text-sm text-gray-500">
                                                     {item.foto ? (
                                                         <img src={`/storage/${item.foto}`} alt={item.nama_produk} className="object-cover w-12 h-12 rounded shadow" />
@@ -547,6 +593,22 @@ export default function ProdukIndex({ auth, products, providers }) {
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* Pagination Links */}
+                        {products.links && products.links.length > 3 && (
+                            <div className="flex flex-wrap justify-center gap-1 mt-6">
+                                {products.links.map((link, key) => (
+                                    <Link
+                                        key={key}
+                                        href={link.url || '#'}
+                                        preserveState
+                                        preserveScroll
+                                        className={`px-4 py-2 text-sm border rounded-md ${link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} ${!link.url ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -555,12 +617,15 @@ export default function ProdukIndex({ auth, products, providers }) {
             <Modal show={isModalOpen} onClose={() => {
                 if (!isCropModalOpen) closeModal();
             }}>
-                <form onSubmit={handleSubmit} className="p-6">
-                    <h2 className="mb-4 text-lg font-medium text-gray-900">
-                        {isEditMode ? 'Edit Produk' : `Tambah Produk ${activeTab === 'arsip' ? '' : (activeTab === 'digital' ? 'Digital' : 'Fisik')}`}
-                    </h2>
+                <form onSubmit={handleSubmit} className="flex flex-col max-h-[90vh]">
+                    <div className="p-6 pb-2 shrink-0">
+                        <h2 className="text-lg font-medium text-gray-900">
+                            {isEditMode ? 'Edit Produk' : `Tambah Produk ${activeTab === 'arsip' ? '' : (activeTab === 'digital' ? 'Digital' : 'Fisik')}`}
+                        </h2>
+                    </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="flex-1 p-6 pt-2 overflow-y-auto">
+                        <div className="grid grid-cols-2 gap-4">
                         {/* Foto Produk */}
                         <div className="col-span-2">
                             <InputLabel htmlFor="foto" value="Foto Produk (Opsional)" />
@@ -653,14 +718,17 @@ export default function ProdukIndex({ auth, products, providers }) {
                         {/* Jenis Manual Input */}
                         <div>
                             <InputLabel htmlFor="jenis" value="Jenis Produk" />
-                            <TextInput
+                            <select
                                 id="jenis"
-                                type="text"
-                                className="block w-full mt-1"
+                                className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 value={data.jenis}
                                 onChange={(e) => setData('jenis', e.target.value)}
-                                placeholder="Contoh: Voucher / Aksesoris"
-                            />
+                            >
+                                <option value="">-- Pilih Jenis Produk --</option>
+                                {kategoris && kategoris.map((kat) => (
+                                    <option key={kat.id} value={kat.nama_kategori}>{kat.nama_kategori}</option>
+                                ))}
+                            </select>
                             <InputError message={errors.jenis} className="mt-2" />
                         </div>
 
@@ -674,6 +742,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                     className="block w-full mt-1"
                                     value={data.stok}
                                     onChange={(e) => setData('stok', e.target.value)}
+                                    onKeyDown={preventInvalidNumberInput}
                                 />
                                 <InputError message={errors.stok} className="mt-2" />
                             </div>
@@ -688,10 +757,11 @@ export default function ProdukIndex({ auth, products, providers }) {
                                 />
                                 <TextInput
                                     id="harga_admin_provider"
-                                    type="number"
+                                    type="text"
+                                    inputMode="numeric"
                                     className="block w-full mt-1"
-                                    value={data.harga_admin_provider ?? ''}
-                                    onChange={(e) => setData('harga_admin_provider', e.target.value)}
+                                    value={formatRupiah(data.harga_admin_provider ?? '')}
+                                    onChange={(e) => setData('harga_admin_provider', parseRupiah(e.target.value))}
                                     placeholder="Contoh: 150"
                                 />
                                 <InputError message={errors.harga_admin_provider} className="mt-2" />
@@ -706,11 +776,12 @@ export default function ProdukIndex({ auth, products, providers }) {
                             />
                             <TextInput
                                 id="harga_modal"
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
                                 className={`block w-full mt-1 ${data.is_flexible_price ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                                 // Pastikan value tidak null/undefined supaya tidak error React
-                                value={data.harga_modal ?? ''}
-                                onChange={(e) => setData('harga_modal', e.target.value)}
+                                value={formatRupiah(data.harga_modal ?? '')}
+                                onChange={(e) => setData('harga_modal', parseRupiah(e.target.value))}
                                 disabled={data.is_flexible_price}
                                 placeholder={data.is_flexible_price ? "Nominal diinput saat kasir" : "0"}
                             />
@@ -726,10 +797,11 @@ export default function ProdukIndex({ auth, products, providers }) {
                             />
                             <TextInput
                                 id="harga_jual"
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
                                 className="block w-full mt-1"
-                                value={data.harga_jual}
-                                onChange={(e) => setData('harga_jual', e.target.value)}
+                                value={formatRupiah(data.harga_jual)}
+                                onChange={(e) => setData('harga_jual', parseRupiah(e.target.value))}
                                 placeholder={data.is_flexible_price ? "Contoh: 2000 (Keuntungan)" : "0"}
                             />
                             <InputError message={errors.harga_jual} className="mt-2" />
@@ -791,11 +863,12 @@ export default function ProdukIndex({ auth, products, providers }) {
                                             <InputLabel htmlFor="min_nominal" value="Minimal Nominal (Opsional)" />
                                             <TextInput
                                                 id="min_nominal"
-                                                type="number"
+                                                type="text"
+                                                inputMode="numeric"
                                                 className="block w-full mt-1"
-                                                value={data.min_nominal}
-                                                onChange={(e) => setData('min_nominal', e.target.value)}
-                                                placeholder="Contoh: 10000"
+                                                value={formatRupiah(data.min_nominal)}
+                                                onChange={(e) => setData('min_nominal', parseRupiah(e.target.value))}
+                                                placeholder="Contoh: 10.000"
                                             />
                                             <InputError message={errors.min_nominal} className="mt-2" />
                                         </div>
@@ -803,11 +876,12 @@ export default function ProdukIndex({ auth, products, providers }) {
                                             <InputLabel htmlFor="max_nominal" value="Maksimal Nominal (Opsional)" />
                                             <TextInput
                                                 id="max_nominal"
-                                                type="number"
+                                                type="text"
+                                                inputMode="numeric"
                                                 className="block w-full mt-1"
-                                                value={data.max_nominal}
-                                                onChange={(e) => setData('max_nominal', e.target.value)}
-                                                placeholder="Contoh: 1000000"
+                                                value={formatRupiah(data.max_nominal)}
+                                                onChange={(e) => setData('max_nominal', parseRupiah(e.target.value))}
+                                                placeholder="Contoh: 1.000.000"
                                             />
                                             <InputError message={errors.max_nominal} className="mt-2" />
                                         </div>
@@ -836,9 +910,10 @@ export default function ProdukIndex({ auth, products, providers }) {
                                 </label>
                             </div>
                         )}
+                        </div>
                     </div>
 
-                    <div className="flex justify-end mt-6">
+                    <div className="flex justify-end p-6 pt-4 border-t border-gray-100 shrink-0">
                         <SecondaryButton onClick={closeModal}>Batal</SecondaryButton>
                         <PrimaryButton className="ms-3" disabled={processing}>{isEditMode ? 'Simpan Perubahan' : 'Simpan'}</PrimaryButton>
                     </div>
@@ -860,6 +935,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                             className="block w-full mt-1"
                             value={stockData.tambah_stok}
                             onChange={(e) => setStockData('tambah_stok', e.target.value)}
+                            onKeyDown={preventInvalidNumberInput}
                             isFocused
                             placeholder="Contoh: 10"
                         />
@@ -945,7 +1021,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                     onChange={(e) => setInjectData('produk_id', e.target.value)}
                                 >
                                     <option value="">-- Pilih Produk Fisik --</option>
-                                    {products.filter(p => p.provider_id == injectData.provider_id && !p.is_digital && !p.is_flexible_price).map((prod) => (
+                                    {(all_products || products.data || []).filter(p => p.provider_id == injectData.provider_id && !p.is_digital && !p.is_flexible_price).map((prod) => (
                                         <option key={prod.id} value={prod.id}>{prod.nama_produk} (Sisa: {prod.stok})</option>
                                     ))}
                                 </select>
@@ -968,25 +1044,29 @@ export default function ProdukIndex({ auth, products, providers }) {
                                 </div>
                                 <div>
                                     <InputLabel htmlFor="inject_jenis" value="Jenis Produk" />
-                                    <TextInput
+                                    <select
                                         id="inject_jenis"
-                                        type="text"
-                                        className="block w-full mt-1"
+                                        className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         value={injectData.jenis}
                                         onChange={(e) => setInjectData('jenis', e.target.value)}
-                                        placeholder="Contoh: Voucher"
-                                    />
+                                    >
+                                        <option value="">-- Pilih Jenis Produk --</option>
+                                        {kategoris && kategoris.map((kat) => (
+                                            <option key={kat.id} value={kat.nama_kategori}>{kat.nama_kategori}</option>
+                                        ))}
+                                    </select>
                                     <InputError message={injectErrors.jenis} className="mt-2" />
                                 </div>
                                 <div>
                                     <InputLabel htmlFor="inject_harga_jual" value="Harga Jual (Rp)" />
                                     <TextInput
                                         id="inject_harga_jual"
-                                        type="number"
+                                        type="text"
+                                        inputMode="numeric"
                                         className="block w-full mt-1"
-                                        value={injectData.harga_jual}
-                                        onChange={(e) => setInjectData('harga_jual', e.target.value)}
-                                        placeholder="Contoh: 15000"
+                                        value={formatRupiah(injectData.harga_jual)}
+                                        onChange={(e) => setInjectData('harga_jual', parseRupiah(e.target.value))}
+                                        placeholder="Contoh: 15.000"
                                     />
                                     <InputError message={injectErrors.harga_jual} className="mt-2" />
                                 </div>
@@ -1000,11 +1080,12 @@ export default function ProdukIndex({ auth, products, providers }) {
                             <InputLabel htmlFor="inject_harga_modal_inject" value="Harga Modal Inject per Pcs (Memotong Saldo)" />
                             <TextInput
                                 id="inject_harga_modal_inject"
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
                                 className="block w-full mt-1"
-                                value={injectData.harga_modal_inject}
-                                onChange={(e) => setInjectData('harga_modal_inject', e.target.value)}
-                                placeholder="Contoh: 10000"
+                                value={formatRupiah(injectData.harga_modal_inject)}
+                                onChange={(e) => setInjectData('harga_modal_inject', parseRupiah(e.target.value))}
+                                placeholder="Contoh: 10.000"
                             />
                             <InputError message={injectErrors.harga_modal_inject} className="mt-2" />
                         </div>
@@ -1012,10 +1093,11 @@ export default function ProdukIndex({ auth, products, providers }) {
                             <InputLabel htmlFor="inject_harga_kertas_voucher" value="Harga Kertas Kosong per Pcs" />
                             <TextInput
                                 id="inject_harga_kertas_voucher"
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
                                 className="block w-full mt-1"
-                                value={injectData.harga_kertas_voucher}
-                                onChange={(e) => setInjectData('harga_kertas_voucher', e.target.value)}
+                                value={formatRupiah(injectData.harga_kertas_voucher)}
+                                onChange={(e) => setInjectData('harga_kertas_voucher', parseRupiah(e.target.value))}
                                 placeholder="Contoh: 500"
                             />
                             <InputError message={injectErrors.harga_kertas_voucher} className="mt-2" />
@@ -1028,6 +1110,7 @@ export default function ProdukIndex({ auth, products, providers }) {
                                 className="block w-full mt-1"
                                 value={injectData.qty}
                                 onChange={(e) => setInjectData('qty', e.target.value)}
+                                onKeyDown={preventInvalidNumberInput}
                                 placeholder="Contoh: 10"
                             />
                             <InputError message={injectErrors.qty} className="mt-2" />

@@ -18,6 +18,7 @@ export default forwardRef(function TextInput(
 
     return (
         <input
+            {...(type === 'number' ? { min: 0 } : {})}
             {...props}
             type={type}
             className={

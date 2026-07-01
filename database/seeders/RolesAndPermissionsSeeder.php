@@ -59,6 +59,12 @@ class RolesAndPermissionsSeeder extends Seeder
             // Pengaturan
             'manage settings', // Pengaturan toko
             'manage roles',    // Akses menu roles ini
+
+            // Kategori Produk
+            'view categories',
+            'create categories',
+            'edit categories',
+            'delete categories',
         ];
 
         // 3. Buat Permission

@@ -20,7 +20,8 @@ class Transaksi extends Model
         'total_laba', // Field baru
         'bayar',
         'kembalian',
-        'umur_pelanggan' // Field baru
+        'umur_pelanggan',
+        'no_hp_pelanggan'
     ];
 
     public function details()

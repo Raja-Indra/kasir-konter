@@ -22,6 +22,18 @@ export default function ProviderIndex({ auth, providers }) {
     const [providerToEdit, setProviderToEdit] = useState(null);
     const [searchKeyword, setSearchKeyword] = useState(''); // State Pencarian
 
+    const formatInputRupiah = (value) => {
+        if (!value && value !== 0) return '';
+        const numberString = value.toString().replace(/[^0-9]/g, '');
+        if (!numberString) return '';
+        return parseInt(numberString, 10).toLocaleString('id-ID');
+    };
+
+    const parseInputRupiah = (value) => {
+        if (!value && value !== 0) return '';
+        return value.toString().replace(/[^0-9]/g, '');
+    };
+
     // --- STATE & FORM UNTUK TAMBAH SALDO ---
     const [isAddSaldoModalOpen, setIsAddSaldoModalOpen] = useState(false);
     const [providerToAddSaldo, setProviderToAddSaldo] = useState(null);
@@ -186,11 +198,10 @@ export default function ProviderIndex({ auth, providers }) {
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Jika user klik Ya, baru eksekusi Inertia delete
                 router.delete(route('providers.destroy', id), {
+                    preserveScroll: true,
                     onSuccess: () => {
-                        // Tampilkan pesan sukses setelah berhasil dihapus
-                        MySwal.fire({
+                        Swal.fire({
                             toast: true,
                             position: 'top-end',
                             showConfirmButton: false,
@@ -198,6 +209,14 @@ export default function ProviderIndex({ auth, providers }) {
                             timerProgressBar: true,
                             icon: 'success',
                             title: 'Data provider berhasil dihapus'
+                        });
+                    },
+                    onError: (errors) => {
+                        Swal.fire({
+                            title: 'Gagal Menghapus!',
+                            text: errors.error || 'Provider tidak dapat dihapus.',
+                            icon: 'error',
+                            confirmButtonColor: '#3085d6'
                         });
                     }
                 });
@@ -350,10 +369,11 @@ export default function ProviderIndex({ auth, providers }) {
                             <InputLabel htmlFor="saldo" value="Saldo Awal" />
                             <TextInput
                                 id="saldo"
-                                type="number"
+                                type="text"
+                                inputMode="numeric"
                                 className="block w-full mt-1"
-                                value={data.saldo}
-                                onChange={(e) => setData('saldo', e.target.value)}
+                                value={formatInputRupiah(data.saldo)}
+                                onChange={(e) => setData('saldo', parseInputRupiah(e.target.value))}
                             />
                             <InputError message={errors.saldo} className="mt-2" />
                         </div>
@@ -378,12 +398,13 @@ export default function ProviderIndex({ auth, providers }) {
                         <InputLabel htmlFor="tambah_saldo" value="Nominal Tambahan (Rp)" />
                         <TextInput
                             id="tambah_saldo"
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
                             className="block w-full mt-1"
-                            value={saldoData.tambah_saldo}
-                            onChange={(e) => setSaldoData('tambah_saldo', e.target.value)}
+                            value={formatInputRupiah(saldoData.tambah_saldo)}
+                            onChange={(e) => setSaldoData('tambah_saldo', parseInputRupiah(e.target.value))}
                             isFocused
-                            placeholder="Contoh: 50000"
+                            placeholder="Contoh: 50.000"
                         />
                         <InputError message={saldoErrors.tambah_saldo} className="mt-2" />
                     </div>

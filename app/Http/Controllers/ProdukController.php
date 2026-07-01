@@ -13,13 +13,55 @@ use Illuminate\Support\Facades\Gate;
 
 class ProdukController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         Gate::authorize('view products');
         
+        $tab = $request->input('tab', 'digital');
+        $search = $request->input('search', '');
+        $perPage = $request->input('per_page', 10);
+
+        $query = Produk::with('provider')->latest();
+
+        $countDigital = Produk::where('is_digital', true)->where('is_archived', false)->count();
+        $countFisik = Produk::where('is_digital', false)->where('is_archived', false)->count();
+        $countArsip = Produk::where('is_archived', true)->count();
+
+        if ($tab === 'arsip') {
+            $query->where('is_archived', true);
+        } else {
+            $query->where('is_archived', false);
+            if ($tab === 'digital') {
+                $query->where('is_digital', true);
+            } else if ($tab === 'fisik') {
+                $query->where('is_digital', false);
+            }
+        }
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nama_produk', 'like', '%' . $search . '%')
+                  ->orWhereHas('provider', function($q2) use ($search) {
+                      $q2->where('nama_provider', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+
         return Inertia::render('Produk/Index', [
-            'products' => Produk::with('provider')->latest()->get(),
-            'providers' => Provider::select('id', 'nama_provider', 'saldo')->get()
+            'products' => $query->paginate($perPage)->withQueryString(),
+            'all_products' => Produk::select('id', 'nama_produk', 'stok', 'provider_id', 'is_digital', 'is_flexible_price')->get(),
+            'providers' => Provider::select('id', 'nama_provider', 'saldo')->get(),
+            'kategoris' => \App\Models\Kategori::orderBy('nama_kategori')->get(),
+            'filters' => [
+                'tab' => $tab,
+                'search' => $search,
+                'per_page' => $perPage
+            ],
+            'counts' => [
+                'digital' => $countDigital,
+                'fisik' => $countFisik,
+                'arsip' => $countArsip
+            ]
         ]);
     }
 

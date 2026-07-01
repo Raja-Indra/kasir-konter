@@ -26,7 +26,7 @@ class TransaksiController extends Controller
                 ->orderBy('is_pinned', 'desc') 
                 ->latest()
                 ->get(),
-            'pelangganHutang' => \App\Models\Hutang::select('nama_pelanggan', 'sisa')->get()
+            'pelangganHutang' => \App\Models\Hutang::select('nama_pelanggan', 'sisa', 'no_hp')->get()
         ]);
     }
 
@@ -40,6 +40,7 @@ class TransaksiController extends Controller
             'total_harga' => 'required|numeric',
             'metode_pembayaran' => 'nullable|string',
             'nama_pelanggan' => 'nullable|string|required_if:metode_pembayaran,hutang',
+            'no_hp_pelanggan' => 'nullable|string',
         ]);
 
         try {
@@ -59,6 +60,7 @@ class TransaksiController extends Controller
                     'bayar' => $request->bayar,
                     'kembalian' => $kembalian,
                     'umur_pelanggan' => $request->umur_pelanggan,
+                    'no_hp_pelanggan' => $request->no_hp_pelanggan,
                     'total_laba' => 0,
                 ]);
 
@@ -80,6 +82,7 @@ class TransaksiController extends Controller
                                 'sisa' => $existingHutang->sisa + $sisaHutang,
                                 'keterangan' => $existingHutang->keterangan . ' | ' . $keteranganHutang,
                                 'status' => 'belum_lunas',
+                                'no_hp' => $request->filled('no_hp_pelanggan') ? $request->no_hp_pelanggan : $existingHutang->no_hp,
                                 // 'transaksi_id' => $transaksi->id, // Biarkan pakai transaksi awal agar riwayat lama tetap punya acuan, atau update ke yang baru
                             ]);
 
@@ -97,6 +100,7 @@ class TransaksiController extends Controller
                                 'terbayar' => $request->bayar,
                                 'sisa' => $sisaHutang,
                                 'status' => 'belum_lunas',
+                                'no_hp' => $request->no_hp_pelanggan,
                             ]);
 
                             \App\Models\RiwayatHutang::create([
@@ -204,7 +208,15 @@ class TransaksiController extends Controller
             });
         }
 
-        $transaksi = $query->paginate(50)->withQueryString();
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('created_at', [
+                $request->start_date . ' 00:00:00', 
+                $request->end_date . ' 23:59:59'
+            ]);
+        }
+
+        $perPage = $request->input('per_page', 50);
+        $transaksi = $query->paginate($perPage)->withQueryString();
 
         $providers = Provider::all();
         $jenis_produk = Produk::select('jenis')->distinct()->whereNotNull('jenis')->pluck('jenis');
@@ -213,7 +225,7 @@ class TransaksiController extends Controller
             'transaksi' => $transaksi,
             'providers' => $providers,
             'jenis_produk' => $jenis_produk,
-            'filters' => $request->only(['provider_id', 'jenis'])
+            'filters' => $request->only(['provider_id', 'jenis', 'start_date', 'end_date', 'per_page'])
         ]);
     }
 

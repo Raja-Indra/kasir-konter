@@ -13,7 +13,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     // Buka dropdown secara otomatis jika URL saat ini ada di dalam kelompok menu tersebut
     useEffect(() => {
         if (route().current('riwayat.*') || route().current('hutang.*')) setActiveDropdown('transaksi');
-        if (route().current('providers.*') || route().current('produk.*')) setActiveDropdown('master');
+        if (route().current('providers.*') || route().current('produk.*') || route().current('kategori.*')) setActiveDropdown('master');
         if (route().current('users.*') || route().current('roles.*') || route().current('settings.*')) setActiveDropdown('konfigurasi');
     }, []);
 
@@ -129,7 +129,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                         )}
 
                         {/* 3. DATA MASTER DROPDOWN */}
-                        {(can('view products') || can('view providers')) && (
+                        {(can('view products') || can('view providers') || can('view categories')) && (
                             <li>
                                 <button onClick={() => handleDropdownClick('master')} className={`${baseLinkClass} w-full justify-between ${activeDropdown === 'master' ? 'bg-blue-900' : ''}`} title={!isOpen ? "Data Master" : ""}>
                                     <div className="flex items-center">
@@ -143,7 +143,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                     )}
                                 </button>
 
-                                <ul className={`ml-8 mt-1 space-y-1 overflow-hidden transition-all duration-300 ${activeDropdown === 'master' && isOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0 hidden'}`}>
+                                <ul className={`ml-8 mt-1 space-y-1 overflow-hidden transition-all duration-300 ${activeDropdown === 'master' && isOpen ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0 hidden'}`}>
+                                    {can('view categories') && (
+                                        <li><Link href={route('kategori.index')} className={`${subLinkClass} ${route().current('kategori.*') ? activeSubLinkClass : ''}`}>Kategori Produk</Link></li>
+                                    )}
                                     {can('view products') && (
                                         <li><Link href={route('produk.index')} className={`${subLinkClass} ${route().current('produk.*') ? activeSubLinkClass : ''}`}>Produk</Link></li>
                                     )}
