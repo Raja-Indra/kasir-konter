@@ -30,14 +30,16 @@ export default function HutangIndex({ auth, hutangs, filters }) {
 
     const formatInputRupiah = (value) => {
         if (!value && value !== 0) return '';
-        const numberString = value.toString().replace(/[^0-9]/g, '');
+        let valString = value.toString().replace(/\.[0-9]{2}$/, '');
+        const numberString = valString.replace(/[^0-9]/g, '');
         if (!numberString) return '';
         return parseInt(numberString, 10).toLocaleString('id-ID');
     };
 
     const parseInputRupiah = (value) => {
         if (!value && value !== 0) return '';
-        return value.toString().replace(/[^0-9]/g, '');
+        let valString = value.toString().replace(/\.[0-9]{2}$/, '');
+        return valString.replace(/[^0-9]/g, '');
     };
 
     // Helper Rupiah
@@ -191,7 +193,7 @@ export default function HutangIndex({ auth, hutangs, filters }) {
 
                         <div className="flex flex-col justify-between gap-4 p-4 mb-6 text-white rounded-lg shadow-md md:flex-row md:items-center bg-gradient-to-r from-blue-800 to-blue-500">
                             <div className="flex items-center gap-3">
-                                <h3 className="text-lg font-bold">Buku Kasbon / Piutang</h3>
+                                <h3 className="text-lg font-bold">Buku Kasbon</h3>
                                 {/* <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-semibold bg-blue-700 rounded-full uppercase tracking-wider">
                                     {hutangs.total} Data
                                 </span> */}

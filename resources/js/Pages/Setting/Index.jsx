@@ -79,7 +79,7 @@ export default function SettingIndex({ auth }) {
                 <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8">
                     <div className="bg-white p-6 shadow-sm sm:rounded-lg max-w-2xl mx-auto">
                         
-                        <h2 className="text-lg font-bold text-gray-900 mb-6 border-b pb-2">⚙️ Pengaturan Toko</h2>
+                        <h2 className="text-lg font-bold text-gray-900 mb-6 border-b pb-2">Pengaturan Toko</h2>
 
                         <form onSubmit={handleSubmit} encType="multipart/form-data">
                             

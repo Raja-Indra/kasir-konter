@@ -106,12 +106,12 @@ export default function KategoriIndex({ auth, kategoris }) {
                     <div className="p-6 bg-white shadow-sm sm:rounded-lg">
                             <div className="flex flex-col justify-between gap-4 p-4 mb-6 text-white rounded-lg shadow-md md:flex-row md:items-center bg-gradient-to-r from-blue-800 to-blue-500">
                                 <div className="flex items-center gap-3">
-                                    <h3 className="text-lg font-bold">Daftar Kategori Produk</h3>
+                                    <h3 className="text-lg font-bold">Daftar Jenis Produk</h3>
                                 </div>
                                 <div className="flex flex-col items-center w-full gap-3 sm:flex-row md:w-auto">
                                     {can('create categories') && (
                                         <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100 whitespace-nowrap w-full sm:w-auto justify-center" onClick={openCreateModal}>
-                                            + Tambah Kategori
+                                            + Tambah Jenis Produk
                                         </PrimaryButton>
                                     )}
                                 </div>
@@ -122,7 +122,7 @@ export default function KategoriIndex({ auth, kategoris }) {
                                     <thead className="bg-gray-50">
                                         <tr>
                                             <th className="px-4 py-3 text-left">No</th>
-                                            <th className="px-4 py-3 text-left">Nama Kategori</th>
+                                            <th className="px-4 py-3 text-left">Jenis Produk</th>
                                             {(can('edit categories') || can('delete categories')) && (
                                                 <th className="px-4 py-3 text-right">Aksi</th>
                                             )}
@@ -164,11 +164,11 @@ export default function KategoriIndex({ auth, kategoris }) {
             <Modal show={isModalOpen} onClose={closeModal}>
                 <form onSubmit={handleSubmit} className="p-6">
                     <h2 className="mb-4 text-lg font-medium text-gray-900">
-                        {isEditMode ? 'Edit Kategori' : 'Tambah Kategori'}
+                        {isEditMode ? 'Edit Jenis Produk' : 'Tambah Jenis Produk'}
                     </h2>
 
                     <div>
-                        <InputLabel htmlFor="nama_kategori" value="Nama Kategori" />
+                        <InputLabel htmlFor="nama_kategori" value="Jenis Produk" />
                         <TextInput
                             id="nama_kategori"
                             type="text"

@@ -32,7 +32,8 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
 
     const formatInputRupiah = (value) => {
         if (!value && value !== 0) return '';
-        const numberString = value.toString().replace(/[^0-9]/g, '');
+        let valString = value.toString().replace(/\.[0-9]{2}$/, '');
+        const numberString = valString.replace(/[^0-9]/g, '');
         if (!numberString) return '';
         return parseInt(numberString, 10).toLocaleString('id-ID');
     };
@@ -78,13 +79,21 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                 html:
                     `<p class="text-sm text-gray-600 mb-4">Biaya Admin: <b>${formatRupiah(biayaAdmin)}</b>${minText}${maxText}</p>` +
                     `<label class="block text-left text-sm mb-1 font-bold">${labelText}</label>` +
-                    '<input id="swal-nominal" type="number" class="swal2-input" placeholder="Contoh: 50000" autofocus>',
+                    '<input id="swal-nominal" type="text" inputmode="numeric" class="swal2-input" placeholder="Contoh: 50.000" autofocus>',
                 focusConfirm: false,
                 showCancelButton: true,
                 confirmButtonText: 'Lanjut',
                 didOpen: () => {
                     const input = document.getElementById('swal-nominal');
                     if (input) {
+                        input.addEventListener('input', (e) => {
+                            let val = e.target.value.replace(/[^0-9]/g, '');
+                            if (val) {
+                                e.target.value = parseInt(val, 10).toLocaleString('id-ID');
+                            } else {
+                                e.target.value = '';
+                            }
+                        });
                         input.addEventListener('keydown', (e) => {
                             if (e.key === 'Enter') {
                                 e.preventDefault();
@@ -94,7 +103,8 @@ export default function TransaksiIndex({ auth, products, pelangganHutang }) {
                     }
                 },
                 preConfirm: () => {
-                    return document.getElementById('swal-nominal').value
+                    const val = document.getElementById('swal-nominal').value;
+                    return val ? val.replace(/[^0-9]/g, '') : '';
                 }
             });
 

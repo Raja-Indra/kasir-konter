@@ -30,14 +30,16 @@ export default function ProdukIndex({ auth, products, all_products, providers, k
 
     const formatRupiah = (value) => {
         if (!value && value !== 0) return '';
-        const numberString = value.toString().replace(/[^0-9]/g, '');
+        let valString = value.toString().replace(/\.[0-9]{2}$/, '');
+        const numberString = valString.replace(/[^0-9]/g, '');
         if (!numberString) return '';
         return parseInt(numberString, 10).toLocaleString('id-ID');
     };
 
     const parseRupiah = (value) => {
         if (!value && value !== 0) return '';
-        return value.toString().replace(/[^0-9]/g, '');
+        let valString = value.toString().replace(/\.[0-9]{2}$/, '');
+        return valString.replace(/[^0-9]/g, '');
     };
 
     const isMounted = useRef(false);

@@ -189,7 +189,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                         <li><Link href={route('users.index')} className={`${subLinkClass} ${route().current('users.*') ? activeSubLinkClass : ''}`}>Manajemen User</Link></li>
                                     )}
                                     {can('manage roles') && (
-                                        <li><Link href={route('roles.index')} className={`${subLinkClass} ${route().current('roles.*') ? activeSubLinkClass : ''}`}>Roles & Izin</Link></li>
+                                        <li><Link href={route('roles.index')} className={`${subLinkClass} ${route().current('roles.*') ? activeSubLinkClass : ''}`}>Role & Izin</Link></li>
                                     )}
                                     {can('manage settings') && (
                                         <>

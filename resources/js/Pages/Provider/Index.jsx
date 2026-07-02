@@ -24,14 +24,16 @@ export default function ProviderIndex({ auth, providers }) {
 
     const formatInputRupiah = (value) => {
         if (!value && value !== 0) return '';
-        const numberString = value.toString().replace(/[^0-9]/g, '');
+        let valString = value.toString().replace(/\.[0-9]{2}$/, '');
+        const numberString = valString.replace(/[^0-9]/g, '');
         if (!numberString) return '';
         return parseInt(numberString, 10).toLocaleString('id-ID');
     };
 
     const parseInputRupiah = (value) => {
         if (!value && value !== 0) return '';
-        return value.toString().replace(/[^0-9]/g, '');
+        let valString = value.toString().replace(/\.[0-9]{2}$/, '');
+        return valString.replace(/[^0-9]/g, '');
     };
 
     // --- STATE & FORM UNTUK TAMBAH SALDO ---
@@ -237,7 +239,7 @@ export default function ProviderIndex({ auth, providers }) {
                     <div className="p-6 bg-white shadow-sm sm:rounded-lg">
 
                         <div className="flex flex-col justify-between gap-4 p-4 mb-6 text-white rounded-lg shadow-md sm:flex-row sm:items-center bg-gradient-to-r from-blue-800 to-blue-500">
-                            <h3 className="text-lg font-bold">Provider Manajement</h3>
+                            <h3 className="text-lg font-bold">Daftar Provider</h3>
                             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">

@@ -113,7 +113,7 @@ export default function UserIndex({ auth, users, roles }) {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        const actionText = isEditMode ? 'mengubah data user' : 'menambahkan user baru';
+        const actionText = isEditMode ? 'mengubah data pengguna' : 'menambahkan pengguna baru';
 
         MySwal.fire({
             title: 'Simpan Data?',
@@ -129,7 +129,7 @@ export default function UserIndex({ auth, users, roles }) {
                 post(routeName, {
                     onSuccess: () => {
                         closeModal();
-                        MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Data user tersimpan', showConfirmButton: false, timer: 3000, timerProgressBar: true });
+                        MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Data pengguna tersimpan', showConfirmButton: false, timer: 3000, timerProgressBar: true });
                     }
                 });
             }
@@ -138,7 +138,7 @@ export default function UserIndex({ auth, users, roles }) {
 
     const handleDelete = (id) => {
         MySwal.fire({
-            title: 'Hapus User?',
+            title: 'Hapus Pengguna?',
             text: "Data tidak bisa dikembalikan!",
             icon: 'warning',
             showCancelButton: true,
@@ -147,7 +147,7 @@ export default function UserIndex({ auth, users, roles }) {
         }).then((result) => {
             if (result.isConfirmed) {
                 router.delete(route('users.destroy', id), {
-                    onSuccess: () => MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'User berhasil dihapus', showConfirmButton: false, timer: 3000, timerProgressBar: true })
+                    onSuccess: () => MySwal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Pengguna berhasil dihapus', showConfirmButton: false, timer: 3000, timerProgressBar: true })
                 });
             }
         });
@@ -155,16 +155,16 @@ export default function UserIndex({ auth, users, roles }) {
 
     return (
         <AuthenticatedLayout user={auth.user}>
-            <Head title="Manajemen User" />
+            <Head title="Manajemen Pengguna" />
 
             <div className="py-6">
                 <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8">
                     <div className="p-6 bg-white shadow-sm sm:rounded-lg">
 
                         <div className="flex items-center justify-between p-4 mb-6 text-white rounded-lg shadow-md bg-gradient-to-r from-blue-800 to-blue-500">
-                            <h3 className="text-lg font-bold">Daftar Pengguna / Kasir</h3>
+                            <h3 className="text-lg font-bold">Daftar Pengguna</h3>
                             {can('create users') && (
-                                <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={openCreateModal}>+ Tambah User</PrimaryButton>
+                                <PrimaryButton className="!bg-white !text-blue-800 hover:!bg-gray-100" onClick={openCreateModal}>+ Tambah Pengguna</PrimaryButton>
                             )}
                         </div>
 
@@ -172,7 +172,7 @@ export default function UserIndex({ auth, users, roles }) {
                             <table className="min-w-full divide-y divide-gray-200 w-full">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pengguna</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kontak</th>
                                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Role</th>
                                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
@@ -259,7 +259,7 @@ export default function UserIndex({ auth, users, roles }) {
             }}>
                 <form onSubmit={handleSubmit} className="p-6">
                     <h2 className="mb-4 text-lg font-medium text-gray-900">
-                        {isEditMode ? 'Edit User' : 'Tambah User Baru'}
+                        {isEditMode ? 'Edit Pengguna' : 'Tambah Pengguna Baru'}
                     </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -333,7 +333,7 @@ export default function UserIndex({ auth, users, roles }) {
 
                         {/* Pilihan Role */}
                         <div className="col-span-2">
-                            <InputLabel htmlFor="role" value="Role / Jabatan" />
+                            <InputLabel htmlFor="role" value="Role" />
                             <select
                                 id="role"
                                 className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm mt-1 block w-full"
@@ -359,7 +359,7 @@ export default function UserIndex({ auth, users, roles }) {
                                 />
                                 <div className="ms-3">
                                     <span className="block text-sm font-medium text-gray-900">Akun Aktif</span>
-                                    <span className="block text-xs text-gray-500">Jika dimatikan, user tidak bisa login.</span>
+                                    <span className="block text-xs text-gray-500">Jika dimatikan, pengguna tidak bisa login.</span>
                                 </div>
                             </label>
                         </div>

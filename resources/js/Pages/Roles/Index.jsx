@@ -135,7 +135,7 @@ export default function RoleIndex({ auth, roles, allPermissions }) {
                 <div className="p-6 bg-white shadow-sm sm:rounded-lg">
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-5 mb-6 text-white rounded-xl shadow-md bg-gradient-to-r from-blue-700 to-blue-500">
                         <div className="mb-4 md:mb-0">
-                            <h3 className="text-xl font-bold">Manajemen Role & Akses</h3>
+                            <h3 className="text-xl font-bold">Daftar Role & Akses</h3>
                             <p className="text-sm text-blue-100 mt-1">Atur hak akses karyawan untuk setiap fitur aplikasi.</p>
                         </div>
                         <button 
